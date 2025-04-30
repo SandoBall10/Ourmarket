@@ -1,0 +1,284 @@
+/* Principal.css */
+
+.full-width-container {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.container-fluid {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 30px !important;
+  padding-right: 30px !important;
+}
+
+h2,
+h3 {
+  color: #2c3e50;
+}
+
+footer {
+  background-color: #f8f9fa;
+  width: 100%;
+}
+
+footer a {
+  color: #2c3e50;
+  text-decoration: none;
+  margin-left: 10px;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* Estilos para menú desplegable */
+.mega-dropdown {
+  position: static !important;
+}
+
+.mega-menu-wrapper {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  border-top: 1px solid #eee;
+}
+
+.mega-menu-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dropdown-menu {
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.mega-dropdown .dropdown-toggle::after {
+  display: none;
+}
+
+/* Estilos para los textos de navegación */
+.nav-link-text {
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Estilos específicos para los dropdowns */
+.navbar .dropdown-toggle::after {
+  display: none;
+}
+
+.navbar .fa-chevron-down {
+  font-size: 10px;
+  margin-left: 5px;
+  color: #666;
+}
+
+/* Estilo para los títulos de columnas */
+.mega-menu-container h6 {
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+/* Estilo para los elementos de la lista */
+.mega-menu-container ul li {
+  padding: 4px 0;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.mega-menu-container ul li:hover {
+  color: #136254;
+}
+
+/* Botones en el navbar */
+.btn-publicar {
+  font-weight: 500;
+  font-size: 14px;
+  border-color: #ddd;
+}
+
+.btn-ingresar {
+  font-weight: 500;
+  font-size: 14px;
+  background-color: #136254;
+  border-color: #136254;
+}
+
+.btn-ingresar:hover {
+  background-color: #0d4e42;
+  border-color: #0d4e42;
+}
+
+/* Iconos en la barra de navegación */
+.navbar .far {
+  margin-left: 5px;
+}
+
+/* Para pantallas pequeñas */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+}
+/* Comportamiento del menú al pasar el mouse */
+.mega-dropdown {
+  position: static !important;
+}
+
+.mega-menu-wrapper {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  border-top: 1px solid #eee;
+}
+
+/* Transición suave para los menús */
+.mega-dropdown .dropdown-menu {
+  transition: all 0.3s ease;
+  margin-top: 0;
+  border: none;
+}
+
+/* Ajustes para quitar el borde del menú */
+.dropdown-menu {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Ajuste para el contenido del menú */
+.mega-menu-container h6 {
+  margin-bottom: 15px;
+}
+
+.mega-menu-container ul li {
+  padding: 4px 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.mega-menu-container ul li:hover {
+  color: #136254;
+}
+
+/* Ocultar la flecha del dropdown de Bootstrap */
+.mega-dropdown .dropdown-toggle::after {
+  display: none;
+}
+
+/* Animación de la flecha al desplegar */
+.mega-dropdown:hover .fa-chevron-down {
+  transform: rotate(180deg);
+  transition: transform 0.3s;
+}
+
+.mega-dropdown .fa-chevron-down {
+  transition: transform 0.3s;
+}
+/* Añadir al archivo Principal.css */
+
+/* Estilos para la sección de búsqueda */
+.search-hero {
+  margin-bottom: 50px;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 16px;
+  transition: all 0.2s;
+}
+
+.nav-tabs .nav-link:hover {
+  border-color: rgba(19, 98, 84, 0.5);
+  color: #136254;
+}
+
+.nav-tabs .nav-link.active {
+  font-weight: bold;
+  color: #136254;
+  border-bottom: 3px solid #136254;
+}
+
+/* Estilo campos de formulario */
+.search-form .form-control,
+.search-form .form-select {
+  border-radius: 4px;
+  font-size: 15px;
+  height: 50px;
+}
+
+.search-form .form-control:focus,
+.search-form .form-select:focus {
+  box-shadow: 0 0 0 0.2rem rgba(19, 98, 84, 0.25);
+  border-color: #136254;
+}
+
+/* Mejora de visibilidad para el ComboBox - reemplaza la clase .select-dark existente */
+.select-dark {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background-color: white !important;
+  cursor: pointer;
+  color: black !important;
+  font-weight: 600 !important;
+  text-align: left;
+  padding-left: 15px !important;
+  height: 55px !important;
+  line-height: 1.5;
+}
+
+/* Añade estas clases nuevas */
+.select-dark:focus {
+  border-color: #136254 !important;
+  box-shadow: 0 0 0 0.2rem rgba(19, 98, 84, 0.25) !important;
+}
+
+.select-dark option {
+  color: black !important;
+  background-color: white !important;
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  padding: 10px !important;
+}
+
+/* Ajusta estos estilos para el ícono del select */
+.select-icon {
+  position: absolute !important;
+  right: 15px !important; 
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  pointer-events: none !important;
+  color: #495057 !important;
+  font-size: 12px !important;
+  z-index: 2 !important;
+}
+
+/* Mejora para el contenedor del select */
+.position-relative {
+  position: relative !important;
+  display: block !important;
+}
