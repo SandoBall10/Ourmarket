@@ -14,7 +14,7 @@ public class ClienteController {
     @Autowired
     private ClienteService clienteService;
 
-    @PostMapping("/crear")
+    @PostMapping("/registrar")
     public ResponseEntity<Cliente> crearCliente(@RequestBody Cliente cliente) {
         Cliente nuevoCliente = clienteService.crearCliente(cliente);
         return ResponseEntity.ok(nuevoCliente);
@@ -27,9 +27,9 @@ public class ClienteController {
     }
 
     // Buscar cliente por email
-    @GetMapping("/email")
-    public ResponseEntity<Cliente> obtenerClientePorEmail(@RequestParam String email) {
-        return clienteService.ObtenerClientePorEmail(email)
+    @GetMapping("/buscar/tipoDocumento/{tipoDocumento}")
+    public ResponseEntity<Cliente> obtenerClientePorTipoDocumento(@PathVariable String tipoDocumento) {
+        return clienteService.obtenerClientePorTipoDocumento(tipoDocumento)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

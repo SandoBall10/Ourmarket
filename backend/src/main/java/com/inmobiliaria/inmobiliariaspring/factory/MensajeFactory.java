@@ -8,7 +8,7 @@ import com.inmobiliaria.inmobiliariaspring.model.Mensaje;
 import com.inmobiliaria.inmobiliariaspring.model.Mensaje.TipoMensaje;
 
 public class MensajeFactory {
-    public static Mensaje crearMensaje(String contenido, TipoMensaje tipoMensaje, Cliente cliente, Inmueble inmueble) {
+    public static Mensaje crearMensaje(String contenido, Cliente cliente, Inmueble inmueble, TipoMensaje tipoMensaje) {
         return new Mensaje(contenido, LocalDateTime.now(), cliente, inmueble, tipoMensaje);
     }
 }

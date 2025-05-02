@@ -36,7 +36,7 @@ public class Favorito {
         this.idInmueble = idInmueble;
     }
 
-    //Clase inner para unir las dos claves foráneas
+    // Clase interna para unir las dos claves foráneas
     public static class FavoritoId implements java.io.Serializable {
         private Integer idCliente;
         private Integer idInmueble;
@@ -60,8 +60,8 @@ public class Favorito {
         public int hashCode() {
             return idCliente.hashCode() + idInmueble.hashCode();
         }
-        
-        // getters y setters de inner
+
+        // Getters y setters de la clase interna
         public Integer getIdCliente() {
             return idCliente;
         }
@@ -77,9 +77,9 @@ public class Favorito {
         public void setIdInmueble(Integer idInmueble) {
             this.idInmueble = idInmueble;
         }
-
     }
-    // getters y setters
+
+    // Getters y setters
     public Integer getIdCliente() {
         return idCliente;
     }

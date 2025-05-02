@@ -3,16 +3,7 @@ package com.inmobiliaria.inmobiliariaspring.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "inmueble")
@@ -46,19 +37,18 @@ public class Inmueble {
     @Column(name = "fecha_publicacion", nullable = false)
     private LocalDateTime fechaPublicacion;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean autorizado = false;
 
     @ManyToOne
     @JoinColumn(name = "id_cliente")
     private Cliente cliente;
 
-    @Column(columnDefinition = "LONGTEXT")
-    private String imagenes; // Se almacena como JSON validado
+    @Column(columnDefinition = "TEXT")
+    private String imagenes;
 
     public Inmueble() {}
 
-    // Constructor completo para el Factory
     public Inmueble(String titulo, String descripcion, BigDecimal precio, Tipo tipo, Estado estado, 
                     String ubicacion, LocalDateTime fechaPublicacion, Boolean autorizado, 
                     String imagenes, Cliente cliente) {
@@ -66,15 +56,14 @@ public class Inmueble {
         this.descripcion = descripcion;
         this.precio = precio;
         this.tipo = tipo;
-        this.estado = estado;
+        this.estado = estado != null ? estado : Estado.disponible;
         this.ubicacion = ubicacion;
-        this.fechaPublicacion = fechaPublicacion;
-        this.autorizado = autorizado;
+        this.fechaPublicacion = fechaPublicacion != null ? fechaPublicacion : LocalDateTime.now();
+        this.autorizado = autorizado != null ? autorizado : false; // Si no se proporciona, usa "false"
         this.imagenes = imagenes;
         this.cliente = cliente;
     }
 
-    //Enums
     public enum Tipo {
         casa, departamento, terreno
     }

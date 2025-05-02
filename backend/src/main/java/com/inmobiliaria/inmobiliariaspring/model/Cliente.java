@@ -28,6 +28,9 @@ public class Cliente {
     @Column(name = "contraseña")
     private String contraseña;
 
+    @Column(name = "tipo_documento", nullable = false)  // Cambiado a tipo de documento (DNI o Carnet de Extranjería)
+    private String tipoDocumento;  // 'DNI' o 'Carnet de Extranjería'
+
     @ManyToOne
     @JoinColumn(name = "id_rol")
     private Rol rol;
@@ -52,11 +55,12 @@ public class Cliente {
     } 
     
     // Constructor personalizado para usar en Factory
-    public Cliente(String nombre, String apellido, String email, String contraseña, Rol rol, LocalDateTime fechaRegistro) {
+    public Cliente(String nombre, String apellido, String email, String contraseña, String tipoDocumento, Rol rol, LocalDateTime fechaRegistro) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
         this.contraseña = contraseña;
+        this.tipoDocumento = tipoDocumento;  // 'DNI' o 'Carnet de Extranjería'
         this.rol = rol;
         this.fechaRegistro = fechaRegistro;
     }
@@ -100,6 +104,14 @@ public class Cliente {
 
     public void setContraseña(String contraseña) {
         this.contraseña = contraseña;
+    }
+
+    public String getTipoDocumento() {
+        return tipoDocumento;
+    }
+
+    public void setTipoDocumento(String tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
     }
 
     public Rol getRol() {
@@ -149,6 +161,4 @@ public class Cliente {
     public void setFavoritos(List<Favorito> favoritos) {
         this.favoritos = favoritos;
     }
-
-
 }
