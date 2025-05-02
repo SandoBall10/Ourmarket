@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { useNavigate, Link } from 'react-router-dom'; // Importa Link
 import './Login.css';
+// Removed unused import for Registro
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -10,12 +10,11 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    // Simulación de inicio de sesión
     setTimeout(() => {
       if (username === 'admin' && password === 'admin') {
         setError('');
@@ -24,86 +23,98 @@ const Login: React.FC = () => {
         setError('Usuario o contraseña incorrectos');
       }
       setIsLoading(false);
-    }, 1000); // Simula una espera de 1 segundo
+    }, 1000);
   };
 
   return (
-    <div className="login-container">
-      <div className="card login-card shadow-lg p-4">
-        <div className="text-center mb-4">
-          <i className="fas fa-user-circle fa-4x text-primary mb-3"></i>
-          <h2 className="mt-2">Iniciar Sesión</h2>
-          <p className="text-muted">Ingresa a tu cuenta y accede a los avisos que contactaste, tus favoritos, las búsquedas guardadas ¡y más!</p>
-        </div>
-
-        {error && (
-          <div className="alert alert-danger" role="alert">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="username" className="form-label">
-              Correo Electrónico
-            </label>
-            <div className="input-group">
-              <span className="input-group-text">
-                <i className="fas fa-envelope"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                id="username"
-                placeholder="Ingresa tu correo"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">
-              Contraseña
-            </label>
-            <div className="input-group">
-              <span className="input-group-text">
-                <i className="fas fa-lock"></i>
-              </span>
-              <input
-                type="password"
-                className="form-control"
-                id="password"
-                placeholder="Ingresa tu contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className={`btn btn-primary w-100 ${isLoading ? 'disabled' : ''}`}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Cargando...
-              </>
-            ) : (
-              'Iniciar Sesión'
-            )}
-          </button>
-        </form>
-
-        <div className="text-center mt-3">
-          <p className="text-green">
-            ¿No tienes una cuenta?{' '}
-            <a href="/register" className="register-link">Regístrate aquí</a>
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-left">
+          <h1 className="login-title">Bienvenido a InmoMarket</h1>
+          <p className="login-description">
+            Encuentra, compra y vende propiedades de forma rápida y segura.
           </p>
+          <img
+            src="https://via.placeholder.com/400x300" // Reemplaza con una imagen adecuada
+            alt="InmoMarket"
+            className="login-image"
+          />
+        </div>
+        <div className="login-right">
+          <div className="login-card">
+            <h2 className="text-center">Iniciar Sesión</h2>
+            <form onSubmit={handleSubmit}>
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
+              <div className="mb-3">
+                <label htmlFor="username" className="form-label">
+                  Correo Electrónico
+                </label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="fas fa-envelope"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="username"
+                    placeholder="Ingresa tu correo"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">
+                  Contraseña
+                </label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="fas fa-lock"></i>
+                  </span>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="password"
+                    placeholder="Ingresa tu contraseña"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className={`btn btn-primary w-100 ${isLoading ? 'disabled' : ''}`}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Cargando...
+                  </>
+                ) : (
+                  'Iniciar Sesión'
+                )}
+              </button>
+            </form>
+            <div className="text-center mt-3">
+              <p>
+                ¿No tienes una cuenta?{' '}
+                <Link to="/registro" className="register-link">
+                  Regístrate aquí
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
