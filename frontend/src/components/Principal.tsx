@@ -11,11 +11,11 @@ const Principal: React.FC = () => {
   const [isServiciosOpen, setIsServiciosOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('comprar');
   const [selectedAction, setSelectedAction] = useState('comprar'); // Default to 'comprar'
-  
+
   // Add user state
-  const [user, setUser] = useState<{name: string, username: string} | null>(null);
+  const [user, setUser] = useState<{ name: string, username: string } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
+
   // Check if user is logged in on component mount
   useEffect(() => {
     // Check if user info exists in localStorage or sessionStorage
@@ -30,7 +30,7 @@ const Principal: React.FC = () => {
       }
     }
   }, []);
-  
+
   // Function to handle logout
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -171,25 +171,33 @@ const Principal: React.FC = () => {
                   <Container fluid className="mega-menu-container py-4 px-4">
                     <Row>
                       <Col>
-                <h6 className="fw-bold mb-3">Para Vendedores</h6>
-                <ul className="list-unstyled">
-                  <li>
-                    <Link to="/vendedores" className="text-decoration-none text-dark">
-                      Guía para Vender
-                    </Link>
-                  </li>
-                </ul>
-              </Col>
+                        <h6 className="fw-bold mb-3">Para Vendedores</h6>
+                        <ul className="list-unstyled">
+                          <li>
+                            <Link to="/vendedores" className="text-decoration-none text-dark">
+                              Guía para Vender
+                            </Link>
+                          </li>
+                        </ul>
+                      </Col>
                       <Col>
                         <h6 className="fw-bold mb-3">Para compradores</h6>
                         <ul className="list-unstyled">
-                          <li>Guía de compra</li>
+                          <li>
+                            <Link to="/compradores" className="text-decoration-none text-dark">
+                              Guía para Comprar
+                            </Link>
+                          </li>
                         </ul>
                       </Col>
                       <Col>
                         <h6 className="fw-bold mb-3">Nuestra Mision y Vision</h6>
                         <ul className="list-unstyled">
-                          <li>Conocenos</li>
+                          <li>
+                            <Link to="/vendedores" className="text-decoration-none text-dark">
+                              Conocenos
+                            </Link>
+                          </li>
                         </ul>
                       </Col>
                     </Row>
@@ -475,150 +483,150 @@ const Principal: React.FC = () => {
         </div>
       </section>
 
-{/* Te acompañamos en cada paso Section - Enhanced with Animations */}
-<div className="accompaniment-section py-5">
-  <div className="accompaniment-bg-shape"></div>
-  <Container>
-    <h2 className="section-title fw-bold mb-5 text-center">
-      <span className="highlight-text">Te acompañamos</span> en cada paso
-    </h2>
-    <Row className="g-4 features-container">
-      <Col xs={12} md={3} className="feature-col">
-        <div className="feature-card text-center p-4">
-          <div className="feature-icon-wrapper mb-4">
-            <div className="feature-icon">
-              <i className="fas fa-search"></i>
-            </div>
-          </div>
-          <h5 className="fw-bold mb-3">Búsqueda clara y rápida</h5>
-          <p className="text-muted">Pensamos nuestros filtros y mapas para simplificar tu experiencia en nuestro portal.</p>
-          <div className="feature-hover-effect"></div>
-        </div>
-      </Col>
-      <Col xs={12} md={3} className="feature-col">
-        <div className="feature-card text-center p-4">
-          <div className="feature-icon-wrapper mb-4">
-            <div className="feature-icon">
-              <i className="fas fa-user-circle"></i>
-            </div>
-          </div>
-          <h5 className="fw-bold mb-3">Tienes tu propia sección</h5>
-          <p className="text-muted">Accede de forma fácil y segura a los avisos contactados, favoritos, las notas que creaste y más.</p>
-          <div className="feature-hover-effect"></div>
-        </div>
-      </Col>
-      <Col xs={12} md={3} className="feature-col">
-        <div className="feature-card text-center p-4">
-          <div className="feature-icon-wrapper mb-4">
-            <div className="feature-icon">
-              <i className="fas fa-building"></i>
-            </div>
-          </div>
-          <h5 className="fw-bold mb-3">Variedad de anunciantes</h5>
-          <p className="text-muted">Inmobiliarias y dueños directos de todo el país ofrecen las mejores opciones de inmuebles para ti.</p>
-          <div className="feature-hover-effect"></div>
-        </div>
-      </Col>
-      <Col xs={12} md={3} className="feature-col">
-        <div className="feature-card text-center p-4">
-          <div className="feature-icon-wrapper mb-4">
-            <div className="feature-icon">
-              <i className="fas fa-award"></i>
-            </div>
-          </div>
-          <h5 className="fw-bold mb-3">¡Somos InmoMarket!</h5>
-          <p className="text-muted">Somos una pagina confiable para tu primera Casa o Terreno.</p>
-          <div className="feature-hover-effect"></div>
-        </div>
-      </Col>
-    </Row>
-  </Container>
-</div>
+      {/* Te acompañamos en cada paso Section - Enhanced with Animations */}
+      <div className="accompaniment-section py-5">
+        <div className="accompaniment-bg-shape"></div>
+        <Container>
+          <h2 className="section-title fw-bold mb-5 text-center">
+            <span className="highlight-text">Te acompañamos</span> en cada paso
+          </h2>
+          <Row className="g-4 features-container">
+            <Col xs={12} md={3} className="feature-col">
+              <div className="feature-card text-center p-4">
+                <div className="feature-icon-wrapper mb-4">
+                  <div className="feature-icon">
+                    <i className="fas fa-search"></i>
+                  </div>
+                </div>
+                <h5 className="fw-bold mb-3">Búsqueda clara y rápida</h5>
+                <p className="text-muted">Pensamos nuestros filtros y mapas para simplificar tu experiencia en nuestro portal.</p>
+                <div className="feature-hover-effect"></div>
+              </div>
+            </Col>
+            <Col xs={12} md={3} className="feature-col">
+              <div className="feature-card text-center p-4">
+                <div className="feature-icon-wrapper mb-4">
+                  <div className="feature-icon">
+                    <i className="fas fa-user-circle"></i>
+                  </div>
+                </div>
+                <h5 className="fw-bold mb-3">Tienes tu propia sección</h5>
+                <p className="text-muted">Accede de forma fácil y segura a los avisos contactados, favoritos, las notas que creaste y más.</p>
+                <div className="feature-hover-effect"></div>
+              </div>
+            </Col>
+            <Col xs={12} md={3} className="feature-col">
+              <div className="feature-card text-center p-4">
+                <div className="feature-icon-wrapper mb-4">
+                  <div className="feature-icon">
+                    <i className="fas fa-building"></i>
+                  </div>
+                </div>
+                <h5 className="fw-bold mb-3">Variedad de anunciantes</h5>
+                <p className="text-muted">Inmobiliarias y dueños directos de todo el país ofrecen las mejores opciones de inmuebles para ti.</p>
+                <div className="feature-hover-effect"></div>
+              </div>
+            </Col>
+            <Col xs={12} md={3} className="feature-col">
+              <div className="feature-card text-center p-4">
+                <div className="feature-icon-wrapper mb-4">
+                  <div className="feature-icon">
+                    <i className="fas fa-award"></i>
+                  </div>
+                </div>
+                <h5 className="fw-bold mb-3">¡Somos InmoMarket!</h5>
+                <p className="text-muted">Somos una pagina confiable para tu primera Casa o Terreno.</p>
+                <div className="feature-hover-effect"></div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
 
       {/* Enhanced Footer */}
-<footer className="footer-section">
-  {/* Footer Top Section */}
-  <div className="footer-top">
-    <Container>
-      <Row className="footer-row">
-        <Col lg={4} md={6} className="mb-4 mb-md-0">
-          <div className="footer-brand">
-            <h2 className="text-white mb-3">InmoMarket</h2>
-            <p className="footer-desc">
-              La plataforma inmobiliaria que conecta a compradores y 
-              vendedores para hacer realidad sus sueños inmobiliarios.
-            </p>
-            <div className="footer-social">
-              <a href="#" className="social-icon"><i className="fab fa-facebook-f"></i></a>
-              <a href="#" className="social-icon"><i className="fab fa-instagram"></i></a>
-              <a href="#" className="social-icon"><i className="fab fa-twitter"></i></a>
-              <a href="#" className="social-icon"><i className="fab fa-linkedin-in"></i></a>
-              <a href="#" className="social-icon"><i className="fab fa-youtube"></i></a>
-            </div>
-          </div>
-        </Col>
-        
-        <Col lg={2} md={6} className="mb-4 mb-lg-0">
-          <h5 className="footer-heading">Comprar</h5>
-          <ul className="footer-links">
-            <li><a href="#">Departamentos</a></li>
-            <li><a href="#">Casas</a></li>
-            <li><a href="#">Terrenos</a></li>
-          </ul>
-        </Col>
-        
-        <Col lg={2} md={6} className="mb-4 mb-lg-0">
-          <h5 className="footer-heading">Vender</h5>
-          <ul className="footer-links">
-            <li><a href="#">Publicar Propiedad</a></li>
-            <li><a href="#">Consejos de Venta</a></li>
-            <li><a href="#">Valoración de Inmuebles</a></li>
-            <li><a href="#">Publicaciones Destacadas</a></li>
-          </ul>
-        </Col>
-        
-        <Col lg={4} md={6}>
-          <h5 className="footer-heading">Suscríbete</h5>
-          <p className="footer-newsletter-text">
-            Recibe las mejores ofertas inmobiliarias en tu correo
-          </p>
-          <div className="footer-newsletter">
-            <input type="email" placeholder="Tu correo electrónico" className="footer-input" />
-            <button className="footer-subscribe-btn">Suscribirse</button>
-          </div>
-          <div className="footer-contact mt-4">
-            <div className="d-flex align-items-center mb-2">
-              <i className="fas fa-phone-alt me-2"></i>
-              <span>(01) 555-1234</span>
-            </div>
-            <div className="d-flex align-items-center">
-              <i className="fas fa-envelope me-2"></i>
-              <span>contacto@inmomarket.com</span>
-            </div>
-          </div>
-        </Col>
-      </Row>
-    </Container>
-  </div>
-  
-  {/* Footer Bottom Section */}
-  <div className="footer-bottom">
-    <Container>
-      <Row className="align-items-center">
-        <Col md={6} className="text-center text-md-start">
-          <p className="mb-md-0">
-            &copy; {new Date().getFullYear()} InmoMarket. Todos los derechos reservados.
-          </p>
-        </Col>
-        <Col md={6} className="text-center text-md-end footer-links-bottom">
-          <a href="#">Política de Privacidad</a>
-          <a href="#">Términos y Condiciones</a>
-          <a href="#">Mapa del Sitio</a>
-        </Col>
-      </Row>
-    </Container>
-  </div>
-</footer>
+      <footer className="footer-section">
+        {/* Footer Top Section */}
+        <div className="footer-top">
+          <Container>
+            <Row className="footer-row">
+              <Col lg={4} md={6} className="mb-4 mb-md-0">
+                <div className="footer-brand">
+                  <h2 className="text-white mb-3">InmoMarket</h2>
+                  <p className="footer-desc">
+                    La plataforma inmobiliaria que conecta a compradores y
+                    vendedores para hacer realidad sus sueños inmobiliarios.
+                  </p>
+                  <div className="footer-social">
+                    <a href="#" className="social-icon"><i className="fab fa-facebook-f"></i></a>
+                    <a href="#" className="social-icon"><i className="fab fa-instagram"></i></a>
+                    <a href="#" className="social-icon"><i className="fab fa-twitter"></i></a>
+                    <a href="#" className="social-icon"><i className="fab fa-linkedin-in"></i></a>
+                    <a href="#" className="social-icon"><i className="fab fa-youtube"></i></a>
+                  </div>
+                </div>
+              </Col>
+
+              <Col lg={2} md={6} className="mb-4 mb-lg-0">
+                <h5 className="footer-heading">Comprar</h5>
+                <ul className="footer-links">
+                  <li><a href="#">Departamentos</a></li>
+                  <li><a href="#">Casas</a></li>
+                  <li><a href="#">Terrenos</a></li>
+                </ul>
+              </Col>
+
+              <Col lg={2} md={6} className="mb-4 mb-lg-0">
+                <h5 className="footer-heading">Vender</h5>
+                <ul className="footer-links">
+                  <li><a href="#">Publicar Propiedad</a></li>
+                  <li><a href="#">Consejos de Venta</a></li>
+                  <li><a href="#">Valoración de Inmuebles</a></li>
+                  <li><a href="#">Publicaciones Destacadas</a></li>
+                </ul>
+              </Col>
+
+              <Col lg={4} md={6}>
+                <h5 className="footer-heading">Suscríbete</h5>
+                <p className="footer-newsletter-text">
+                  Recibe las mejores ofertas inmobiliarias en tu correo
+                </p>
+                <div className="footer-newsletter">
+                  <input type="email" placeholder="Tu correo electrónico" className="footer-input" />
+                  <button className="footer-subscribe-btn">Suscribirse</button>
+                </div>
+                <div className="footer-contact mt-4">
+                  <div className="d-flex align-items-center mb-2">
+                    <i className="fas fa-phone-alt me-2"></i>
+                    <span>(01) 555-1234</span>
+                  </div>
+                  <div className="d-flex align-items-center">
+                    <i className="fas fa-envelope me-2"></i>
+                    <span>contacto@inmomarket.com</span>
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+
+        {/* Footer Bottom Section */}
+        <div className="footer-bottom">
+          <Container>
+            <Row className="align-items-center">
+              <Col md={6} className="text-center text-md-start">
+                <p className="mb-md-0">
+                  &copy; {new Date().getFullYear()} InmoMarket. Todos los derechos reservados.
+                </p>
+              </Col>
+              <Col md={6} className="text-center text-md-end footer-links-bottom">
+                <a href="#">Política de Privacidad</a>
+                <a href="#">Términos y Condiciones</a>
+                <a href="#">Mapa del Sitio</a>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      </footer>
     </div>
   );
 };

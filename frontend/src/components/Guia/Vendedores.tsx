@@ -14,6 +14,10 @@ const Vendedores: React.FC = () => {
   const [isAlquilarOpen, setIsAlquilarOpen] = useState(false);
   const [isServiciosOpen, setIsServiciosOpen] = useState(false);
 
+  // Mock user authentication state
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Change to false if not logged in
+  const [user, setUser] = useState({ name: 'A' }); // Replace with actual user data
+
   // Inicializar animaciones cuando el componente se monta
   useEffect(() => {
     AOS.init({
@@ -23,12 +27,16 @@ const Vendedores: React.FC = () => {
     });
   }, []);
 
+  function handleLogout(_event: React.MouseEvent<HTMLElement>): void {
+    throw new Error('Function not implemented.');
+  }
+
   return (
     <div className="full-width-container">
       {/* Barra de Navegación */}
       <Navbar bg="white" expand="lg" className="w-100 border-bottom">
         <Container fluid className="px-4">
-          <Navbar.Brand as={Link} to="/">
+          <Navbar.Brand href="#">
             <img
               src="imagen"
               alt="InmoMarket"
@@ -74,7 +82,7 @@ const Vendedores: React.FC = () => {
                         <ul className="list-unstyled">
                           <li>Departamento</li>
                           <li>Casa</li>
-                          <li>Terreno/Lote</li>
+                          <li>Terreno / Lote</li>
                           <li>Oficina</li>
                           <li>Local Comercial</li>
                         </ul>
@@ -94,43 +102,133 @@ const Vendedores: React.FC = () => {
                 </div>
               </NavDropdown>
 
-              {/* Resto de menús (ya existentes) */}
+              {/* Menú Alquilar */}
               <NavDropdown
-                title={<span className="nav-link-text">Vender <i className="fas fa-chevron-down fa-xs"></i></span>}
+                title={
+                  <span className="nav-link-text">Vender <i className="fas fa-chevron-down fa-xs"></i></span>
+                }
                 id="alquilar-dropdown"
                 className="mega-dropdown"
                 show={isAlquilarOpen}
                 onMouseEnter={() => setIsAlquilarOpen(true)}
-                onMouseLeave={() => setIsAlquilarOpen(false)} children={undefined}              >
-                {/* Contenido existente */}
+                onMouseLeave={() => setIsAlquilarOpen(false)}
+              >
+                <div className="mega-menu-wrapper">
+                  <Container fluid className="mega-menu-container py-4 px-4">
+                    <Row>
+                      <Col>
+                        <h6 className="fw-bold mb-3">Estado</h6>
+                        <ul className="list-unstyled">
+                          <li>Lima</li>
+                          <li>Piura</li>
+                          <li>Arequipa</li>
+                          <li>Cusco</li>
+                        </ul>
+                      </Col>
+                      <Col>
+                        <h6 className="fw-bold mb-3">Tipo de propiedad</h6>
+                        <ul className="list-unstyled">
+                          <li>Departamento</li>
+                          <li>Casa</li>
+                          <li>Oficina</li>
+                          <li>Local Comercial</li>
+                        </ul>
+                      </Col>
+                      <Col>
+                        <h6 className="fw-bold mb-3">Dormitorios</h6>
+                        <ul className="list-unstyled">
+                          <li>3 dormitorios</li>
+                          <li>2 dormitorios</li>
+                          <li>1 dormitorio</li>
+                        </ul>
+                      </Col>
+                    </Row>
+                  </Container>
+                </div>
               </NavDropdown>
 
+              {/* Menú Servicios */}
               <NavDropdown
-                title={<span className="nav-link-text">InmoMarket te ayuda <i className="fas fa-chevron-down fa-xs"></i></span>}
+                title={
+                  <span className="nav-link-text">InmoMarket te ayuda <i className="fas fa-chevron-down fa-xs"></i></span>
+                }
                 id="servicios-dropdown"
                 className="mega-dropdown"
                 show={isServiciosOpen}
                 onMouseEnter={() => setIsServiciosOpen(true)}
-                onMouseLeave={() => setIsServiciosOpen(false)} children={undefined}              >
-                {/* Contenido existente */}
+                onMouseLeave={() => setIsServiciosOpen(false)}
+              >
+                <div className="mega-menu-wrapper">
+                  <Container fluid className="mega-menu-container py-4 px-4">
+                    <Row>
+                      <Col>
+                        <h6 className="fw-bold mb-3">Para Vendedores</h6>
+                        <ul className="list-unstyled">
+                          <li>
+                            <Link to="/vendedores" className="text-decoration-none text-dark">
+                              Guía para Vender
+                            </Link>
+                          </li>
+                        </ul>
+                      </Col>
+                      <Col>
+                        <h6 className="fw-bold mb-3">Para compradores</h6>
+                        <ul className="list-unstyled">
+                          <li>
+                            <Link to="/compradores" className="text-decoration-none text-dark">
+                              Guía para Comprar
+                            </Link>
+                          </li>
+                        </ul>
+                      </Col>
+                      <Col>
+                        <h6 className="fw-bold mb-3">Nuestra Mision y Vision</h6>
+                        <ul className="list-unstyled">
+                          <li>
+                            <Link to="/vendedores" className="text-decoration-none text-dark">
+                              Conocenos
+                            </Link>
+                          </li>
+                        </ul>
+                      </Col>
+                    </Row>
+                  </Container>
+                </div>
               </NavDropdown>
             </Nav>
 
             <Nav className="ms-auto">
               {/* Notificaciones */}
               <Nav.Link href="#" className="me-2">
-                <span className="nav-link-text">Notificaciones <i className="bi bi-bell"></i></span>
+                <span className="nav-link-text">Notificaciones <i className="far fa-bell"></i></span>
               </Nav.Link>
-              {/* Ingresar */}
-              <Nav.Link href="#">
-                <Button
-                  variant="success"
-                  className="btn-ingresar"
-                  onClick={() => navigate('/login')}
+              {/* Ingresar o Avatar de Usuario */}
+              {isLoggedIn && user ? (
+                <NavDropdown
+                  title={
+                    <div className="user-avatar">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  }
+                  id="user-dropdown"
+                  align="end"
                 >
-                  Ingresar
-                </Button>
-              </Nav.Link>
+                  <NavDropdown.Item as={Link} to="/perfil">Mi Perfil</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/mis-publicaciones">Mis Publicaciones</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item onClick={handleLogout}>Cerrar Sesión</NavDropdown.Item>
+                </NavDropdown>
+              ) : (
+                <Nav.Link href="#">
+                  <Button
+                    variant="success"
+                    className="btn-ingresar"
+                    onClick={() => navigate('/login')}
+                  >
+                    Ingresar
+                  </Button>
+                </Nav.Link>
+              )}
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -160,7 +258,7 @@ const Vendedores: React.FC = () => {
         <h2 className="section-title text-center mb-5" data-aos="fade-up">
           <i className="bi bi-signpost-split me-2"></i>Tres pasos para vender exitosamente
         </h2>
-        
+
         <Row className="mb-5">
           {/* Paso 1 */}
           <Col md={4} className="mb-4">
@@ -172,7 +270,7 @@ const Vendedores: React.FC = () => {
                 <div className="step-number">1</div>
                 <Card.Title className="fw-bold">Prepara tu propiedad</Card.Title>
                 <Card.Text>
-                  Asegúrate de que tu propiedad esté en las mejores condiciones para atraer compradores. 
+                  Asegúrate de que tu propiedad esté en las mejores condiciones para atraer compradores.
                   Limpia, ordena y realiza reparaciones básicas.
                 </Card.Text>
                 <Button variant="outline-success" className="btn-icon-text mt-3">
@@ -181,7 +279,7 @@ const Vendedores: React.FC = () => {
               </Card.Body>
             </Card>
           </Col>
-          
+
           {/* Paso 2 */}
           <Col md={4} className="mb-4">
             <Card className="info-card h-100 shadow hover-card" data-aos="fade-up" data-aos-delay="200">
@@ -192,7 +290,7 @@ const Vendedores: React.FC = () => {
                 <div className="step-number">2</div>
                 <Card.Title className="fw-bold">Publica tu anuncio</Card.Title>
                 <Card.Text>
-                  Usa nuestra plataforma para publicar tu propiedad con fotos de calidad y 
+                  Usa nuestra plataforma para publicar tu propiedad con fotos de calidad y
                   descripciones atractivas que destaquen sus mejores características.
                 </Card.Text>
                 <Button variant="outline-success" className="btn-icon-text mt-3">
@@ -201,7 +299,7 @@ const Vendedores: React.FC = () => {
               </Card.Body>
             </Card>
           </Col>
-          
+
           {/* Paso 3 */}
           <Col md={4} className="mb-4">
             <Card className="info-card h-100 shadow hover-card" data-aos="fade-up" data-aos-delay="300">
@@ -212,7 +310,7 @@ const Vendedores: React.FC = () => {
                 <div className="step-number">3</div>
                 <Card.Title className="fw-bold">Negocia y vende</Card.Title>
                 <Card.Text>
-                  Aprende a negociar eficazmente con los compradores y cierra el trato 
+                  Aprende a negociar eficazmente con los compradores y cierra el trato
                   de manera segura utilizando nuestras herramientas profesionales.
                 </Card.Text>
                 <Button variant="outline-success" className="btn-icon-text mt-3">
@@ -229,7 +327,7 @@ const Vendedores: React.FC = () => {
             <i className="bi bi-quote"></i>
           </div>
           <p className="testimonial-text">
-            "Gracias a InmoMarket, pude vender mi departamento en menos de dos semanas. 
+            "Gracias a InmoMarket, pude vender mi departamento en menos de dos semanas.
             El proceso fue muy fácil y recibí un excelente asesoramiento en todo momento."
           </p>
           <div className="testimonial-author">
@@ -247,16 +345,16 @@ const Vendedores: React.FC = () => {
         <div className="cta-banner" data-aos="zoom-in">
           <h3><i className="bi bi-lightning-charge-fill me-2"></i>¿Listo para comenzar a vender?</h3>
           <p>Nuestro equipo está preparado para ayudarte en cada paso del camino</p>
-          <Button 
-            variant="success" 
-            size="lg" 
+          <Button
+            variant="success"
+            size="lg"
             className="animated-btn"
             onClick={() => navigate('/publicar')}
           >
             <i className="bi bi-rocket-takeoff me-2"></i>Comenzar ahora
           </Button>
         </div>
-        
+
         {/* Sección de estadísticas - nueva */}
         <Row className="stats-section text-center mt-5 pt-3">
           <h4 className="mb-4" data-aos="fade-up">Por qué elegir InmoMarket</h4>
@@ -309,7 +407,7 @@ const Vendedores: React.FC = () => {
                 <div className="footer-brand">
                   <h2 className="text-white mb-3">InmoMarket</h2>
                   <p className="footer-desc">
-                    La plataforma inmobiliaria que conecta a compradores y 
+                    La plataforma inmobiliaria que conecta a compradores y
                     vendedores para hacer realidad sus sueños inmobiliarios.
                   </p>
                   <div className="footer-social">
@@ -321,7 +419,7 @@ const Vendedores: React.FC = () => {
                   </div>
                 </div>
               </Col>
-              
+
               <Col lg={2} md={6} className="mb-4 mb-lg-0">
                 <h5 className="footer-heading">Comprar</h5>
                 <ul className="footer-links">
@@ -330,7 +428,7 @@ const Vendedores: React.FC = () => {
                   <li><a href="#">Terrenos</a></li>
                 </ul>
               </Col>
-              
+
               <Col lg={2} md={6} className="mb-4 mb-lg-0">
                 <h5 className="footer-heading">Vender</h5>
                 <ul className="footer-links">
@@ -340,7 +438,7 @@ const Vendedores: React.FC = () => {
                   <li><a href="#">Publicaciones Destacadas</a></li>
                 </ul>
               </Col>
-              
+
               <Col lg={4} md={6}>
                 <h5 className="footer-heading">Suscríbete</h5>
                 <p className="footer-newsletter-text">
@@ -364,7 +462,7 @@ const Vendedores: React.FC = () => {
             </Row>
           </Container>
         </div>
-        
+
         {/* Footer Bottom Section */}
         <div className="footer-bottom">
           <Container>

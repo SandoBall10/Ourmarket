@@ -1,0 +1,468 @@
+/* Hero Section con Efecto Parallax */
+.hero-section-compradores {
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1560520031-3a4dc4e9de0c?ixlib=rb-4.0.3');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #fff;
+  padding: 120px 0;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(13, 78, 66, 0.9) 0%, rgba(0, 0, 0, 0.8) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero-icon-container {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  color: #28a745;
+}
+
+.hero-section-compradores h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.hero-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px auto;
+}
+
+.hero-divider span {
+  height: 1px;
+  width: 80px;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.hero-divider i {
+  margin: 0 15px;
+  color: #28a745;
+}
+
+/* Sección de contenido */
+.section-title {
+  position: relative;
+  margin-bottom: 40px;
+  font-weight: 600;
+}
+
+.section-title:after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #28a745;
+}
+
+/* Cards con iconos */
+.info-card {
+  border-radius: 10px;
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.hover-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-icon-top {
+  background-color: #0d4e42;
+  color: white;
+  font-size: 2rem;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.hover-card:hover .card-icon-top {
+  background-color: #28a745;
+}
+
+.step-number {
+  position: absolute;
+  top: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  border: 2px solid #28a745;
+  color: #28a745;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.btn-icon-text {
+  border-color: #28a745;
+  color: #28a745;
+  transition: all 0.3s ease;
+}
+
+.btn-icon-text:hover {
+  background-color: #28a745;
+  color: white;
+}
+
+/* Sección de consejos financieros */
+.finance-tips-section {
+  background-color: #f8f9fa;
+  border-left: 5px solid #28a745;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.finance-icon {
+  font-size: 8rem;
+  color: #28a745;
+  opacity: 0.2;
+}
+
+.tip-item h5 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Testimonial section */
+.testimonial-section {
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 40px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.testimonial-quote {
+  font-size: 4rem;
+  color: rgba(13, 78, 66, 0.1);
+  position: absolute;
+  top: 20px;
+  left: 30px;
+}
+
+.testimonial-text {
+  font-size: 1.2rem;
+  font-style: italic;
+  margin-bottom: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.testimonial-avatar {
+  font-size: 2.5rem;
+  color: #0d4e42;
+  margin-right: 15px;
+}
+
+.testimonial-info {
+  text-align: left;
+}
+
+.testimonial-info h5 {
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.testimonial-info p {
+  color: #6c757d;
+  margin: 0;
+}
+
+/* Consideraciones importantes */
+.considerations-section {
+  margin: 60px 0;
+}
+
+.consideration-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 25px;
+  height: 100%;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.consideration-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.consideration-icon {
+  font-size: 2rem;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+/* CTA Banner */
+.cta-banner {
+  background: linear-gradient(135deg, #0d4e42 0%, #28a745 100%);
+  padding: 50px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+  margin: 50px 0;
+  box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+}
+
+.cta-banner h3 {
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.animated-btn {
+  padding: 12px 30px;
+  margin-top: 20px;
+  font-weight: 600;
+  background-color: white;
+  color: #0d4e42;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.animated-btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-3px);
+  color: #0d4e42;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Recursos adicionales */
+.resource-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 30px;
+  height: 100%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.resource-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.resource-icon {
+  font-size: 2.5rem;
+  color: #28a745;
+  margin-bottom: 20px;
+}
+
+/* Sección FAQ */
+.faq-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 25px;
+  height: 100%;
+  text-align: left;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border-left: 4px solid #28a745;
+}
+
+.faq-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.faq-icon {
+  font-size: 2.5rem;
+  color: #28a745;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.faq-card h5 {
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.faq-more {
+  margin-top: 15px;
+  text-align: right;
+}
+
+/* Animaciones adicionales */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animated-btn {
+  animation: pulse 2s infinite;
+}
+
+/* Estilos del Footer */
+.footer-section {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+.footer-top {
+  padding: 60px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-bottom {
+  padding: 20px 0;
+  background-color: #111;
+}
+
+.footer-heading {
+  font-weight: 600;
+  margin-bottom: 20px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.footer-heading:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background-color: #28a745;
+}
+
+.footer-links li {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  color: #ccc;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #28a745;
+  text-decoration: none;
+}
+
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #fff;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+  background-color: #28a745;
+  color: #fff;
+  transform: translateY(-3px);
+}
+
+.footer-newsletter {
+  display: flex;
+  margin-top: 20px;
+}
+
+.footer-input {
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px 0 0 4px;
+}
+
+.footer-subscribe-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0 20px;
+  border-radius: 0 4px 4px 0;
+  transition: all 0.3s ease;
+}
+
+.footer-subscribe-btn:hover {
+  background-color: #218838;
+}
+
+.footer-links-bottom a {
+  color: #aaa;
+  margin-left: 20px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.footer-links-bottom a:hover {
+  color: #28a745;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-section-compradores h1 {
+    font-size: 2.5rem;
+  }
+  
+  .card-icon-top {
+    height: 80px;
+    font-size: 1.8rem;
+  }
+  
+  .step-number {
+    top: 65px;
+  }
+  
+  .cta-banner {
+    padding: 30px 20px;
+  }
+  
+  .finance-tips-section {
+    text-align: center;
+  }
+
+  .footer-links-bottom a {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}

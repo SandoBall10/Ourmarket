@@ -6,6 +6,8 @@ import Login from './components/Login';
 import Principal from './components/Principal';
 import Registro from './components/Registro/Registro';
 import Vendedores from './components/Guia/Vendedores';
+import Compradores from './components/Guia/Compradores';
+
 const App: React.FC = () => {
   return (
     <Routes>
@@ -13,6 +15,7 @@ const App: React.FC = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
       <Route path="/vendedores" element={<Vendedores />} />
+      <Route path="/compradores" element={<Compradores />} />
     </Routes>
   );
 };
