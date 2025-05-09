@@ -194,7 +194,7 @@ const Principal: React.FC = () => {
                         <h6 className="fw-bold mb-3">Nuestra Mision y Vision</h6>
                         <ul className="list-unstyled">
                           <li>
-                            <Link to="/vendedores" className="text-decoration-none text-dark">
+                            <Link to="/conocenos" className="text-decoration-none text-dark">
                               Conocenos
                             </Link>
                           </li>

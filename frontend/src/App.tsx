@@ -7,6 +7,7 @@ import Principal from './components/Principal';
 import Registro from './components/Registro/Registro';
 import Vendedores from './components/Guia/Vendedores';
 import Compradores from './components/Guia/Compradores';
+import Conocenos from './components/Guia/Conocenos';
 
 const App: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ const App: React.FC = () => {
       <Route path="/registro" element={<Registro />} />
       <Route path="/vendedores" element={<Vendedores />} />
       <Route path="/compradores" element={<Compradores />} />
+      <Route path="/conocenos" element={<Conocenos />} />
     </Routes>
   );
 };

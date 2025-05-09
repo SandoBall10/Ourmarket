@@ -6,9 +6,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import './Compradores.css'; // Asegúrate de crear este archivo CSS
+import './Conocenos.css'; // Asegúrate de crear este archivo CSS
 
-const Compradores: React.FC = () => {
+const Conocenos: React.FC = () => {
     const navigate = useNavigate();
     const [isComprarOpen, setIsComprarOpen] = useState(false);
     const [isAlquilarOpen, setIsAlquilarOpen] = useState(false);
@@ -28,7 +28,7 @@ const Compradores: React.FC = () => {
     }, []);
 
     function handleLogout(_event: React.MouseEvent<HTMLElement>): void {
-        setUser(null); // Set user to null when logging out
+        setUser(null);
         setIsLoggedIn(false);
     }
 
@@ -36,17 +36,17 @@ const Compradores: React.FC = () => {
         <div className="full-width-container">
             {/* Barra de Navegación */}
             <Navbar bg="white" expand="lg" className="w-100 border-bottom">
-                    <Container fluid className="px-4">
-                      <Navbar.Brand href="#">
+                <Container fluid className="px-4">
+                    <Navbar.Brand href="#">
                         <img
-                          src="imagen"
-                          alt="InmoMarket"
-                          height="30"
-                          className="d-inline-block align-top"
+                            src="imagen"
+                            alt="InmoMarket"
+                            height="30"
+                            className="d-inline-block align-top"
                         />
-                      </Navbar.Brand>
-                      <Navbar.Toggle aria-controls="navbar-nav" />
-                      <Navbar.Collapse id="navbar-nav">
+                    </Navbar.Brand>
+                    <Navbar.Toggle aria-controls="navbar-nav" />
+                    <Navbar.Collapse id="navbar-nav">
                         <Nav className="me-auto">
                             {/* Menú Comprar */}
                             <NavDropdown
@@ -180,11 +180,11 @@ const Compradores: React.FC = () => {
                                                 </ul>
                                             </Col>
                                             <Col>
-                                                <h6 className="fw-bold mb-3">Nuestra Mision y Vision</h6>
+                                                <h6 className="fw-bold mb-3">Nuestra Misión y Visión</h6>
                                                 <ul className="list-unstyled">
                                                     <li>
                                                         <Link to="/conocenos" className="text-decoration-none text-dark">
-                                                            Conocenos
+                                                            Conócenos
                                                         </Link>
                                                     </li>
                                                 </ul>
@@ -200,6 +200,7 @@ const Compradores: React.FC = () => {
                             <Nav.Link href="#" className="me-2">
                                 <span className="nav-link-text">Notificaciones <i className="bi bi-bell"></i></span>
                             </Nav.Link>
+
                             {/* Ingresar o Avatar de Usuario */}
                             {isLoggedIn && user ? (
                                 <NavDropdown
@@ -233,16 +234,16 @@ const Compradores: React.FC = () => {
             </Navbar>
 
             {/* Hero section mejorado con animaciones */}
-            <div className="hero-section-compradores">
+            <div className="hero-section-conocenos">
                 <div className="hero-overlay"></div>
                 <Container>
                     <div className="hero-content" data-aos="fade-up">
                         <div className="hero-icon-container mb-4">
-                            <i className="bi bi-building-check"></i>
+                            <i className="bi bi-building-fill"></i>
                         </div>
-                        <h1 className="text-center">Guía para Compradores</h1>
+                        <h1 className="text-center">Conócenos</h1>
                         <p className="text-center lead">
-                            Encuentra tu propiedad ideal y aprende todo sobre el proceso de compra inmobiliaria
+                            Descubre quiénes somos y cómo estamos transformando el mercado inmobiliario
                         </p>
                         <div className="hero-divider">
                             <span></span><i className="bi bi-diamond-fill"></i><span></span>
@@ -253,205 +254,294 @@ const Compradores: React.FC = () => {
 
             {/* Contenido principal con animaciones y mejoras */}
             <Container className="content-section py-5">
-                <h2 className="section-title text-center mb-5" data-aos="fade-up">
-                    <i className="bi bi-signpost-split me-2"></i>Pasos para comprar tu propiedad
-                </h2>
+                {/* Sección Sobre Nosotros */}
+                <div className="about-section mb-5">
+                    <h2 className="section-title text-center mb-5" data-aos="fade-up">
+                        <i className="bi bi-building me-2"></i>Nuestra Historia
+                    </h2>
 
-                <Row className="mb-5">
-                    {/* Paso 1 */}
-                    <Col md={4} className="mb-4">
-                        <Card className="info-card h-100 shadow hover-card" data-aos="fade-up" data-aos-delay="100">
-                            <div className="card-icon-top">
-                                <i className="bi bi-search"></i>
+                    <Row className="align-items-center mb-5">
+                        <Col lg={6} data-aos="fade-right">
+                            <p className="lead fw-bold">
+                                Desde 2025, InmoMarket ha sido un gran reto pero con el equipo adecuado se logo realizar.
+                            </p>
+                            <p>
+                                Nacimos como un proyecto universitario con una misión clara: transformar la forma en que
+                                las personas compran y venden propiedades, haciendo el proceso más transparente,
+                                eficiente y accesible para todos.
+                            </p>
+                            <p>
+                                Lo que comenzó como una iniciativa académica entre estudiantes apasionados por
+                                la tecnología y el sector inmobiliario en la universidad, se ha convertido en una
+                                plataforma integral que conecta a compradores, vendedores y profesionales del sector.
+                            </p>
+                            <p>
+                                Hoy, tras un arduo trabajo y dedicación constante, el proyecto llamado InmoMarket es un
+                                es una realiadad.
+                            </p>
+                        </Col>
+                        <Col lg={6} className="text-center" data-aos="fade-left">
+                            <div className="history-image-container">
+                                <i className="bi bi-graph-up-arrow history-icon"></i>
+                                <div className="history-year">
+                                    <span>2025</span>
+                                </div>
                             </div>
-                            <Card.Body className="text-center">
-                                <div className="step-number">1</div>
-                                <Card.Title className="fw-bold">Búsqueda inteligente</Card.Title>
-                                <Card.Text>
-                                    Utiliza nuestros filtros avanzados para encontrar propiedades que se ajusten
-                                    a tus necesidades y presupuesto.
-                                </Card.Text>
-                                <Button variant="outline-primary" className="btn-icon-text mt-3">
-                                    <i className="bi bi-funnel-fill me-2"></i>Explorar filtros
-                                </Button>
-                            </Card.Body>
-                        </Card>
+                        </Col>
+                    </Row>
+                </div>
+
+                {/* Sección de Misión y Visión */}
+                <div className="mission-vision-section mb-5">
+                    <Row>
+                        {/* Misión */}
+                        <Col lg={6} className="mb-4" data-aos="fade-right">
+                            <div className="mission-card">
+                                <div className="mission-icon">
+                                    <i className="bi bi-bullseye"></i>
+                                </div>
+                                <h3>Nuestra Misión</h3>
+                                <p>
+                                    Democratizar el acceso al mercado inmobiliario a través de una plataforma digital
+                                    transparente y eficiente que conecte de forma directa a compradores y vendedores,
+                                    proporcionando las herramientas y el conocimiento necesarios para tomar decisiones
+                                    informadas y confiables.
+                                </p>
+                                <p>
+                                    Nos esforzamos por hacer que cada transacción inmobiliaria sea un proceso
+                                    claro, seguro y satisfactorio, eliminando intermediarios innecesarios y
+                                    aportando valor real a cada etapa del proceso.
+                                </p>
+                            </div>
+                        </Col>
+
+                        {/* Visión */}
+                        <Col lg={6} className="mb-4" data-aos="fade-left">
+                            <div className="vision-card">
+                                <div className="vision-icon">
+                                    <i className="bi bi-eye"></i>
+                                </div>
+                                <h3>Nuestra Visión</h3>
+                                <p>
+                                    Aspiramos a ser la plataforma inmobiliaria líder en Latinoamérica,
+                                    reconocida por transformar la industria a través de la innovación tecnológica
+                                    y un enfoque centrado en el usuario.
+                                </p>
+                                <p>
+                                    Buscamos crear un ecosistema inmobiliario donde la transparencia,
+                                    la confianza y la accesibilidad sean los pilares fundamentales,
+                                    permitiendo a las personas encontrar el hogar de sus sueños o
+                                    realizar inversiones inmobiliarias exitosas con facilidad y seguridad.
+                                </p>
+                            </div>
+                        </Col>
+                    </Row>
+                </div>
+
+                {/* Sección de valores */}
+                <div className="values-section my-5">
+                    <h3 className="section-title text-center mb-4">Nuestros Valores</h3>
+                    <Row>
+                        <Col md={4} className="mb-4">
+                            <div className="value-card">
+                                <div className="value-icon">
+                                    <i className="bi bi-shield-check"></i>
+                                </div>
+                                <h4>Transparencia</h4>
+                                <p>Creemos que la claridad y la honestidad son fundamentales en cada transacción inmobiliaria. 
+                                Nos comprometemos a proporcionar información precisa y completa.</p>
+                            </div>
+                        </Col>
+                        <Col md={4} className="mb-4">
+                            <div className="value-card">
+                                <div className="value-icon">
+                                    <i className="bi bi-lightbulb"></i>
+                                </div>
+                                <h4>Innovación</h4>
+                                <p>Buscamos constantemente nuevas formas de mejorar la experiencia inmobiliaria a través de la 
+                                tecnología y soluciones creativas.</p>
+                            </div>
+                        </Col>
+                        <Col md={4} className="mb-4">
+                            <div className="value-card">
+                                <div className="value-icon">
+                                    <i className="bi bi-people"></i>
+                                </div>
+                                <h4>Comunidad</h4>
+                                <p>Fomentamos un sentido de pertenencia entre nuestros usuarios, creando un espacio donde
+                                todos pueden colaborar y beneficiarse mutuamente.</p>
+                            </div>
+                        </Col>
+                        <Col md={4} className="mb-4">
+                            <div className="value-card">
+                                <div className="value-icon">
+                                    <i className="bi bi-award"></i>
+                                </div>
+                                <h4>Excelencia</h4>
+                                <p>Nos esforzamos por superar las expectativas en todo lo que hacemos, desde el desarrollo de la 
+                                plataforma hasta el servicio al cliente.</p>
+                            </div>
+                        </Col>
+                        <Col md={4} className="mb-4">
+                            <div className="value-card">
+                                <div className="value-icon">
+                                    <i className="bi bi-lock"></i>
+                                </div>
+                                <h4>Confianza</h4>
+                                <p>Construimos relaciones duraderas basadas en la confianza mutua y el respeto con nuestros usuarios
+                                y socios comerciales.</p>
+                            </div>
+                        </Col>
+                        <Col md={4} className="mb-4">
+                            <div className="value-card">
+                                <div className="value-icon">
+                                    <i className="bi bi-recycle"></i>
+                                </div>
+                                <h4>Sostenibilidad</h4>
+                                <p>Promovemos prácticas inmobiliarias sostenibles y responsables con el medio ambiente y las
+                                comunidades locales.</p>
+                            </div>
+                        </Col>
+                    </Row>
+                </div>
+
+                {/* Sección de Equipo Directivo */}
+                <div className="team-section mb-5">
+                    <h2 className="section-title text-center mb-5" data-aos="fade-up">
+                        <i className="bi bi-people-fill me-2"></i>Nuestro Equipo Directivo
+                    </h2>
+
+                    <Row data-aos="fade-up">
+                        <Col lg={3} md={6} className="mb-4">
+                            <div className="team-card">
+                                <div className="team-img-container">
+                                    <i className="bi bi-person-circle team-placeholder"></i>
+                                </div>
+                                <div className="team-info">
+                                    <h4>Adrian Sandobal Ballona</h4>
+                                    <p className="team-position">Estudiante Ing. Sistemas</p>
+                                    <p className="team-bio">
+                                        Enfocado en la optimización y eficiencia del frontend, implementó
+                                        las secciones responsivas y la integración con APIs.
+                                    </p>
+                                    <div className="team-social">
+                                        <a href="#" className="social-link"><i className="bi bi-linkedin"></i></a>
+                                        <a href="#" className="social-link"><i className="bi bi-twitter"></i></a>
+                                        <a href="#" className="social-link"><i className="bi bi-envelope"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </Col>
+
+                        <Col lg={3} md={6} className="mb-4">
+                            <div className="team-card">
+                                <div className="team-img-container">
+                                    <i className="bi bi-person-circle team-placeholder"></i>
+                                </div>
+                                <div className="team-info">
+                                    <h4>Andersson Flores Ruiz</h4>
+                                    <p className="team-position">Estudiante Ing. Sistemas</p>
+                                    <p className="team-bio">
+                                        Enfocado en desarrollo frontend utilizando React y TypeScript, responsable de la
+                                        implementación de componentes interactivos y la experiencia de usuario.
+                                    </p>
+                                    <div className="team-social">
+                                        <a href="#" className="social-link"><i className="bi bi-linkedin"></i></a>
+                                        <a href="#" className="social-link"><i className="bi bi-twitter"></i></a>
+                                        <a href="#" className="social-link"><i className="bi bi-envelope"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </Col>
+
+                        <Col lg={3} md={6} className="mb-4">
+                            <div className="team-card">
+                                <div className="team-img-container">
+                                    <i className="bi bi-person-circle team-placeholder"></i>
+                                </div>
+                                <div className="team-info">
+                                    <h4>Aaron Silva Chorres</h4>
+                                    <p className="team-position">Estudiante Ing. Sistemas</p>
+                                    <p className="team-bio">
+                                        Enfocado en desarrollo backend y arquitectura de sistemas.
+                                        Responsable de la creación de la estructura de bases de datos y
+                                        los sistemas de autenticación de la plataforma.
+                                    </p>
+                                    <div className="team-social">
+                                        <a href="#" className="social-link"><i className="bi bi-linkedin"></i></a>
+                                        <a href="#" className="social-link"><i className="bi bi-twitter"></i></a>
+                                        <a href="#" className="social-link"><i className="bi bi-envelope"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </Col>
+
+                        <Col lg={3} md={6} className="mb-4">
+                            <div className="team-card">
+                                <div className="team-img-container">
+                                    <i className="bi bi-person-circle team-placeholder"></i>
+                                </div>
+                                <div className="team-info">
+                                    <h4>Gabriel Marreros Navarro</h4>
+                                    <p className="team-position">Estudiante Ing. Sistemas</p>
+                                    <p className="team-bio">
+                                        Enfocado en el backend en seguridad y rendimiento.
+                                        Diseñó e implementó las APIs que potencian la plataforma y los
+                                        sistemas de procesamiento de datos inmobiliarios.
+                                    </p>
+                                    <div className="team-social">
+                                        <a href="#" className="social-link"><i className="bi bi-linkedin"></i></a>
+                                        <a href="#" className="social-link"><i className="bi bi-twitter"></i></a>
+                                        <a href="#" className="social-link"><i className="bi bi-envelope"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </Col>
+                    </Row>
+                </div>
+                {/* Sección de estadísticas */}
+                <Row className="stats-section text-center mt-5 pt-3">
+                    <h4 className="mb-4">InmoMarket en números</h4>
+                    <Col md={3} sm={6} className="mb-4">
+                        <div className="stat-item">
+                            <div className="stat-icon">
+                                <i className="bi bi-people-fill"></i>
+                            </div>
+                            <h3>10K+</h3>
+                            <p>Usuarios activos</p>
+                        </div>
                     </Col>
-
-                    {/* Paso 2 */}
-                    <Col md={4} className="mb-4">
-                        <Card className="info-card h-100 shadow hover-card" data-aos="fade-up" data-aos-delay="200">
-                            <div className="card-icon-top">
-                                <i className="bi bi-bar-chart-steps"></i>
+                    <Col md={3} sm={6} className="mb-4">
+                        <div className="stat-item">
+                            <div className="stat-icon">
+                                <i className="bi bi-house-heart-fill"></i>
                             </div>
-                            <Card.Body className="text-center">
-                                <div className="step-number">2</div>
-                                <Card.Title className="fw-bold">Compara opciones</Card.Title>
-                                <Card.Text>
-                                    Analiza las diferentes propiedades disponibles y compara características,
-                                    precios y beneficios para tomar la mejor decisión de compra.
-                                </Card.Text>
-                                <Button variant="outline-success" className="btn-icon-text mt-3">
-                                    <i className="bi bi-grid-3x3-gap me-2"></i>Tabla comparativa
-                                </Button>
-                            </Card.Body>
-                        </Card>
+                            <h3>5K+</h3>
+                            <p>Propiedades listadas</p>
+                        </div>
                     </Col>
-
-                    {/* Paso 3 */}
-                    <Col md={4} className="mb-4">
-                        <Card className="info-card h-100 shadow hover-card" data-aos="fade-up" data-aos-delay="300">
-                            <div className="card-icon-top">
-                                <i className="bi bi-file-earmark-text"></i>
+                    <Col md={3} sm={6} className="mb-4">
+                        <div className="stat-item">
+                            <div className="stat-icon">
+                                <i className="bi bi-geo-alt-fill"></i>
                             </div>
-                            <Card.Body className="text-center">
-                                <div className="step-number">3</div>
-                                <Card.Title className="fw-bold">Cierre seguro</Card.Title>
-                                <Card.Text>
-                                    Negocia el precio, revisa la documentación legal y cierra el trato con total
-                                    seguridad y confianza.
-                                </Card.Text>
-                                <Button variant="outline-primary" className="btn-icon-text mt-3">
-                                    <i className="bi bi-shield-check me-2"></i>Guía legal
-                                </Button>
-                            </Card.Body>
-                        </Card>
+                            <h3>15+</h3>
+                            <p>Ciudades cubiertas</p>
+                        </div>
+                    </Col>
+                    <Col md={3} sm={6} className="mb-4">
+                        <div className="stat-item">
+                            <div className="stat-icon">
+                                <i className="bi bi-laptop"></i>
+                            </div>
+                            <h3>24/7</h3>
+                            <p>Soporte disponible</p>
+                        </div>
                     </Col>
                 </Row>
-
-                {/* Sección de testimonios */}
-                <div className="testimonial-section my-5" data-aos="fade-up">
-                    <div className="testimonial-quote">
-                        <i className="bi bi-quote"></i>
-                    </div>
-                    <p className="testimonial-text">
-                        "Gracias a la guía de compradores de InmoMarket pude encontrar mi departamento ideal.
-                        La información sobre el proceso de compra y los consejos para la negociación fueron fundamentales."
-                    </p>
-                    <div className="testimonial-author">
-                        <div className="testimonial-avatar">
-                            <i className="bi bi-person-circle"></i>
-                        </div>
-                        <div className="testimonial-info">
-                            <h5>Mariana López</h5>
-                            <p>Arequipa, Perú</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Sección de consideraciones importantes - animaciones reducidas */}
-                <div className="considerations-section">
-                    <h3 className="text-center mb-4">
-                        <i className="bi bi-lightbulb me-2"></i>
-                        Consideraciones importantes
-                    </h3>
-                    <Row>
-                        <Col md={6} lg={3} className="mb-4">
-                            <div className="consideration-card">
-                                <div className="consideration-icon">
-                                    <i className="bi bi-geo-alt"></i>
-                                </div>
-                                <h5>Ubicación</h5>
-                                <p>Evalúa la cercanía a servicios, transporte y la proyección futura de la zona.</p>
-                            </div>
-                        </Col>
-                        <Col md={6} lg={3} className="mb-4">
-                            <div className="consideration-card">
-                                <div className="consideration-icon">
-                                    <i className="bi bi-rulers"></i>
-                                </div>
-                                <h5>Tamaño y distribución</h5>
-                                <p>Considera tus necesidades actuales y futuras al evaluar los espacios.</p>
-                            </div>
-                        </Col>
-                        <Col md={6} lg={3} className="mb-4">
-                            <div className="consideration-card">
-                                <div className="consideration-icon">
-                                    <i className="bi bi-clipboard-data"></i>
-                                </div>
-                                <h5>Documentación legal</h5>
-                                <p>Verifica que la propiedad esté libre de gravámenes y con todos sus papeles en regla.</p>
-                            </div>
-                        </Col>
-                        <Col md={6} lg={3} className="mb-4">
-                            <div className="consideration-card">
-                                <div className="consideration-icon">
-                                    <i className="bi bi-tools"></i>
-                                </div>
-                                <h5>Estado y mantenimiento</h5>
-                                <p>Evalúa el estado general y posibles costos de renovación o mantenimiento.</p>
-                            </div>
-                        </Col>
-                    </Row>
-                </div>
-
-                {/* Call to action */}
-                <div className="cta-banner" data-aos="zoom-in">
-                    <h3><i className="bi bi-house-heart-fill me-2"></i>¿Listo para encontrar tu nueva casa?</h3>
-                    <p>Nuestros asesores pueden ayudarte a iniciar tu búsqueda ahora mismo</p>
-                    <Button
-                        variant="primary"
-                        size="lg"
-                        className="animated-btn"
-                        onClick={() => navigate('/buscar-propiedades')}
-                    >
-                        <i className="bi bi-search-heart me-2"></i>Comenzar búsqueda
-                    </Button>
-                </div>
-
-                {/* Sección de preguntas frecuentes - animaciones reducidas */}
-                <div className="faq-section text-center mt-5">
-                    <h4 className="section-title mb-5">Preguntas frecuentes de compradores</h4>
-                    <Row>
-                        <Col md={6} className="mb-4">
-                            <div className="faq-card">
-                                <div className="faq-icon">
-                                    <i className="bi bi-cash-coin"></i>
-                                </div>
-                                <h5>¿Cuál es la mejor forma de financiar mi compra?</h5>
-                                <p>Evalúa tus opciones entre créditos hipotecarios, préstamos personales o financiamiento directo con el vendedor, según tu capacidad y plazo de pago.</p>
-                                <div className="faq-more">
-                                </div>
-                            </div>
-                        </Col>
-                        <Col md={6} className="mb-4">
-                            <div className="faq-card">
-                                <div className="faq-icon">
-                                    <i className="bi bi-file-earmark-text"></i>
-                                </div>
-                                <h5>¿Qué documentos necesito para comprar?</h5>
-                                <p>Para iniciar el proceso de compra necesitarás identificación oficial, comprobantes de ingresos y documentos que acrediten tu historial crediticio.</p>
-                                <div className="faq-more">
-                                </div>
-                            </div>
-                        </Col>
-                        <Col md={6} className="mb-4">
-                            <div className="faq-card">
-                                <div className="faq-icon">
-                                    <i className="bi bi-calendar-check"></i>
-                                </div>
-                                <h5>¿Cuánto tiempo toma el proceso de compra?</h5>
-                                <p>El tiempo promedio desde la oferta hasta la escrituración puede variar entre 30 y 90 días, dependiendo de las condiciones de la transacción y el tipo de financiamiento.</p>
-                                <div className="faq-more">
-                                </div>
-                            </div>
-                        </Col>
-                        <Col md={6} className="mb-4">
-                            <div className="faq-card">
-                                <div className="faq-icon">
-                                    <i className="bi bi-graph-up-arrow"></i>
-                                </div>
-                                <h5>¿Es buen momento para invertir en propiedades?</h5>
-                                <p>Actualmente el mercado inmobiliario muestra estabilidad y oportunidades de plusvalía en zonas estratégicas, pero siempre es recomendable evaluar cada inversión individualmente.</p>
-                                <div className="faq-more">
-                                </div>
-                            </div>
-                        </Col>
-                    </Row>
-                </div>
             </Container>
 
-            {/* Footer mejorado */}
+            {/* Footer */}
             <footer className="footer-section">
                 {/* Footer Top Section */}
                 <div className="footer-top">
@@ -538,4 +628,4 @@ const Compradores: React.FC = () => {
     );
 };
 
-export default Compradores;
+export default Conocenos;

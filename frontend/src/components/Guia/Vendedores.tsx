@@ -35,18 +35,18 @@ const Vendedores: React.FC = () => {
     <div className="full-width-container">
       {/* Barra de Navegación */}
       <Navbar bg="white" expand="lg" className="w-100 border-bottom">
-        <Container fluid className="px-4">
-          <Navbar.Brand href="#">
-            <img
-              src="imagen"
-              alt="InmoMarket"
-              height="30"
-              className="d-inline-block align-top"
-            />
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="navbar-nav" />
-          <Navbar.Collapse id="navbar-nav">
-            <Nav className="me-auto">
+              <Container fluid className="px-4">
+                <Navbar.Brand href="#">
+                  <img
+                    src="imagen"
+                    alt="InmoMarket"
+                    height="30"
+                    className="d-inline-block align-top"
+                  />
+                </Navbar.Brand>
+                <Navbar.Toggle aria-controls="navbar-nav" />
+                <Navbar.Collapse id="navbar-nav">
+                  <Nav className="me-auto">
               {/* Menú Comprar */}
               <NavDropdown
                 title={
@@ -185,7 +185,7 @@ const Vendedores: React.FC = () => {
                         <h6 className="fw-bold mb-3">Nuestra Mision y Vision</h6>
                         <ul className="list-unstyled">
                           <li>
-                            <Link to="/vendedores" className="text-decoration-none text-dark">
+                            <Link to="/conocenos" className="text-decoration-none text-dark">
                               Conocenos
                             </Link>
                           </li>

@@ -1,0 +1,589 @@
+/* Hero Section con Efecto Parallax */
+.hero-section-conocenos {
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #fff;
+  padding: 120px 0;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(13, 78, 66, 0.9) 0%, rgba(0, 0, 0, 0.8) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero-icon-container {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  color: #28a745;
+}
+
+.hero-section-conocenos h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.hero-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px auto;
+}
+
+.hero-divider span {
+  height: 1px;
+  width: 80px;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.hero-divider i {
+  margin: 0 15px;
+  color: #28a745;
+}
+
+/* Sección de contenido */
+.section-title {
+  position: relative;
+  margin-bottom: 40px;
+  font-weight: 600;
+}
+
+.section-title:after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #28a745;
+}
+
+/* Sección Sobre Nosotros */
+.about-section {
+  padding: 20px 0;
+}
+
+.about-section p {
+  line-height: 1.8;
+}
+
+.history-image-container {
+  position: relative;
+  padding: 40px;
+  text-align: center;
+}
+
+.history-icon {
+  font-size: 10rem;
+  color: #28a745;
+  opacity: 0.2;
+}
+
+.history-year {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #0d4e42;
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  padding: 10px 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Sección de Misión y Visión */
+.mission-vision-section {
+  margin: 60px 0;
+}
+
+.mission-card, .vision-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 30px;
+  height: 100%;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.mission-card:hover, .vision-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.mission-card {
+  border-left: 5px solid #28a745;
+}
+
+.vision-card {
+  border-right: 5px solid #0d4e42;
+}
+
+.mission-icon, .vision-icon {
+  font-size: 3rem;
+  color: #28a745;
+  margin-bottom: 20px;
+}
+
+.mission-card h3, .vision-card h3 {
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #0d4e42;
+}
+
+.mission-card p, .vision-card p {
+  line-height: 1.7;
+}
+
+/* Sección de Valores */
+.value-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 25px;
+  height: 100%;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.value-icon {
+  font-size: 2.5rem;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+.value-card h4 {
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #0d4e42;
+}
+
+/* Sección de Equipo */
+.team-card {
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  height: 100%; /* Asegura que todas las tarjetas tengan la misma altura */
+  display: flex;
+  flex-direction: column;
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.team-img-container {
+  background-color: #f6f6f6;
+  padding: 30px;
+  text-align: center;
+  border-bottom: 3px solid #28a745;
+  height: 160px; /* Altura fija para todos los contenedores de imagen */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.team-placeholder {
+  font-size: 5rem;
+  color: #0d4e42;
+}
+
+.team-info {
+  padding: 20px;
+  flex-grow: 1; /* Permite que esta sección ocupe el espacio restante */
+  display: flex;
+  flex-direction: column;
+}
+
+.team-info h4 {
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #0d4e42;
+}
+
+.team-position {
+  color: #28a745;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.team-bio {
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  flex-grow: 1; /* Hace que todas las biografías ocupen el mismo espacio vertical */
+}
+
+.team-social {
+  display: flex;
+  gap: 10px;
+  margin-top: auto; /* Empuja los iconos sociales al fondo de la tarjeta */
+}
+
+/* Corregir color de los iconos sociales en tarjetas de equipo */
+.team-social .social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f4f4f4;
+  color: #0d4e42; /* Color verde oscuro base */
+  transition: all 0.3s ease;
+}
+
+.team-social .social-link:hover {
+  background-color: #28a745; /* Verde principal al hacer hover */
+  color: #fff;
+  transform: translateY(-3px);
+}
+
+/* Asegurar que los iconos de Bootstrap sean verdes */
+.team-social .bi {
+  color: #28a745; /* Color verde principal para los iconos */
+}
+
+.team-social .social-link:hover .bi {
+  color: #fff; /* Iconos blancos al hacer hover */
+}
+
+/* Sección Timeline */
+.timeline-section {
+  padding: 40px 0;
+}
+
+.timeline {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.timeline::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  background-color: #28a745;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  margin-left: -2px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 50px;
+  width: 100%;
+}
+
+.timeline-content {
+  position: relative;
+  width: 45%;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-content.right {
+  margin-left: auto;
+}
+
+.timeline-dot {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #28a745;
+  border-radius: 50%;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.timeline-date {
+  color: #28a745;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.timeline-content h4 {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #0d4e42;
+}
+
+/* Stats Section */
+.stats-section {
+  padding: 30px 0;
+}
+
+.stat-item {
+  margin-bottom: 20px;
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+.stat-item h3 {
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 5px;
+  color: #0d4e42;
+}
+
+/* Sección de Premios */
+.award-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 30px;
+  height: 100%;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border-top: 4px solid #28a745;
+}
+
+.award-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.award-icon {
+  font-size: 3rem;
+  color: #28a745;
+  margin-bottom: 20px;
+}
+
+.award-card h4 {
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #0d4e42;
+}
+
+/* CTA Banner */
+.cta-banner {
+  background: linear-gradient(135deg, #0d4e42 0%, #28a745 100%);
+  padding: 50px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+  margin: 50px 0;
+  box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+}
+
+.cta-banner h3 {
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.animated-btn {
+  padding: 12px 30px;
+  margin-top: 20px;
+  font-weight: 600;
+  background-color: white;
+  color: #0d4e42;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.animated-btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-3px);
+  color: #0d4e42;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos del Footer */
+.footer-section {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+.footer-top {
+  padding: 60px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-bottom {
+  padding: 20px 0;
+  background-color: #111;
+}
+
+.footer-heading {
+  font-weight: 600;
+  margin-bottom: 20px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.footer-heading:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background-color: #28a745;
+}
+
+.footer-links li {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  color: #ccc;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #28a745;
+  text-decoration: none;
+}
+
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #fff;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+  background-color: #28a745;
+  color: #fff;
+  transform: translateY(-3px);
+}
+
+.footer-newsletter {
+  display: flex;
+  margin-top: 20px;
+}
+
+.footer-input {
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px 0 0 4px;
+}
+
+.footer-subscribe-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0 20px;
+  border-radius: 0 4px 4px 0;
+  transition: all 0.3s ease;
+}
+
+.footer-subscribe-btn:hover {
+  background-color: #218838;
+}
+
+.footer-links-bottom a {
+  color: #aaa;
+  margin-left: 20px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.footer-links-bottom a:hover {
+  color: #28a745;
+}
+
+/* Animaciones adicionales */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animated-btn {
+  animation: pulse 2s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .timeline::after {
+    left: 31px;
+  }
+  
+  .timeline-content {
+    width: calc(100% - 60px);
+    margin-left: 60px;
+  }
+  
+  .timeline-content.right {
+    margin-left: 60px;
+  }
+  
+  .timeline-dot {
+    left: 31px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section-conocenos h1 {
+    font-size: 2.5rem;
+  }
+  
+  .mission-card, .vision-card {
+    margin-bottom: 20px;
+  }
+  
+  .timeline-item {
+    margin-bottom: 30px;
+  }
+  
+  .cta-banner {
+    padding: 30px 20px;
+  }
+  
+  .footer-links-bottom a {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
