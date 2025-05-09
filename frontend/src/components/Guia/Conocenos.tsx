@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Navbar, Nav, Container, Row, Col, Button, NavDropdown, Card } from 'react-bootstrap';
+import { Navbar, Nav, Container, Row, Col, Button, NavDropdown } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 // Importar bibliotecas para animaciones e iconos
 import AOS from 'aos';
