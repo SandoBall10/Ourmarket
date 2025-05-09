@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Principal.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, Container, Row, Col, Button, NavDropdown } from 'react-bootstrap';
@@ -11,7 +11,34 @@ const Principal: React.FC = () => {
   const [isServiciosOpen, setIsServiciosOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('comprar');
   const [selectedAction, setSelectedAction] = useState('comprar'); // Default to 'comprar'
-
+  
+  // Add user state
+  const [user, setUser] = useState<{name: string, username: string} | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Check if user is logged in on component mount
+  useEffect(() => {
+    // Check if user info exists in localStorage or sessionStorage
+    const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setIsLoggedIn(true);
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+      }
+    }
+  }, []);
+  
+  // Function to handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
+    setUser(null);
+    setIsLoggedIn(false);
+    navigate('/');
+  };
 
   return (
     <div className="full-width-container">
@@ -176,16 +203,33 @@ const Principal: React.FC = () => {
               <Nav.Link href="#" className="me-2">
                 <span className="nav-link-text">Notificaciones <i className="far fa-bell"></i></span>
               </Nav.Link>
-              {/* Ingresar */}
-              <Nav.Link href="#">
-                <Button
-                  variant="success"
-                  className="btn-ingresar"
-                  onClick={() => navigate('/login')}
+              {/* Ingresar o Avatar de Usuario */}
+              {isLoggedIn && user ? (
+                <NavDropdown
+                  title={
+                    <div className="user-avatar">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  }
+                  id="user-dropdown"
+                  align="end"
                 >
-                  Ingresar
-                </Button>
-              </Nav.Link>
+                  <NavDropdown.Item as={Link} to="/perfil">Mi Perfil</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/mis-publicaciones">Mis Publicaciones</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item onClick={handleLogout}>Cerrar Sesión</NavDropdown.Item>
+                </NavDropdown>
+              ) : (
+                <Nav.Link href="#">
+                  <Button
+                    variant="success"
+                    className="btn-ingresar"
+                    onClick={() => navigate('/login')}
+                  >
+                    Ingresar
+                  </Button>
+                </Nav.Link>
+              )}
             </Nav>
           </Navbar.Collapse>
         </Container>

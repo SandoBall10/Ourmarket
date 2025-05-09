@@ -1776,3 +1776,39 @@ html, body {
   }
 }
 
+/* User Avatar Styles */
+.user-avatar {
+  width: 35px;  /* Reducido de 40px */
+  height: 35px; /* Reducido de 40px */
+  border-radius: 50%;
+  background-color: #0d4e42;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px; /* Reducido de 16px */
+}
+
+/* Alineación vertical para notificaciones */
+.ms-auto .me-2 {
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo adicional para alinear el texto de notificaciones */
+.nav-link-text {
+  display: flex;
+  align-items: center;
+}
+
+/* Alineación de elementos en la barra de navegación */
+.navbar .ms-auto {
+  display: flex;
+  align-items: center;
+}
+
+/* Asegurar que el dropdown del usuario esté alineado */
+#user-dropdown {
+  vertical-align: middle;
+}

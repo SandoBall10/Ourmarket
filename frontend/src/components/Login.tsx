@@ -17,6 +17,15 @@ const Login: React.FC = () => {
 
     setTimeout(() => {
       if (username === 'admin' && password === 'admin') {
+        // Crear objeto de usuario y guardarlo en localStorage
+        const userData = {
+          name: 'Admin', // Nombre que será usado para mostrar la inicial
+          username: username
+        };
+        
+        // Guardar en localStorage para persistir entre sesiones
+        localStorage.setItem('user', JSON.stringify(userData));
+        
         setError('');
         navigate('/'); // Redirige al componente Principal
       } else {
