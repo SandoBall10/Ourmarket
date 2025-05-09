@@ -37,7 +37,6 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
-      <div className="login-container">
         <div className="login-left">
           <h1 className="login-title">Bienvenido a InmoMarket</h1>
           <p className="login-description">
@@ -125,7 +124,6 @@ const Login: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };
