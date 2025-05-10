@@ -15,8 +15,8 @@ const Vendedores: React.FC = () => {
   const [isServiciosOpen, setIsServiciosOpen] = useState(false);
 
   // Mock user authentication state
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Change to false if not logged in
-  const [user, setUser] = useState({ name: 'A' }); // Replace with actual user data
+  const [isLoggedIn] = useState(true); // Change to false if not logged in
+  const [user] = useState({ name: 'A' }); // Replace with actual user data
 
   // Inicializar animaciones cuando el componente se monta
   useEffect(() => {
@@ -27,7 +27,7 @@ const Vendedores: React.FC = () => {
     });
   }, []);
 
-  function handleLogout(_event: React.MouseEvent<HTMLElement>): void {
+  function handleLogout(): void {
     throw new Error('Function not implemented.');
   }
 

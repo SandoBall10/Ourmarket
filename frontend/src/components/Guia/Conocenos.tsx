@@ -27,7 +27,7 @@ const Conocenos: React.FC = () => {
         });
     }, []);
 
-    function handleLogout(_event: React.MouseEvent<HTMLElement>): void {
+    function handleLogout(): void {
         setUser(null);
         setIsLoggedIn(false);
     }

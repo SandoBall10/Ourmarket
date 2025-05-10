@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './Registro.css';
 
 const Registro: React.FC = () => {
@@ -11,104 +11,132 @@ const Registro: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptDataUsage, setAcceptDataUsage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!acceptTerms || !acceptDataUsage) {
       alert('Debes aceptar los términos y condiciones y el uso de datos.');
       return;
     }
-    alert('¡Registro exitoso!');
-    navigate('/login'); // Redirige al login después del registro
+    
+    setIsLoading(true);
+    try {
+      // Simular registro
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('¡Registro exitoso!');
+      navigate('/login');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+    ? error.message 
+    : 'Error en el registro. Por favor, intenta nuevamente.';
+    alert(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="registro-container d-flex justify-content-center align-items-center vh-100">
-      <div className="card registro-card shadow-lg p-5">
-        <div className="d-flex align-items-center mb-4">
-          <i
-            className="fas fa-arrow-left me-2 text-primary"
-            style={{ cursor: 'pointer' }}
-            onClick={() => navigate('/login')}
-          ></i>
-          <h6 className="m-0">Atrás</h6>
+    <div className="registro-container">
+      <div className="card registro-card shadow-lg p-4">
+        <div className="back-button d-flex align-items-center mb-4">
+          <Link to="/login" className="text-decoration-none text-dark">
+            <i className="bi bi-arrow-left me-2"></i>
+            <span>Volver al login</span>
+          </Link>
         </div>
-        {/* Nuevo encabezado debajo de "Atrás" */}
-        <h3 className="text-center mb-4">Ingresa los datos para crear tu perfil</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label htmlFor="email" className="form-label">Correo Electrónico</label>
-              <div className="input-group">
-                <span className="input-group-text">
-                  <i className="fas fa-envelope"></i>
-                </span>
-                <input
-                  type="email"
-                  className="form-control"
-                  id="email"
-                  placeholder="Ingresa tu correo"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
+
+        <h2 className="registro-title text-center">
+          <i className="bi bi-person-plus-fill me-2"></i>
+          Crear nueva cuenta
+        </h2>
+
+        <form onSubmit={handleSubmit} className="row g-3">
+          {/* Email */}
+          <div className="col-md-6">
+            <label htmlFor="email" className="form-label">Correo Electrónico</label>
+            <div className="input-group">
+              <span className="input-group-text">
+                <i className="bi bi-envelope-fill"></i>
+              </span>
+              <input
+                type="email"
+                className="form-control"
+                id="email"
+                placeholder="correo@ejemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
-            <div className="col-md-6 mb-3">
-              <label htmlFor="password" className="form-label">Contraseña</label>
-              <div className="input-group">
-                <span className="input-group-text">
-                  <i className="fas fa-lock"></i>
-                </span>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="password"
-                  placeholder="Crea una contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
+          </div>
+
+          {/* Password */}
+          <div className="col-md-6">
+            <label htmlFor="password" className="form-label">Contraseña</label>
+            <div className="input-group">
+              <span className="input-group-text">
+                <i className="bi bi-lock-fill"></i>
+              </span>
+              <input
+                type="password"
+                className="form-control"
+                id="password"
+                placeholder="********"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
-            <div className="col-md-6 mb-3">
-              <label htmlFor="name" className="form-label">Nombre</label>
-              <div className="input-group">
-                <span className="input-group-text">
-                  <i className="fas fa-user"></i>
-                </span>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="name"
-                  placeholder="Ingresa tu nombre"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
+          </div>
+
+          {/* Name */}
+          <div className="col-md-6">
+            <label htmlFor="name" className="form-label">Nombre Completo</label>
+            <div className="input-group">
+              <span className="input-group-text">
+                <i className="bi bi-person-fill"></i>
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                id="name"
+                placeholder="Tu nombre completo"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
-            <div className="col-md-6 mb-3">
-              <label htmlFor="phone" className="form-label">Teléfono</label>
-              <div className="input-group">
-                <span className="input-group-text">
-                  <i className="fas fa-phone"></i>
-                </span>
-                <input
-                  type="tel"
-                  className="form-control"
-                  id="phone"
-                  placeholder="Ingresa tu número de teléfono"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                />
-              </div>
+          </div>
+
+          {/* Phone */}
+          <div className="col-md-6">
+            <label htmlFor="phone" className="form-label">Teléfono</label>
+            <div className="input-group">
+              <span className="input-group-text">
+                <i className="bi bi-telephone-fill"></i>
+              </span>
+              <input
+                type="tel"
+                className="form-control"
+                id="phone"
+                placeholder="123456789"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
             </div>
-            <div className="col-md-6 mb-3">
-              <label htmlFor="documentType" className="form-label">Tipo de Documento</label>
+          </div>
+
+          {/* Document Type */}
+          <div className="col-md-6">
+            <label htmlFor="documentType" className="form-label">Tipo de Documento</label>
+            <div className="input-group">
+              <span className="input-group-text">
+                <i className="bi bi-card-text"></i>
+              </span>
               <select
                 className="form-select"
                 id="documentType"
@@ -120,49 +148,75 @@ const Registro: React.FC = () => {
                 <option value="Carnet de Extranjería">Carnet de Extranjería</option>
               </select>
             </div>
-            <div className="col-md-6 mb-3">
-              <label htmlFor="documentNumber" className="form-label">Número de Documento</label>
-              <div className="input-group">
-                <span className="input-group-text">
-                  <i className="fas fa-id-card"></i>
-                </span>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="documentNumber"
-                  placeholder={`Ingresa tu ${documentType}`}
-                  value={documentNumber}
-                  onChange={(e) => setDocumentNumber(e.target.value)}
-                  required
-                />
-              </div>
+          </div>
+
+          {/* Document Number */}
+          <div className="col-md-6">
+            <label htmlFor="documentNumber" className="form-label">Número de Documento</label>
+            <div className="input-group">
+              <span className="input-group-text">
+                <i className="bi bi-hash"></i>
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                id="documentNumber"
+                placeholder={`Número de ${documentType}`}
+                value={documentNumber}
+                onChange={(e) => setDocumentNumber(e.target.value)}
+                required
+              />
             </div>
           </div>
-          <div className="form-check mb-2">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="acceptTerms"
-              checked={acceptTerms}
-              onChange={(e) => setAcceptTerms(e.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="acceptTerms">
-              Acepto los Términos y Condiciones de Uso y las Politicas de Privacidad.
-            </label>
+
+          {/* Terms and Conditions */}
+          <div className="col-12 mt-4">
+            <div className="form-check mb-3">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="acceptTerms"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="acceptTerms">
+                <i className="bi bi-shield-check me-2"></i>
+                Acepto los Términos y Condiciones
+              </label>
+            </div>
+
+            <div className="form-check mb-4">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="acceptDataUsage"
+                checked={acceptDataUsage}
+                onChange={(e) => setAcceptDataUsage(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="acceptDataUsage">
+                <i className="bi bi-shield-lock me-2"></i>
+                Autorizo el uso de mis datos personales
+              </label>
+            </div>
+
+            <button 
+              type="submit" 
+              className="btn btn-primary w-100"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Procesando...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-person-plus-fill me-2"></i>
+                  Crear cuenta
+                </>
+              )}
+            </button>
           </div>
-          <div className="form-check mb-3">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="acceptDataUsage"
-              checked={acceptDataUsage}
-              onChange={(e) => setAcceptDataUsage(e.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="acceptDataUsage">
-              Autorizo el uso de mi información para fines adicionales
-            </label>
-          </div>
-          <button type="submit" className="btn btn-primary w-100 mb-3">Registrarse</button>
         </form>
       </div>
     </div>

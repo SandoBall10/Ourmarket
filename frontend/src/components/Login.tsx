@@ -52,7 +52,7 @@ const Login: React.FC = () => {
               <div className="form-floating mb-3">
                 <i className="bi bi-envelope input-icon"></i>
                 <input
-                  type="email"
+                  type="text"
                   className="form-control"
                   id="email"
                   placeholder="nombre@ejemplo.com"
@@ -84,7 +84,7 @@ const Login: React.FC = () => {
               </button>
               <p className="text-center mt-3">
                 ¿No tienes una cuenta?{' '}
-                <Link to="/register" className="register-link">
+                <Link to="/registro" className="register-link">
                   Regístrate aquí
                 </Link>
               </p>

@@ -27,7 +27,7 @@ const Compradores: React.FC = () => {
         });
     }, []);
 
-    function handleLogout(_event: React.MouseEvent<HTMLElement>): void {
+    function handleLogout(): void {
         setUser(null); // Set user to null when logging out
         setIsLoggedIn(false);
     }
