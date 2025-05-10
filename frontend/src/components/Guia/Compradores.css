@@ -1,7 +1,7 @@
 /* Hero Section con Efecto Parallax */
-.hero-section-vendedores {
+.hero-section-compradores {
   position: relative;
-  background-image: url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3');
+  background-image: url('https://images.unsplash.com/photo-1560520031-3a4dc4e9de0c?ixlib=rb-4.0.3');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -33,7 +33,7 @@
   color: #28a745;
 }
 
-.hero-section-vendedores h1 {
+.hero-section-compradores h1 {
   font-size: 3.5rem;
   font-weight: 700;
   margin-bottom: 20px;
@@ -133,6 +133,24 @@
   color: white;
 }
 
+/* Sección de consejos financieros */
+.finance-tips-section {
+  background-color: #f8f9fa;
+  border-left: 5px solid #28a745;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.finance-icon {
+  font-size: 8rem;
+  color: #28a745;
+  opacity: 0.2;
+}
+
+.tip-item h5 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 /* Testimonial section */
 .testimonial-section {
   background-color: #f9f9f9;
@@ -185,6 +203,32 @@
   margin: 0;
 }
 
+/* Consideraciones importantes */
+.considerations-section {
+  margin: 60px 0;
+}
+
+.consideration-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 25px;
+  height: 100%;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.consideration-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.consideration-icon {
+  font-size: 2rem;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
 /* CTA Banner */
 .cta-banner {
   background: linear-gradient(135deg, #0d4e42 0%, #28a745 100%);
@@ -218,26 +262,59 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Stats Section */
-.stats-section {
-  padding: 30px 0;
+/* Recursos adicionales */
+.resource-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 30px;
+  height: 100%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
-.stat-item {
+.resource-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.resource-icon {
+  font-size: 2.5rem;
+  color: #28a745;
   margin-bottom: 20px;
 }
 
-.stat-icon {
+/* Sección FAQ */
+.faq-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 25px;
+  height: 100%;
+  text-align: left;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border-left: 4px solid #28a745;
+}
+
+.faq-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.faq-icon {
   font-size: 2.5rem;
   color: #28a745;
   margin-bottom: 15px;
+  text-align: center;
 }
 
-.stat-item h3 {
-  font-weight: 700;
-  font-size: 2rem;
-  margin-bottom: 5px;
-  color: #0d4e42;
+.faq-card h5 {
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.faq-more {
+  margin-top: 15px;
+  text-align: right;
 }
 
 /* Animaciones adicionales */
@@ -257,9 +334,113 @@
   animation: pulse 2s infinite;
 }
 
+/* Estilos del Footer */
+.footer-section {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+.footer-top {
+  padding: 60px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-bottom {
+  padding: 20px 0;
+  background-color: #111;
+}
+
+.footer-heading {
+  font-weight: 600;
+  margin-bottom: 20px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.footer-heading:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background-color: #28a745;
+}
+
+.footer-links li {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  color: #ccc;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #28a745;
+  text-decoration: none;
+}
+
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #fff;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+  background-color: #28a745;
+  color: #fff;
+  transform: translateY(-3px);
+}
+
+.footer-newsletter {
+  display: flex;
+  margin-top: 20px;
+}
+
+.footer-input {
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px 0 0 4px;
+}
+
+.footer-subscribe-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0 20px;
+  border-radius: 0 4px 4px 0;
+  transition: all 0.3s ease;
+}
+
+.footer-subscribe-btn:hover {
+  background-color: #218838;
+}
+
+.footer-links-bottom a {
+  color: #aaa;
+  margin-left: 20px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.footer-links-bottom a:hover {
+  color: #28a745;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .hero-section-vendedores h1 {
+  .hero-section-compradores h1 {
     font-size: 2.5rem;
   }
   
@@ -274,5 +455,14 @@
   
   .cta-banner {
     padding: 30px 20px;
+  }
+  
+  .finance-tips-section {
+    text-align: center;
+  }
+
+  .footer-links-bottom a {
+    margin-left: 10px;
+    margin-right: 10px;
   }
 }
