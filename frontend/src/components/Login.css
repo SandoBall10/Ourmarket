@@ -1,127 +1,177 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Arial', sans-serif;
-  background-color: #f8f9fa;
-  display: flex;
-  min-height: 100vh;
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 .login-page {
-  display: flex;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a73e8, #34a853);
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: row;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  max-width: 1000px;
+  width: 100%;
+  animation: fadeIn 0.8s ease-out;
 }
 
 .login-left {
   flex: 1;
-  background: linear-gradient(135deg, #6b8e23, #8fbc8f);
-  color: white;
+  background: linear-gradient(135deg, #1a73e8, #34a853);
+  padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  padding: 40px;
-  text-align: center;
+  position: relative;
+  animation: slideIn 0.8s ease-out;
 }
 
-.login-left .login-title {
+.login-title {
   font-size: 2.5rem;
-  font-weight: bold;
+  font-weight: 700;
+  color: white;
   margin-bottom: 20px;
+  animation: slideIn 0.6s ease-out;
 }
 
-.login-left .login-description {
+.login-description {
   font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 30px;
+  animation: slideIn 0.8s ease-out;
 }
 
-.login-left .login-image {
-  max-width: 80%;
+.login-image {
+  width: 100%;
+  max-width: 400px;
   height: auto;
-  border-radius: 10px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  animation: fadeIn 1s ease-out;
+}
+
+.login-image:hover {
+  transform: translateY(-5px);
 }
 
 .login-right {
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: 40px;
   background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-card {
   width: 100%;
   max-width: 400px;
-  padding: 40px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
+  animation: fadeIn 0.8s ease-out;
 }
 
-.login-card h2 {
-  font-size: 1.8rem;
-  color: #6b8e23;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.input-group-text {
-  background-color: #6b8e23;
-  color: white;
+.form-floating {
+  margin-bottom: 1.5rem;
+  position: relative;
 }
 
 .form-control {
-  border: 1px solid #6b8e23;
-  border-radius: 5px;
+  padding-left: 2.5rem !important;
+  border: 2px solid #e1e5ee;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 0.25rem rgba(26, 115, 232, 0.1);
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 1.2rem;
+  color: #1a73e8;
+  z-index: 2;
 }
 
 .btn-primary {
-  background-color: #6b8e23;
-  border-color: #6b8e23;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 1rem;
+  background: linear-gradient(135deg, #1a73e8, #34a853);
+  border: none;
+  padding: 12px;
+  font-weight: 600;
   width: 100%;
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background-color: #556b2f;
-  border-color: #556b2f;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(26, 115, 232, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .register-link {
-  color: #6b8e23;
-  text-decoration: none;
-  font-weight: bold;
+  color: #1a73e8;
+  transition: all 0.3s ease;
 }
 
 .register-link:hover {
-  text-decoration: underline;
+  color: #34a853;
+  text-decoration: none;
 }
 
-.alert {
-  margin-bottom: 20px;
-  font-size: 0.9rem;
+/* Loading animation */
+.loading-spinner {
+  animation: pulse 1.5s infinite;
 }
 
 @media (max-width: 768px) {
-  .login-page {
+  .login-container {
     flex-direction: column;
+    margin: 15px;
   }
 
-  .login-left {
-    padding: 20px;
+  .login-left,
+  .login-right {
+    width: 100%;
+    padding: 25px;
   }
 
-  .login-left .login-title {
+  .login-title {
     font-size: 2rem;
   }
 
-  .login-left .login-description {
+  .login-description {
     font-size: 1rem;
   }
 
-  .login-card {
-    padding: 20px;
+  .login-image {
+    margin-top: 20px;
+    max-width: 100%;
   }
 }

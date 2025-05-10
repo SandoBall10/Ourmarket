@@ -17,15 +17,6 @@ const Login: React.FC = () => {
 
     setTimeout(() => {
       if (username === 'admin' && password === 'admin') {
-        // Crear objeto de usuario y guardarlo en localStorage
-        const userData = {
-          name: 'Admin', // Nombre que será usado para mostrar la inicial
-          username: username
-        };
-        
-        // Guardar en localStorage para persistir entre sesiones
-        localStorage.setItem('user', JSON.stringify(userData));
-        
         setError('');
         navigate('/'); // Redirige al componente Principal
       } else {
@@ -37,93 +28,70 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
+      <div className="login-container">
         <div className="login-left">
           <h1 className="login-title">Bienvenido a InmoMarket</h1>
           <p className="login-description">
             Encuentra, compra y vende propiedades de forma rápida y segura.
           </p>
           <img
-            src="https://via.placeholder.com/400x300" // Reemplaza con una imagen adecuada
+            src="/path-to-your-image.jpg"
             alt="InmoMarket"
             className="login-image"
           />
         </div>
         <div className="login-right">
           <div className="login-card">
-            <h2 className="text-center">Iniciar Sesión</h2>
+            <h2 className="text-center mb-4">Iniciar Sesión</h2>
             <form onSubmit={handleSubmit}>
               {error && (
                 <div className="alert alert-danger" role="alert">
                   {error}
                 </div>
               )}
-              <div className="mb-3">
-                <label htmlFor="username" className="form-label">
-                  Correo Electrónico
-                </label>
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <i className="fas fa-envelope"></i>
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="username"
-                    placeholder="Ingresa tu correo"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                  />
-                </div>
+              <div className="form-floating mb-3">
+                <i className="bi bi-envelope input-icon"></i>
+                <input
+                  type="email"
+                  className="form-control"
+                  id="email"
+                  placeholder="nombre@ejemplo.com"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <label htmlFor="email">Correo electrónico</label>
               </div>
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">
-                  Contraseña
-                </label>
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <i className="fas fa-lock"></i>
-                  </span>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                    placeholder="Ingresa tu contraseña"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
+              <div className="form-floating mb-3">
+                <i className="bi bi-lock input-icon"></i>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="password"
+                  placeholder="Contraseña"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <label htmlFor="password">Contraseña</label>
               </div>
-              <button
-                type="submit"
-                className={`btn btn-primary w-100 ${isLoading ? 'disabled' : ''}`}
-                disabled={isLoading}
-              >
+              <button type="submit" className="btn btn-primary w-100" disabled={isLoading}>
                 {isLoading ? (
-                  <>
-                    <span
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                    Cargando...
-                  </>
+                  <span>
+                    <i className="bi bi-arrow-repeat loading-spinner"></i> Cargando...
+                  </span>
                 ) : (
                   'Iniciar Sesión'
                 )}
               </button>
-            </form>
-            <div className="text-center mt-3">
-              <p>
+              <p className="text-center mt-3">
                 ¿No tienes una cuenta?{' '}
-                <Link to="/registro" className="register-link">
+                <Link to="/register" className="register-link">
                   Regístrate aquí
                 </Link>
               </p>
-            </div>
+            </form>
           </div>
         </div>
+      </div>
     </div>
   );
 };
