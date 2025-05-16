@@ -35,9 +35,11 @@
 
 .container-fluid {
   width: 100%;
-  max-width: 100%;
+  max-width: 1400px;
   padding-left: 30px !important;
   padding-right: 30px !important;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 h2, h3 {
@@ -60,39 +62,129 @@ footer a:hover {
 }
 
 /* ===== NAVIGATION STYLES ===== */
+/* Estilos para menú desplegable - versión corregida */
+.mega-dropdown {
+  position: relative !important; /* Cambiado a relative para mejor control */
+}
+
+@media (min-width: 992px) {
+  .mega-dropdown {
+    position: static !important; /* En pantallas grandes mantener static */
+  }
+}
+
+/* Resetear y simplificar el comportamiento hover */
+.mega-menu-wrapper {
+  display: none !important; /* Forzar oculto por defecto */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  width: 80%; /* Cambiar de 100% a 80% para hacerlo más delgado */
+  max-width: 1200px; /* Limitar el ancho máximo */
+  margin-left: auto; /* Centrar el menú */
+  margin-right: auto; /* Centrar el menú */
+  z-index: 9999;
+  background-color: #fff;
+  border-top: 1px solid #eaeaea;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.175);
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+/* Regla específica y forzada para mostrar el menú */
+.mega-dropdown:hover .mega-menu-wrapper {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Detener cualquier transición que pueda interferir */
+.mega-menu-wrapper {
+  transition: none !important;
+}
+
+/* Asegurar que el puntero sea correctamente detectado */
+.nav-link-text {
+  cursor: pointer;
+  padding: 15px 10px;
+  display: inline-block;
+}
+
+/* Arreglar problemas de z-index */
+.navbar {
+  position: relative;
+  z-index: 1020;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Evitar que el contenido principal bloquee los menús */
+.navbar-collapse {
+  position: static;
+}
+
 /* Estilos para menú desplegable */
 .mega-dropdown {
   position: static !important;
 }
 
+/* Hacer que el menú se muestre al pasar el mouse */
+.mega-dropdown:hover .mega-menu-wrapper {
+  display: block !important;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 .mega-menu-wrapper {
+  display: none;
+  opacity: 0;
+  visibility: hidden;
   position: absolute;
+  top: 100%;
   left: 0;
-  width: 100%;
-  background-color: white;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-  z-index: 1000;
-  border-top: 1px solid var(--border-color);
-  max-height: 80vh;
-  overflow-y: auto;
+  right: 0;
+  width: 80%; /* Cambiar de 100% a 80% para hacerlo más delgado */
+  max-width: 1200px; /* Limitar el ancho máximo */
+  margin-left: auto; /* Centrar el menú */
+  margin-right: auto; /* Centrar el menú */
+  z-index: 9999;
+  background-color: #fff;
+  border-top: 1px solid #eaeaea;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.175);
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.mega-dropdown:hover > .mega-menu-wrapper {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .mega-menu-container {
-  width: 100%;
-  max-width: 1200px;
+  padding: 20px 40px;
+  max-width: 1000px; /* Reducir el ancho máximo */
   margin: 0 auto;
 }
 
-.dropdown-menu {
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
+.mega-menu-container h6 {
+  color: #333;
+  font-size: 14px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f0f0f0;
 }
 
-.mega-dropdown .dropdown-toggle::after {
-  display: none;
+.mega-menu-container ul li {
+  padding: 5px 0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.mega-menu-container ul li:hover {
+  color: #28a745;
 }
 
 /* Estilos para los textos de navegación */
@@ -142,13 +234,13 @@ footer a:hover {
 .btn-ingresar {
   font-weight: 500;
   font-size: var(--font-sm);
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
+  background-color: #0a4d40; /* Verde más oscuro que el actual */
+  border-color: #0a4d40;
 }
 
 .btn-ingresar:hover {
-  background-color: var(--primary-color-dark);
-  border-color: var(--primary-color-dark);
+  background-color: #083b31; /* Verde aún más oscuro para el hover */
+  border-color: #083b31;
 }
 
 /* Iconos en la barra de navegación */
@@ -1537,37 +1629,35 @@ footer a:hover {
     padding: 40px 0 20px;
   }
   
-  .footer-row {
-    text-align: center;
+  .footer-bottom {
+    padding: 15px 20px;
   }
   
-  .footer-heading::after {
-    left: 50%;
-    transform: translateX(-50%);
+  .footer-links-bottom {
+    margin-top: 15px;
   }
   
-  .footer-social {
-    justify-content: center;
-  }
-  
-  .footer-links li a {
-    padding-left: 0;
-  }
-  
-  .footer-links li a::before {
-    display: none;
+  .footer-links-bottom a {
+    display: block;
+    margin: 8px 0;
   }
   
   .footer-newsletter {
-    max-width: 400px;
-    margin: 0 auto 15px;
+    flex-direction: column;
   }
   
-  .footer-contact {
-    max-width: 200px;
-    margin: 0 auto;
+  .footer-input {
+    border-radius: 4px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .footer-subscribe-btn {
+    width: 100%;
+    border-radius: 4px;
   }
 }
+
 /* Responsive Styles for All Devices */
 
 /* Base responsive fixes */
@@ -1811,4 +1901,37 @@ html, body {
 /* Asegurar que el dropdown del usuario esté alineado */
 #user-dropdown {
   vertical-align: middle;
+}
+
+/* Añadir estilos para hacer la barra de navegación más delgada */
+.navbar {
+  position: relative;
+  z-index: 1020;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ajustar los contenedores de la barra para mejor alineación */
+.container-fluid {
+  width: 100%;
+  max-width: 1400px;
+  padding-left: 30px !important;
+  padding-right: 30px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ajustar los márgenes de los elementos de navegación para mejorar el espacio */
+.navbar-nav .nav-item {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+/* Asegurar que el menú desplegable se alinee correctamente con la barra más delgada */
+.mega-menu-wrapper {
+  width: 95%;
+  max-width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
 }

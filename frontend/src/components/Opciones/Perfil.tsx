@@ -13,21 +13,21 @@ const Perfil: React.FC = () => {
     email: '',
     telefono: ''
   });
-  
+
   // Estado para contraseñas
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
-  
+
   // Estado para email
   const [emailData, setEmailData] = useState({
     currentEmail: '',
     newEmail: '',
     password: ''
   });
-  
+
   // Estado para notificaciones
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
@@ -37,10 +37,10 @@ const Perfil: React.FC = () => {
     marketUpdates: false,
     promotions: false
   });
-  
+
   // Estado para la sección activa
   const [activeSection, setActiveSection] = useState('datos');
-  const [message, setMessage] = useState<{type: string, text: string} | null>(null);
+  const [message, setMessage] = useState<{ type: string, text: string } | null>(null);
 
   // Efecto de entrada para animaciones
   const pageVariants = {
@@ -48,7 +48,7 @@ const Perfil: React.FC = () => {
     in: { opacity: 1, y: 0 },
     out: { opacity: 0, y: -20 }
   };
-  
+
   const pageTransition = {
     type: "tween",
     ease: "anticipate",
@@ -56,7 +56,7 @@ const Perfil: React.FC = () => {
   };
 
   const sidebarItemVariants = {
-    hover: { 
+    hover: {
       x: 5,
       transition: { duration: 0.3 }
     }
@@ -64,10 +64,10 @@ const Perfil: React.FC = () => {
 
   const listItemVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: (i: number) => ({ 
-      opacity: 1, 
+    visible: (i: number) => ({
+      opacity: 1,
       x: 0,
-      transition: { 
+      transition: {
         delay: i * 0.1,
         duration: 0.5
       }
@@ -87,7 +87,7 @@ const Perfil: React.FC = () => {
         email: 'adrian@inmomarket.com',
         telefono: '999888777'
       });
-      
+
       setEmailData(prev => ({
         ...prev,
         currentEmail: 'adrian@inmomarket.com'
@@ -134,7 +134,7 @@ const Perfil: React.FC = () => {
       type: 'success',
       text: 'Perfil actualizado correctamente'
     });
-    
+
     setTimeout(() => {
       setMessage(null);
     }, 3000);
@@ -142,7 +142,7 @@ const Perfil: React.FC = () => {
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setMessage({
         type: 'danger',
@@ -150,20 +150,20 @@ const Perfil: React.FC = () => {
       });
       return;
     }
-    
+
     // Aquí irían las llamadas a API para cambiar contraseña
     setMessage({
       type: 'success',
       text: 'Contraseña actualizada correctamente'
     });
-    
+
     // Reiniciar campos
     setPasswordData({
       currentPassword: '',
       newPassword: '',
       confirmPassword: ''
     });
-    
+
     setTimeout(() => {
       setMessage(null);
     }, 3000);
@@ -171,20 +171,20 @@ const Perfil: React.FC = () => {
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Aquí irían las llamadas a API para cambiar email
     setMessage({
       type: 'success',
       text: 'Email actualizado correctamente. Se ha enviado un correo de verificación.'
     });
-    
+
     // Reiniciar campos
     setEmailData(prev => ({
       currentEmail: prev.newEmail,
       newEmail: '',
       password: ''
     }));
-    
+
     setTimeout(() => {
       setMessage(null);
     }, 3000);
@@ -192,13 +192,13 @@ const Perfil: React.FC = () => {
 
   const handleNotificationsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Aquí irían las llamadas a API para actualizar preferencias
     setMessage({
       type: 'success',
       text: 'Preferencias de notificaciones actualizadas'
     });
-    
+
     setTimeout(() => {
       setMessage(null);
     }, 3000);
@@ -242,8 +242,8 @@ const Perfil: React.FC = () => {
                         whileHover="hover"
                         variants={sidebarItemVariants}
                       >
-                        <ListGroup.Item 
-                          active={activeSection === item.id} 
+                        <ListGroup.Item
+                          active={activeSection === item.id}
                           onClick={() => setActiveSection(item.id)}
                           className="d-flex align-items-center sidebar-item"
                         >
@@ -260,7 +260,7 @@ const Perfil: React.FC = () => {
 
           {/* Contenido principal con animaciones */}
           <Col md={9} lg={10}>
-            <motion.div 
+            <motion.div
               className="profile-content-container h-100"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -281,7 +281,7 @@ const Perfil: React.FC = () => {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                
+
                 <AnimatePresence mode="wait">
                   {/* SECCIÓN DE DATOS PERSONALES */}
                   {activeSection === 'datos' && (
@@ -297,9 +297,9 @@ const Perfil: React.FC = () => {
                         <span className="title-icon"><i className="bi bi-person-vcard"></i></span>
                         Datos
                       </h2>
-                      
+
                       <Form onSubmit={handleProfileSubmit}>
-                        <motion.section 
+                        <motion.section
                           className="mb-5"
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
@@ -307,7 +307,7 @@ const Perfil: React.FC = () => {
                         >
                           <h4 className="text-primary mb-2">Personales</h4>
                           <p className="text-muted mb-4">Completa con tus datos personales.</p>
-                          
+
                           <Row>
                             <Col md={6} className="mb-3">
                               <Form.Group>
@@ -320,7 +320,7 @@ const Perfil: React.FC = () => {
                                 />
                               </Form.Group>
                             </Col>
-                            
+
                             <Col md={6} className="mb-3">
                               <Form.Group>
                                 <Form.Label>Apellido</Form.Label>
@@ -333,7 +333,7 @@ const Perfil: React.FC = () => {
                               </Form.Group>
                             </Col>
                           </Row>
-                          
+
                           <Row>
                             <Col md={6} className="mb-3">
                               <Form.Group>
@@ -346,7 +346,7 @@ const Perfil: React.FC = () => {
                                 />
                               </Form.Group>
                             </Col>
-                            
+
                             <Col md={6} className="mb-3">
                               <Form.Group>
                                 <Form.Label>Identificador</Form.Label>
@@ -361,8 +361,8 @@ const Perfil: React.FC = () => {
                             </Col>
                           </Row>
                         </motion.section>
-                        
-                        <motion.section 
+
+                        <motion.section
                           className="mb-5"
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
@@ -373,7 +373,7 @@ const Perfil: React.FC = () => {
                             Estos datos son para que podamos enviarte información, ofertas y, si publicaste un aviso, para
                             que puedan contactarte.
                           </p>
-                          
+
                           <Row>
                             <Col md={6} className="mb-3">
                               <Form.Group>
@@ -386,7 +386,7 @@ const Perfil: React.FC = () => {
                                 />
                               </Form.Group>
                             </Col>
-                            
+
                             <Col md={6} className="mb-3">
                               <Form.Group>
                                 <Form.Label>Teléfono</Form.Label>
@@ -400,15 +400,15 @@ const Perfil: React.FC = () => {
                             </Col>
                           </Row>
                         </motion.section>
-                        
-                        <motion.div 
+
+                        <motion.div
                           className="d-flex justify-content-end"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.6, duration: 0.5 }}
                         >
-                          <motion.button 
-                            type="submit" 
+                          <motion.button
+                            type="submit"
                             className="btn btn-success px-4"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -420,7 +420,7 @@ const Perfil: React.FC = () => {
                       </Form>
                     </motion.div>
                   )}
-                  
+
                   {/* SECCIÓN DE CAMBIO DE CONTRASEÑA */}
                   {activeSection === 'password' && (
                     <motion.div
@@ -435,7 +435,7 @@ const Perfil: React.FC = () => {
                       <p className="text-muted mb-4">
                         Para cambiar tu contraseña, ingresa tu contraseña actual y luego la nueva contraseña dos veces.
                       </p>
-                      
+
                       <Form onSubmit={handlePasswordSubmit}>
                         <Row>
                           <Col md={6} className="mb-3">
@@ -451,7 +451,7 @@ const Perfil: React.FC = () => {
                             </Form.Group>
                           </Col>
                         </Row>
-                        
+
                         <Row>
                           <Col md={6} className="mb-3">
                             <Form.Group>
@@ -468,7 +468,7 @@ const Perfil: React.FC = () => {
                               </Form.Text>
                             </Form.Group>
                           </Col>
-                          
+
                           <Col md={6} className="mb-3">
                             <Form.Group>
                               <Form.Label>Confirmar nueva contraseña</Form.Label>
@@ -482,7 +482,7 @@ const Perfil: React.FC = () => {
                             </Form.Group>
                           </Col>
                         </Row>
-                        
+
                         <div className="d-flex justify-content-end mt-4">
                           <button type="submit" className="btn btn-success px-4">
                             <i className="bi bi-key me-2"></i>
@@ -492,7 +492,7 @@ const Perfil: React.FC = () => {
                       </Form>
                     </motion.div>
                   )}
-                  
+
                   {/* SECCIÓN DE CAMBIO DE EMAIL */}
                   {activeSection === 'email' && (
                     <motion.div
@@ -508,7 +508,7 @@ const Perfil: React.FC = () => {
                         Para cambiar tu dirección de correo electrónico, ingresa tu nueva dirección y tu contraseña actual.
                         Enviaremos un correo de verificación a la nueva dirección.
                       </p>
-                      
+
                       <Form onSubmit={handleEmailSubmit}>
                         <Row>
                           <Col md={6} className="mb-3">
@@ -522,7 +522,7 @@ const Perfil: React.FC = () => {
                               />
                             </Form.Group>
                           </Col>
-                          
+
                           <Col md={6} className="mb-3">
                             <Form.Group>
                               <Form.Label>Nuevo email</Form.Label>
@@ -536,7 +536,7 @@ const Perfil: React.FC = () => {
                             </Form.Group>
                           </Col>
                         </Row>
-                        
+
                         <Row>
                           <Col md={6} className="mb-3">
                             <Form.Group>
@@ -551,7 +551,7 @@ const Perfil: React.FC = () => {
                             </Form.Group>
                           </Col>
                         </Row>
-                        
+
                         <div className="d-flex justify-content-end mt-4">
                           <button type="submit" className="btn btn-success px-4">
                             <i className="bi bi-envelope-check me-2"></i>
@@ -561,7 +561,7 @@ const Perfil: React.FC = () => {
                       </Form>
                     </motion.div>
                   )}
-                  
+
                   {/* SECCIÓN DE NOTIFICACIONES */}
                   {activeSection === 'notificaciones' && (
                     <motion.div
@@ -576,7 +576,7 @@ const Perfil: React.FC = () => {
                       <p className="text-muted mb-4">
                         Personaliza cómo y cuándo quieres recibir notificaciones de InmoMarket.
                       </p>
-                      
+
                       <Form onSubmit={handleNotificationsSubmit}>
                         <section className="mb-4">
                           <h4 className="mb-3">Canales de notificación</h4>
@@ -593,7 +593,7 @@ const Perfil: React.FC = () => {
                               className="fs-4"
                             />
                           </div>
-                          
+
                           <div className="mb-3 d-flex justify-content-between p-3 border-bottom">
                             <div>
                               <h5 className="mb-1">Notificaciones push</h5>
@@ -608,10 +608,10 @@ const Perfil: React.FC = () => {
                             />
                           </div>
                         </section>
-                        
+
                         <section className="mb-4">
                           <h4 className="mb-3">Tipos de notificaciones</h4>
-                          
+
                           <div className="mb-3 d-flex justify-content-between p-3 border-bottom">
                             <div>
                               <h5 className="mb-1">Nuevas propiedades</h5>
@@ -625,7 +625,7 @@ const Perfil: React.FC = () => {
                               className="fs-4"
                             />
                           </div>
-                          
+
                           <div className="mb-3 d-flex justify-content-between p-3 border-bottom">
                             <div>
                               <h5 className="mb-1">Cambios de precio</h5>
@@ -639,7 +639,7 @@ const Perfil: React.FC = () => {
                               className="fs-4"
                             />
                           </div>
-                          
+
                           <div className="mb-3 d-flex justify-content-between p-3 border-bottom">
                             <div>
                               <h5 className="mb-1">Actualizaciones del mercado</h5>
@@ -653,7 +653,7 @@ const Perfil: React.FC = () => {
                               className="fs-4"
                             />
                           </div>
-                          
+
                           <div className="mb-3 d-flex justify-content-between p-3 border-bottom">
                             <div>
                               <h5 className="mb-1">Promociones y ofertas</h5>
@@ -668,7 +668,7 @@ const Perfil: React.FC = () => {
                             />
                           </div>
                         </section>
-                        
+
                         <div className="d-flex justify-content-end mt-4">
                           <button type="submit" className="btn btn-success px-4">
                             <i className="bi bi-save me-2"></i>
@@ -678,7 +678,7 @@ const Perfil: React.FC = () => {
                       </Form>
                     </motion.div>
                   )}
-                  
+
                 </AnimatePresence>
               </div>
             </motion.div>

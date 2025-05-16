@@ -57,16 +57,13 @@ const Principal: React.FC = () => {
           <Navbar.Collapse id="navbar-nav">
             <Nav className="me-auto">
               {/* Menú Comprar */}
-              <NavDropdown
-                title={
-                  <span className="nav-link-text">Comprar <i className="fas fa-chevron-down fa-xs"></i></span>
-                }
-                id="comprar-dropdown"
-                className="mega-dropdown"
-                show={isComprarOpen}
-                onMouseEnter={() => setIsComprarOpen(true)}
-                onMouseLeave={() => setIsComprarOpen(false)}
-              >
+              <div className="nav-item mega-dropdown">
+                <Nav.Link 
+                  className="nav-link-text"
+                  id="comprar-dropdown"
+                >
+                  Comprar <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
                 <div className="mega-menu-wrapper">
                   <Container fluid className="mega-menu-container py-4 px-4">
                     <Row>
@@ -109,19 +106,16 @@ const Principal: React.FC = () => {
                     </Row>
                   </Container>
                 </div>
-              </NavDropdown>
+              </div>
 
               {/* Menú Alquilar */}
-              <NavDropdown
-                title={
-                  <span className="nav-link-text">Vender <i className="fas fa-chevron-down fa-xs"></i></span>
-                }
-                id="alquilar-dropdown"
-                className="mega-dropdown"
-                show={isAlquilarOpen}
-                onMouseEnter={() => setIsAlquilarOpen(true)}
-                onMouseLeave={() => setIsAlquilarOpen(false)}
-              >
+              <div className="nav-item mega-dropdown">
+                <Nav.Link 
+                  className="nav-link-text"
+                  id="vender-dropdown"
+                >
+                  Vender <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
                 <div className="mega-menu-wrapper">
                   <Container fluid className="mega-menu-container py-4 px-4">
                     <Row>
@@ -154,19 +148,16 @@ const Principal: React.FC = () => {
                     </Row>
                   </Container>
                 </div>
-              </NavDropdown>
+              </div>
 
               {/* Menú Servicios */}
-              <NavDropdown
-                title={
-                  <span className="nav-link-text">InmoMarket te ayuda <i className="fas fa-chevron-down fa-xs"></i></span>
-                }
-                id="servicios-dropdown"
-                className="mega-dropdown"
-                show={isServiciosOpen}
-                onMouseEnter={() => setIsServiciosOpen(true)}
-                onMouseLeave={() => setIsServiciosOpen(false)}
-              >
+              <div className="nav-item mega-dropdown">
+                <Nav.Link 
+                  className="nav-link-text"
+                  id="servicios-dropdown"
+                >
+                  InmoMarket te ayuda <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
                 <div className="mega-menu-wrapper">
                   <Container fluid className="mega-menu-container py-4 px-4">
                     <Row>
@@ -203,7 +194,7 @@ const Principal: React.FC = () => {
                     </Row>
                   </Container>
                 </div>
-              </NavDropdown>
+              </div>
             </Nav>
 
             <Nav className="ms-auto">
@@ -490,7 +481,7 @@ const Principal: React.FC = () => {
         <div className="accompaniment-bg-shape"></div>
         <Container>
           <h2 className="section-title fw-bold mb-5 text-center">
-            <span className="highlight-text">Te acompañamos</span> en cada paso
+            <span className="highlight-text">Te acompañamos en cada paso</span>
           </h2>
           <Row className="g-4 features-container">
             <Col xs={12} md={3} className="feature-col">
