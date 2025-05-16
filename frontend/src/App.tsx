@@ -8,7 +8,6 @@ import Registro from './components/Registro/Registro';
 import Vendedores from './components/Guia/Vendedores';
 import Compradores from './components/Guia/Compradores';
 import Conocenos from './components/Guia/Conocenos';
-import Favoritos from './components/Opciones/Favoritos';
 import Publicaciones from './components/Opciones/Publicaciones';
 import Perfil from './components/Opciones/Perfil';
 
@@ -21,7 +20,6 @@ const App: React.FC = () => {
       <Route path="/vendedores" element={<Vendedores />} />
       <Route path="/compradores" element={<Compradores />} />
       <Route path="/conocenos" element={<Conocenos />} />
-      <Route path="/favoritos" element={<Favoritos />} />
       <Route path="/publicaciones" element={<Publicaciones />} />
       <Route path="/perfil" element={<Perfil />} />
     </Routes>
