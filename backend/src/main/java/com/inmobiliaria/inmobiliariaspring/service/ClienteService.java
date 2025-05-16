@@ -4,10 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.inmobiliaria.inmobiliariaspring.factory.ClienteFactory;
 import com.inmobiliaria.inmobiliariaspring.model.Cliente;
 import com.inmobiliaria.inmobiliariaspring.model.Rol;
@@ -44,11 +43,12 @@ public class ClienteService {
         String contraseñaEncriptada = passwordEncoder.encode(cliente.getContraseña());
 
         Cliente nuevoCliente = ClienteFactory.crearCliente(
-            cliente.getNombre(),
-            cliente.getApellido(),
+            cliente.getNombreCompleto(),
             cliente.getEmail(),
             contraseñaEncriptada, // usamos la contraseña encriptada
+            cliente.getTelefono(),
             cliente.getTipoDocumento(),
+            cliente.getNumeroDocumento(),
             rolCliente
         );
 
@@ -97,8 +97,7 @@ public class ClienteService {
                 clienteRepository.findByEmail(clienteActualizado.getEmail()).isPresent()) {
                 throw new RuntimeException("El email ya está registrado por otro cliente");
             }
-            cliente.setNombre(clienteActualizado.getNombre());
-            cliente.setApellido(clienteActualizado.getApellido());
+            cliente.setNombreCompleto(clienteActualizado.getNombreCompleto());
             cliente.setEmail(clienteActualizado.getEmail());
 
             // Si la contraseña fue modificada, encriptarla antes de actualizarla
@@ -119,15 +118,5 @@ public class ClienteService {
         clienteRepository.deleteById(id);
     }
 
-    // Cargar cliente como UserDetails para Spring Security
-    public UserDetails loadUserByUsername(String email) {
-        Cliente cliente = clienteRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Cliente no encontrado: " + email));
-
-        return new org.springframework.security.core.userdetails.User(
-            cliente.getEmail(),
-            cliente.getContraseña(),
-            List.of(new SimpleGrantedAuthority(cliente.getRol().getNombre())) // Asignar roles
-        );
-    }
+    
 }

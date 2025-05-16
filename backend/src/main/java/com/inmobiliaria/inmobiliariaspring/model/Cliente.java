@@ -2,8 +2,11 @@ package com.inmobiliaria.inmobiliariaspring.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,15 +24,24 @@ public class Cliente {
     @Column(name = "id_cliente")
     private Integer idCliente;
 
-    private String nombre;
-    private String apellido;
+    @Column(name = "nombre_completo", length = 30)
+    private String nombreCompleto;
+
+    @Column(name = "email", length = 100)
     private String email;
 
-    @Column(name = "contraseña")
+    @Column(name = "contraseña", length = 30)
     private String contraseña;
 
-    @Column(name = "tipo_documento", nullable = false)  // Cambiado a tipo de documento (DNI o Carnet de Extranjería)
-    private String tipoDocumento;  // 'DNI' o 'Carnet de Extranjería'
+    @Column(name = "telefono", length = 9, nullable = false)
+    private String telefono;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_documento", nullable = false, length = 20)  // Cambiado a tipo de documento (DNI o Carnet de Extranjería)
+    private TipoDocumento tipoDocumento;  // 'DNI' o 'Carnet de Extranjería'
+
+    @Column(name="numero_documento", length = 20, nullable = false)
+    private String numeroDocumento;  // Número de documento (DNI o Carnet de Extranjería) 
 
     @ManyToOne
     @JoinColumn(name = "id_rol")
@@ -55,12 +67,13 @@ public class Cliente {
     } 
     
     // Constructor personalizado para usar en Factory
-    public Cliente(String nombre, String apellido, String email, String contraseña, String tipoDocumento, Rol rol, LocalDateTime fechaRegistro) {
-        this.nombre = nombre;
-        this.apellido = apellido;
+    public Cliente(String nombreCompleto, String email, String contraseña, String telefono, TipoDocumento tipoDocumento, String numeroDocumento, Rol rol, LocalDateTime fechaRegistro) {
+        this.nombreCompleto = nombreCompleto;
         this.email = email;
         this.contraseña = contraseña;
+        this.telefono = telefono;
         this.tipoDocumento = tipoDocumento;  // 'DNI' o 'Carnet de Extranjería'
+        this.numeroDocumento = numeroDocumento;  // Número de documento (DNI o Carnet de Extranjería)
         this.rol = rol;
         this.fechaRegistro = fechaRegistro;
     }
@@ -74,20 +87,12 @@ public class Cliente {
         this.idCliente = idCliente;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getNombreCompleto() {
+        return nombreCompleto;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getApellido() {
-        return apellido;
-    }
-
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
+    public void setNombreCompleto(String nombreCompleto) {
+        this.nombreCompleto = nombreCompleto;
     }
 
     public String getEmail() {
@@ -106,12 +111,27 @@ public class Cliente {
         this.contraseña = contraseña;
     }
 
-    public String getTipoDocumento() {
+    public String getTelefono() {
+        return telefono;
+    }
+    
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public TipoDocumento getTipoDocumento() {
         return tipoDocumento;
     }
 
-    public void setTipoDocumento(String tipoDocumento) {
+    public void setTipoDocumento(TipoDocumento tipoDocumento) {
         this.tipoDocumento = tipoDocumento;
+    }
+
+    public String getNumeroDocumento() {
+        return numeroDocumento;
+    }
+    public void setNumeroDocumento(String numeroDocumento) {
+        this.numeroDocumento = numeroDocumento;
     }
 
     public Rol getRol() {
@@ -160,5 +180,11 @@ public class Cliente {
 
     public void setFavoritos(List<Favorito> favoritos) {
         this.favoritos = favoritos;
+    }
+
+    // Enum TipoDocumento
+    public enum TipoDocumento {
+        DNI,
+        CARNET_EXTRANJERIA
     }
 }
