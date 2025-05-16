@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar, Container, Nav, Form, Button, Card, Badge } from 'react-bootstrap';
+import { Navbar, Container, Nav, Form, Button, Card, Badge, NavDropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import './Publicaciones.css';
 import AOS from 'aos';
@@ -26,11 +26,23 @@ const Publicaciones: React.FC = () => {
   const [busqueda, setBusqueda] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Estados para la autenticación
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<any>(null);
+
   useEffect(() => {
     AOS.init({
       duration: 800,
       once: false
     });
+
+    // Cargar datos de usuario
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      setIsLoggedIn(true);
+    }
 
     // Simulación de carga de datos
     const cargarPublicaciones = async () => {
@@ -62,26 +74,176 @@ const Publicaciones: React.FC = () => {
     cargarPublicaciones();
   }, []);
 
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    setUser(null);
+    navigate('/login');
+  };
+
   const publicacionesFiltradas = publicaciones.filter(pub => {
     const cumpleTipo = filtroTipo === 'todos' || pub.tipo === filtroTipo;
     const cumpleEstado = filtroEstado === 'todos' || pub.estado === filtroEstado;
     const cumpleBusqueda = pub.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-                          pub.ubicacion.toLowerCase().includes(busqueda.toLowerCase());
+      pub.ubicacion.toLowerCase().includes(busqueda.toLowerCase());
     return cumpleTipo && cumpleEstado && cumpleBusqueda;
   });
 
   return (
     <div className="publicaciones-page">
+      {/* Barra de Navegación */}
       <Navbar bg="white" expand="lg" className="w-100 border-bottom">
-        <Container fluid>
-          <Navbar.Brand as={Link} to="/">
-            <img src="/path-to-logo.png" alt="InmoMarket" height="30" />
+        <Container fluid className="px-4">
+          <Navbar.Brand href="#">
+            <img
+              src="imagen"
+              alt="InmoMarket"
+              height="30"
+              className="d-inline-block align-top"
+            />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">
+            <Nav className="me-auto">
+              {/* Menú Mis Publicaciones */}
+              <div className="nav-item mega-dropdown">
+                <Nav.Link
+                  as={Link}
+                  to="/publicaciones"
+                  className="nav-link-text"
+                  id="comprar-dropdown"
+                >
+                  Mis Publicaciones <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
+                <div className="mega-menu-wrapper">
+                </div>
+              </div>
+
+              {/* Menú Favoritos */}
+              <div className="nav-item mega-dropdown">
+                <Nav.Link
+                  as={Link}
+                  to="/mis-favoritos"
+                  className="nav-link-text"
+                  id="favoritos-dropdown"
+                >
+                  Favoritos <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
+                <div className="mega-menu-wrapper">
+                </div>
+              </div>
+
+              {/* Menú Mis Chats */}
+              <div className="nav-item mega-dropdown">
+                <Nav.Link
+                  as={Link}
+                  to="/chats"
+                  className="nav-link-text"
+                  id="chats-dropdown"
+                >
+                  Mis Chats <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
+                <div className="mega-menu-wrapper">
+                </div>
+              </div>
+
+              {/* Menú Historial*/}
+              <div className="nav-item mega-dropdown">
+                <Nav.Link
+                  as={Link}
+                  to="/historial"
+                  className="nav-link-text"
+                  id="historial-dropdown"
+                >
+                  Historial <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
+                <div className="mega-menu-wrapper">
+                </div>
+              </div>
+            </Nav>
+
             <Nav className="ms-auto">
-              <Nav.Link as={Link} to="/">Inicio</Nav.Link>
-              <Nav.Link as={Link} to="/perfil">Mi Perfil</Nav.Link>
+              {/* Notificaciones */}
+              <Nav.Link href="#" className="me-2">
+                <span className="nav-link-text">Notificaciones <i className="far fa-bell"></i></span>
+              </Nav.Link>
+              {/* Ingresar o Avatar de Usuario */}
+              {isLoggedIn && user ? (
+                <NavDropdown
+                  title={
+                    <div className="avatar-container">
+                      <div className="user-avatar">
+                        {user.name?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                      <i className="fas fa-chevron-down avatar-arrow"></i>
+                    </div>
+                  }
+                  id="user-dropdown"
+                  align="end"
+                  className="custom-dropdown"
+                >
+                  {/* Botón de Inicio */}
+                  <NavDropdown.Item as={Link} to="/" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="fas fa-home"></i></div>
+                    <span>Inicio</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item as={Link} to="/publicaciones" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
+                    <span>Mis publicaciones</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/mis-favoritos" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-heart"></i></div>
+                    <span>Favoritos</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/chats" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-comments"></i></div>
+                    <span>Mis chats</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/historial" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-eye"></i></div>
+                    <span>Historial</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-user"></i></div>
+                    <span>Mi cuenta</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item
+                    onClick={() => {
+                      // Cerrar el dropdown
+                      document.body.click();
+                      // Cambiar a la sección de notificaciones en Perfil
+                      navigate('/perfil', { state: { activeSection: 'notificaciones' } });
+                    }}
+                    className="dropdown-item-custom"
+                  >
+                    <div className="icon-wrapper"><i className="fas fa-cog"></i></div>
+                    <span>Ajustes de notificaciones</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item as={Link} to="/ayuda" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-question-circle"></i></div>
+                    <span>Ayuda</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item onClick={handleLogout} className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="fas fa-sign-out-alt"></i></div>
+                    <span>Cerrar sesión</span>
+                  </NavDropdown.Item>
+                </NavDropdown>
+              ) : (
+                <Nav.Link href="#">
+                  <Button
+                    variant="success"
+                    className="btn-ingresar"
+                    onClick={() => navigate('/login')}
+                  >
+                    Ingresar
+                  </Button>
+                </Nav.Link>
+              )}
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -124,7 +286,7 @@ const Publicaciones: React.FC = () => {
               </Form.Select>
             </div>
             <div className="col-12 col-md-2">
-              <Button 
+              <Button
                 className="nuevo-inmueble-btn w-100"
                 onClick={() => navigate('/nueva-publicacion')}
               >
@@ -174,15 +336,15 @@ const Publicaciones: React.FC = () => {
                     </div>
                   </div>
                   <div className="acciones">
-                    <Button 
-                      variant="outline-primary" 
+                    <Button
+                      variant="outline-primary"
                       size="sm"
                       onClick={() => navigate(`/editar-publicacion/${pub.id}`)}
                     >
                       <i className="bi bi-pencil-fill"></i> Editar
                     </Button>
-                    <Button 
-                      variant="outline-danger" 
+                    <Button
+                      variant="outline-danger"
                       size="sm"
                       onClick={() => {
                         if (window.confirm('¿Estás seguro de eliminar esta publicación?')) {

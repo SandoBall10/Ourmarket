@@ -58,7 +58,7 @@ const Principal: React.FC = () => {
             <Nav className="me-auto">
               {/* Menú Comprar */}
               <div className="nav-item mega-dropdown">
-                <Nav.Link 
+                <Nav.Link
                   className="nav-link-text"
                   id="comprar-dropdown"
                 >
@@ -110,7 +110,7 @@ const Principal: React.FC = () => {
 
               {/* Menú Alquilar */}
               <div className="nav-item mega-dropdown">
-                <Nav.Link 
+                <Nav.Link
                   className="nav-link-text"
                   id="vender-dropdown"
                 >
@@ -152,7 +152,7 @@ const Principal: React.FC = () => {
 
               {/* Menú Servicios */}
               <div className="nav-item mega-dropdown">
-                <Nav.Link 
+                <Nav.Link
                   className="nav-link-text"
                   id="servicios-dropdown"
                 >
@@ -206,19 +206,59 @@ const Principal: React.FC = () => {
               {isLoggedIn && user ? (
                 <NavDropdown
                   title={
-                    <div className="user-avatar">
-                      {user.name.charAt(0).toUpperCase()}
+                    <div className="avatar-container">
+                      <div className="user-avatar">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                      <i className="fas fa-chevron-down avatar-arrow"></i>
                     </div>
                   }
                   id="user-dropdown"
                   align="end"
+                  className="custom-dropdown"
                 >
-                  <NavDropdown.Item as={Link} to="/perfil">Mi Perfil</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/perfil">Mis Chats</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/mis-favoritos">Mis Favoritos</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/publicaciones">Mis Publicaciones</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/publicaciones" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
+                    <span>Mis publicaciones</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/mis-favoritos" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-heart"></i></div>
+                    <span>Favoritos</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/chats" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-comments"></i></div>
+                    <span>Mis chats</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/historial" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-eye"></i></div>
+                    <span>Historial</span>
+                  </NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item onClick={handleLogout}>Cerrar Sesión</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-user"></i></div>
+                    <span>Mi cuenta</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item 
+                    onClick={() => {
+                      // Cerrar el dropdown
+                      document.body.click();
+                      // Cambiar a la sección de notificaciones en Perfil
+                      navigate('/perfil', { state: { activeSection: 'notificaciones' } });
+                    }} 
+                    className="dropdown-item-custom"
+                  >
+                    <div className="icon-wrapper"><i className="fas fa-cog"></i></div>
+                    <span>Ajustes de notificaciones</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item as={Link} to="/ayuda" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-question-circle"></i></div>
+                    <span>Ayuda</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item onClick={handleLogout} className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="fas fa-sign-out-alt"></i></div>
+                    <span>Cerrar sesión</span>
+                  </NavDropdown.Item>
                 </NavDropdown>
               ) : (
                 <Nav.Link href="#">
@@ -481,7 +521,7 @@ const Principal: React.FC = () => {
         <div className="accompaniment-bg-shape"></div>
         <Container>
           <h2 className="section-title fw-bold mb-5 text-center">
-            <span className="highlight-text">Te acompañamos en cada paso</span>
+            <span className="highlight-text">Te acompañamos in cada paso</span>
           </h2>
           <Row className="g-4 features-container">
             <Col xs={12} md={3} className="feature-col">

@@ -1005,9 +1005,14 @@ footer a:hover {
   transition: background-image 0.5s ease-in-out;
 }
 
-/* Add this for smooth image transitions */
 .search-hero {
   position: relative;
+  height: 80vh; /* Aumenta el alto al 100% de la pantalla */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 7rem; /* espacio interno si quieres separar del borde */
 }
 
 .search-hero::before {
@@ -1925,4 +1930,90 @@ html, body {
   max-width: 1300px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Dropdown styling con alineación mejorada de iconos */
+.custom-dropdown .dropdown-menu {
+  padding: 0.5rem 0;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  min-width: 240px;
+}
+
+.dropdown-item-custom {
+  padding: 0.6rem 1.2rem;
+  color: #333;
+  font-size: 0.95rem;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-item-custom:hover {
+  background-color: #f8f9fa;
+  color: #136254;
+}
+
+.dropdown-item-custom .icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  margin-right: 10px;
+  color: #667;
+}
+
+.dropdown-item-custom:hover .icon-wrapper {
+  color: #136254;
+}
+
+.dropdown-divider {
+  margin: 0.3rem 0;
+  border-color: #f0f0f0;
+}
+
+/* User avatar styling */
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background-color: #136254;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Estilos para el contenedor del avatar con flecha */
+.avatar-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.avatar-arrow {
+  font-size: 12px;
+  color: #333;
+  transition: transform 0.2s;
+}
+
+/* Rotar la flecha cuando el menú está desplegado */
+.show .avatar-arrow {
+  transform: rotate(180deg);
+}
+
+/* Mantener los estilos del avatar */
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background-color: #136254;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: transform 0.2s;
 }

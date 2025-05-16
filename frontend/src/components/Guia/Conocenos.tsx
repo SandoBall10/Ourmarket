@@ -49,16 +49,13 @@ const Conocenos: React.FC = () => {
                     <Navbar.Collapse id="navbar-nav">
                         <Nav className="me-auto">
                             {/* Menú Comprar */}
-                            <NavDropdown
-                                title={
-                                    <span className="nav-link-text">Comprar <i className="fas fa-chevron-down fa-xs"></i></span>
-                                }
-                                id="comprar-dropdown"
-                                className="mega-dropdown"
-                                show={isComprarOpen}
-                                onMouseEnter={() => setIsComprarOpen(true)}
-                                onMouseLeave={() => setIsComprarOpen(false)}
-                            >
+                            <div className="nav-item mega-dropdown">
+                                <Nav.Link
+                                    className="nav-link-text"
+                                    id="comprar-dropdown"
+                                >
+                                    Comprar <i className="fas fa-chevron-down fa-xs"></i>
+                                </Nav.Link>
                                 <div className="mega-menu-wrapper">
                                     <Container fluid className="mega-menu-container py-4 px-4">
                                         <Row>
@@ -73,6 +70,9 @@ const Conocenos: React.FC = () => {
                                                     <li>La Libertad</li>
                                                     <li>Arequipa</li>
                                                     <li>Cusco</li>
+                                                    <li>Tumbes</li>
+                                                    <li>Junín</li>
+                                                    <li>Ancash</li>
                                                 </ul>
                                             </Col>
                                             <Col>
@@ -80,7 +80,7 @@ const Conocenos: React.FC = () => {
                                                 <ul className="list-unstyled">
                                                     <li>Departamento</li>
                                                     <li>Casa</li>
-                                                    <li>Terreno/Lote</li>
+                                                    <li>Terreno / Lote</li>
                                                     <li>Oficina</li>
                                                     <li>Local Comercial</li>
                                                 </ul>
@@ -98,19 +98,16 @@ const Conocenos: React.FC = () => {
                                         </Row>
                                     </Container>
                                 </div>
-                            </NavDropdown>
+                            </div>
 
-                            {/* Menú Vender */}
-                            <NavDropdown
-                                title={
-                                    <span className="nav-link-text">Vender <i className="fas fa-chevron-down fa-xs"></i></span>
-                                }
-                                id="alquilar-dropdown"
-                                className="mega-dropdown"
-                                show={isAlquilarOpen}
-                                onMouseEnter={() => setIsAlquilarOpen(true)}
-                                onMouseLeave={() => setIsAlquilarOpen(false)}
-                            >
+                            {/* Menú Alquilar */}
+                            <div className="nav-item mega-dropdown">
+                                <Nav.Link
+                                    className="nav-link-text"
+                                    id="vender-dropdown"
+                                >
+                                    Vender <i className="fas fa-chevron-down fa-xs"></i>
+                                </Nav.Link>
                                 <div className="mega-menu-wrapper">
                                     <Container fluid className="mega-menu-container py-4 px-4">
                                         <Row>
@@ -143,19 +140,16 @@ const Conocenos: React.FC = () => {
                                         </Row>
                                     </Container>
                                 </div>
-                            </NavDropdown>
+                            </div>
 
                             {/* Menú Servicios */}
-                            <NavDropdown
-                                title={
-                                    <span className="nav-link-text">InmoMarket te ayuda <i className="fas fa-chevron-down fa-xs"></i></span>
-                                }
-                                id="servicios-dropdown"
-                                className="mega-dropdown"
-                                show={isServiciosOpen}
-                                onMouseEnter={() => setIsServiciosOpen(true)}
-                                onMouseLeave={() => setIsServiciosOpen(false)}
-                            >
+                            <div className="nav-item mega-dropdown">
+                                <Nav.Link
+                                    className="nav-link-text"
+                                    id="servicios-dropdown"
+                                >
+                                    InmoMarket te ayuda <i className="fas fa-chevron-down fa-xs"></i>
+                                </Nav.Link>
                                 <div className="mega-menu-wrapper">
                                     <Container fluid className="mega-menu-container py-4 px-4">
                                         <Row>
@@ -180,11 +174,11 @@ const Conocenos: React.FC = () => {
                                                 </ul>
                                             </Col>
                                             <Col>
-                                                <h6 className="fw-bold mb-3">Nuestra Misión y Visión</h6>
+                                                <h6 className="fw-bold mb-3">Nuestra Mision y Vision</h6>
                                                 <ul className="list-unstyled">
                                                     <li>
                                                         <Link to="/conocenos" className="text-decoration-none text-dark">
-                                                            Conócenos
+                                                            Conocenos
                                                         </Link>
                                                     </li>
                                                 </ul>
@@ -192,30 +186,63 @@ const Conocenos: React.FC = () => {
                                         </Row>
                                     </Container>
                                 </div>
-                            </NavDropdown>
+                            </div>
                         </Nav>
 
                         <Nav className="ms-auto">
                             {/* Notificaciones */}
                             <Nav.Link href="#" className="me-2">
-                                <span className="nav-link-text">Notificaciones <i className="bi bi-bell"></i></span>
+                                <span className="nav-link-text">Notificaciones <i className="far fa-bell"></i></span>
                             </Nav.Link>
-
                             {/* Ingresar o Avatar de Usuario */}
                             {isLoggedIn && user ? (
                                 <NavDropdown
                                     title={
-                                        <div className="user-avatar">
-                                            {user.name.charAt(0).toUpperCase()}
+                                        <div className="avatar-container">
+                                            <div className="user-avatar">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <i className="fas fa-chevron-down avatar-arrow"></i>
                                         </div>
                                     }
                                     id="user-dropdown"
                                     align="end"
+                                    className="custom-dropdown"
                                 >
-                                    <NavDropdown.Item as={Link} to="/perfil">Mi Perfil</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/publicaciones">Mis Publicaciones</NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/publicaciones" className="dropdown-item-custom">
+                                        <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
+                                        <span>Mis publicaciones</span>
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/mis-favoritos" className="dropdown-item-custom">
+                                        <div className="icon-wrapper"><i className="far fa-heart"></i></div>
+                                        <span>Favoritos</span>
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/chats" className="dropdown-item-custom">
+                                        <div className="icon-wrapper"><i className="far fa-comments"></i></div>
+                                        <span>Mis chats</span>
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/historial" className="dropdown-item-custom">
+                                        <div className="icon-wrapper"><i className="far fa-eye"></i></div>
+                                        <span>Historial</span>
+                                    </NavDropdown.Item>
                                     <NavDropdown.Divider />
-                                    <NavDropdown.Item onClick={handleLogout}>Cerrar Sesión</NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
+                                        <div className="icon-wrapper"><i className="far fa-user"></i></div>
+                                        <span>Mi cuenta</span>
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/ajustes-notificaciones" className="dropdown-item-custom">
+                                        <div className="icon-wrapper"><i className="fas fa-cog"></i></div>
+                                        <span>Ajustes de notificaciones</span>
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Divider />
+                                    <NavDropdown.Item as={Link} to="/ayuda" className="dropdown-item-custom">
+                                        <div className="icon-wrapper"><i className="far fa-question-circle"></i></div>
+                                        <span>Ayuda</span>
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item onClick={handleLogout} className="dropdown-item-custom">
+                                        <div className="icon-wrapper"><i className="fas fa-sign-out-alt"></i></div>
+                                        <span>Cerrar sesión</span>
+                                    </NavDropdown.Item>
                                 </NavDropdown>
                             ) : (
                                 <Nav.Link href="#">
@@ -232,7 +259,6 @@ const Conocenos: React.FC = () => {
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
-
             {/* Hero section mejorado con animaciones */}
             <div className="hero-section-conocenos">
                 <div className="hero-overlay"></div>
@@ -348,8 +374,8 @@ const Conocenos: React.FC = () => {
                                     <i className="bi bi-shield-check"></i>
                                 </div>
                                 <h4>Transparencia</h4>
-                                <p>Creemos que la claridad y la honestidad son fundamentales en cada transacción inmobiliaria. 
-                                Nos comprometemos a proporcionar información precisa y completa.</p>
+                                <p>Creemos que la claridad y la honestidad son fundamentales en cada transacción inmobiliaria.
+                                    Nos comprometemos a proporcionar información precisa y completa.</p>
                             </div>
                         </Col>
                         <Col md={4} className="mb-4">
@@ -358,8 +384,8 @@ const Conocenos: React.FC = () => {
                                     <i className="bi bi-lightbulb"></i>
                                 </div>
                                 <h4>Innovación</h4>
-                                <p>Buscamos constantemente nuevas formas de mejorar la experiencia inmobiliaria a través de la 
-                                tecnología y soluciones creativas.</p>
+                                <p>Buscamos constantemente nuevas formas de mejorar la experiencia inmobiliaria a través de la
+                                    tecnología y soluciones creativas.</p>
                             </div>
                         </Col>
                         <Col md={4} className="mb-4">
@@ -369,7 +395,7 @@ const Conocenos: React.FC = () => {
                                 </div>
                                 <h4>Comunidad</h4>
                                 <p>Fomentamos un sentido de pertenencia entre nuestros usuarios, creando un espacio donde
-                                todos pueden colaborar y beneficiarse mutuamente.</p>
+                                    todos pueden colaborar y beneficiarse mutuamente.</p>
                             </div>
                         </Col>
                         <Col md={4} className="mb-4">
@@ -378,8 +404,8 @@ const Conocenos: React.FC = () => {
                                     <i className="bi bi-award"></i>
                                 </div>
                                 <h4>Excelencia</h4>
-                                <p>Nos esforzamos por superar las expectativas en todo lo que hacemos, desde el desarrollo de la 
-                                plataforma hasta el servicio al cliente.</p>
+                                <p>Nos esforzamos por superar las expectativas en todo lo que hacemos, desde el desarrollo de la
+                                    plataforma hasta el servicio al cliente.</p>
                             </div>
                         </Col>
                         <Col md={4} className="mb-4">
@@ -389,7 +415,7 @@ const Conocenos: React.FC = () => {
                                 </div>
                                 <h4>Confianza</h4>
                                 <p>Construimos relaciones duraderas basadas en la confianza mutua y el respeto con nuestros usuarios
-                                y socios comerciales.</p>
+                                    y socios comerciales.</p>
                             </div>
                         </Col>
                         <Col md={4} className="mb-4">
@@ -399,7 +425,7 @@ const Conocenos: React.FC = () => {
                                 </div>
                                 <h4>Sostenibilidad</h4>
                                 <p>Promovemos prácticas inmobiliarias sostenibles y responsables con el medio ambiente y las
-                                comunidades locales.</p>
+                                    comunidades locales.</p>
                             </div>
                         </Col>
                     </Row>
