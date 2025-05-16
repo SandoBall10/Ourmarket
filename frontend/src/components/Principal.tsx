@@ -225,7 +225,7 @@ const Principal: React.FC = () => {
                   <NavDropdown.Item as={Link} to="/perfil">Mi Perfil</NavDropdown.Item>
                   <NavDropdown.Item as={Link} to="/perfil">Mis Chats</NavDropdown.Item>
                   <NavDropdown.Item as={Link} to="/mis-favoritos">Mis Favoritos</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/mis-publicaciones">Mis Publicaciones</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/publicaciones">Mis Publicaciones</NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={handleLogout}>Cerrar Sesión</NavDropdown.Item>
                 </NavDropdown>
