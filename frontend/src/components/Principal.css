@@ -70,6 +70,7 @@ footer a:hover {
 @media (min-width: 992px) {
   .mega-dropdown {
     position: static !important; /* En pantallas grandes mantener static */
+  
   }
 }
 
@@ -80,7 +81,7 @@ footer a:hover {
   top: 100%;
   left: 0;
   right: 0;
-  width: 80%; /* Cambiar de 100% a 80% para hacerlo más delgado */
+  width: 60%; /* Reducir de 80% a 60% para hacerlo más delgado */
   max-width: 1200px; /* Limitar el ancho máximo */
   margin-left: auto; /* Centrar el menú */
   margin-right: auto; /* Centrar el menú */
@@ -106,8 +107,10 @@ footer a:hover {
 /* Asegurar que el puntero sea correctamente detectado */
 .nav-link-text {
   cursor: pointer;
-  padding: 15px 10px;
+  padding: 12px 10px;  /* Reducir padding vertical */
   display: inline-block;
+  font-size: 1.05rem;  /* Aumentar tamaño de fuente */
+  font-weight: 500;    /* Un poco más de peso */
 }
 
 /* Arreglar problemas de z-index */
@@ -115,6 +118,8 @@ footer a:hover {
   position: relative;
   z-index: 1020;
   max-width: 1400px;
+  padding-top: 0.4rem !important;    /* Reducir padding vertical */
+  padding-bottom: 0.4rem !important; /* Reducir padding vertical */
   margin-left: auto;
   margin-right: auto;
 }
@@ -145,7 +150,7 @@ footer a:hover {
   top: 100%;
   left: 0;
   right: 0;
-  width: 80%; /* Cambiar de 100% a 80% para hacerlo más delgado */
+  width: 60%; /* Reducir de 80% a 60% para hacerlo más delgado */
   max-width: 1200px; /* Limitar el ancho máximo */
   margin-left: auto; /* Centrar el menú */
   margin-right: auto; /* Centrar el menú */
@@ -164,7 +169,7 @@ footer a:hover {
 }
 
 .mega-menu-container {
-  padding: 20px 40px;
+  padding: 20px 30px;
   max-width: 1000px; /* Reducir el ancho máximo */
   margin: 0 auto;
 }
@@ -233,14 +238,14 @@ footer a:hover {
 
 .btn-ingresar {
   font-weight: 500;
-  font-size: var(--font-sm);
-  background-color: #0a4d40; /* Verde más oscuro que el actual */
-  border-color: #0a4d40;
+  font-size: 0.95rem;
+  background-color: #0a4d40 !important; /* Verde más oscuro */
+  border-color: #0a4d40 !important;
 }
 
 .btn-ingresar:hover {
-  background-color: #083b31; /* Verde aún más oscuro para el hover */
-  border-color: #083b31;
+  background-color: #083b31 !important; /* Verde aún más oscuro para hover */
+  border-color: #083b31 !important;
 }
 
 /* Iconos en la barra de navegación */
@@ -1434,20 +1439,6 @@ footer a:hover {
   }
 }
 
-/* Make the section responsive */
-@media (max-width: 768px) {
-  .feature-col {
-    margin-bottom: 20px;
-  }
-  
-  .feature-col:hover {
-    transform: translateY(-10px);
-  }
-  
-  .section-title {
-    font-size: 1.75rem;
-  }
-}
 /* Footer Styles */
 .footer-section {
   margin-top: 60px;
@@ -1908,8 +1899,8 @@ html, body {
   position: relative;
   z-index: 1020;
   max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
+  padding-top: 0.4rem !important;    /* Reducir padding vertical */
+  padding-bottom: 0.4rem !important; /* Reducir padding vertical */
 }
 
 /* Ajustar los contenedores de la barra para mejor alineación */
