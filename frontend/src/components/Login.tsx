@@ -18,6 +18,14 @@ const Login: React.FC = () => {
     setTimeout(() => {
       if (username === 'admin' && password === 'admin') {
         setError('');
+        
+        // Guardar información del usuario en localStorage
+        localStorage.setItem('user', JSON.stringify({
+          name: username,
+          isLoggedIn: true,
+          avatarLetter: username.charAt(0).toUpperCase()
+        }));
+        
         navigate('/'); // Redirige al componente Principal
       } else {
         setError('Usuario o contraseña incorrectos');
