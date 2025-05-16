@@ -151,6 +151,62 @@
   animation: pulse 1.5s infinite;
 }
 
+/* Estilos para el botón de volver dentro del recuadro */
+.back-link-container {
+  text-align: left;
+}
+
+.back-link {
+  color: #0d4e42;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 5px 0;
+}
+
+.back-link:hover {
+  color: #1a856f;
+  transform: translateX(-3px);
+}
+
+.back-link i {
+  font-size: 0.9rem;
+}
+
+/* Estilos para el botón de volver en el panel verde */
+.back-link-container-green {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  text-align: left;
+}
+
+.back-link-green {
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 6px 12px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+}
+
+.back-link-green:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateX(-3px);
+}
+
+.back-link-green i {
+  font-size: 0.9rem;
+}
+
 @media (max-width: 768px) {
   .login-container {
     flex-direction: column;

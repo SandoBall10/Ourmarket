@@ -38,6 +38,14 @@ const Login: React.FC = () => {
     <div className="login-page">
       <div className="login-container">
         <div className="login-left">
+          {/* Añadir el botón de volver al inicio en la parte superior del panel verde */}
+          <div className="back-link-container-green">
+            <Link to="/" className="back-link-green">
+              <i className="bi bi-arrow-left me-2"></i>
+              <span>Volver al inicio</span>
+            </Link>
+          </div>
+          
           <h1 className="login-title">Bienvenido a InmoMarket</h1>
           <p className="login-description">
             Encuentra, compra y vende propiedades de forma rápida y segura.
@@ -50,13 +58,11 @@ const Login: React.FC = () => {
         </div>
         <div className="login-right">
           <div className="login-card">
+            
             <h2 className="text-center mb-4">Iniciar Sesión</h2>
+            {error && <div className="alert alert-danger">{error}</div>}
+            
             <form onSubmit={handleSubmit}>
-              {error && (
-                <div className="alert alert-danger" role="alert">
-                  {error}
-                </div>
-              )}
               <div className="form-floating mb-3">
                 <i className="bi bi-envelope input-icon"></i>
                 <input
