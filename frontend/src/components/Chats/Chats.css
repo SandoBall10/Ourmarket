@@ -1,0 +1,152 @@
+/* Avatar del contacto en lista y cabecera */
+.contact-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background-color: #e0f2f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #0d4e42;
+  margin-right: 0.75rem;
+}
+
+.avatar-text {
+  user-select: none;
+}
+
+/* Indicador de estado en línea */
+.online-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #28a745;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+/* Texto del mensaje y nombre del contacto */
+.contact-info {
+  flex: 1;
+}
+
+.contact-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.last-message {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+/* Badge de mensajes no leídos */
+.unread-badge {
+  background-color: #dc3545;
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+/* Cabecera del chat */
+.chat-header {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+}
+
+.selected-contact {
+  display: flex;
+  align-items: center;
+}
+
+/* Vista cuando no hay chat seleccionado */
+.no-chat-selected {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #6c757d;
+}
+
+/* Footer general */
+.footer-section {
+  width: 100%;
+  background-color: #343a40;
+  color: white;
+}
+
+.footer-top {
+  background-color: #212529;
+}
+
+.footer-social a {
+  color: white;
+  margin-right: 10px;
+  font-size: 1.2rem;
+  transition: color 0.3s;
+}
+
+.footer-social a:hover {
+  color: #0d6efd;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: #0d6efd;
+}
+
+.footer-newsletter input {
+  flex: 1;
+}
+
+.footer-contact p {
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+}
+
+/* Footer bottom */
+.footer-bottom {
+  font-size: 0.875rem;
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+  .footer-top {
+    text-align: center;
+  }
+
+  .footer-newsletter {
+    flex-direction: column;
+  }
+
+  .footer-newsletter input {
+    margin-bottom: 0.5rem;
+  }
+}

@@ -10,6 +10,7 @@ import Compradores from './components/Guia/Compradores';
 import Conocenos from './components/Guia/Conocenos';
 import Publicaciones from './components/Opciones/Publicaciones';
 import Perfil from './components/Opciones/Perfil';
+
 import Buscar from './components/Operaciones/Buscar';
 
 const App: React.FC = () => {
