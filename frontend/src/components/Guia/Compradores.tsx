@@ -10,9 +10,6 @@ import './Compradores.css'; // Asegúrate de crear este archivo CSS
 
 const Compradores: React.FC = () => {
     const navigate = useNavigate();
-    const [isComprarOpen, setIsComprarOpen] = useState(false);
-    const [isAlquilarOpen, setIsAlquilarOpen] = useState(false);
-    const [isServiciosOpen, setIsServiciosOpen] = useState(false);
 
     // Mock user authentication state
     const [isLoggedIn, setIsLoggedIn] = useState(true); // Change to false if not logged in

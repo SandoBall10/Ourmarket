@@ -6,9 +6,6 @@ import { useNavigate, Link } from 'react-router-dom';
 
 const Principal: React.FC = () => {
   const navigate = useNavigate();
-  const [isComprarOpen, setIsComprarOpen] = useState(false);
-  const [isAlquilarOpen, setIsAlquilarOpen] = useState(false);
-  const [isServiciosOpen, setIsServiciosOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('comprar');
   const [selectedAction, setSelectedAction] = useState('comprar'); // Default to 'comprar'
 

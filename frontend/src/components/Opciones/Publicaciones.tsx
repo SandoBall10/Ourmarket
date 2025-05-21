@@ -28,7 +28,12 @@ const Publicaciones: React.FC = () => {
 
   // Estados para la autenticación
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [user, setUser] = useState<any>(null);
+  interface User {
+    name?: string;
+    // Agrega aquí otras propiedades del usuario si las necesitas
+  }
+  
+    const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     AOS.init({
