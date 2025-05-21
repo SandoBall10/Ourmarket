@@ -325,7 +325,18 @@ const Principal: React.FC = () => {
                 />
               </div>
               <div className="col-12 col-md-2">
-                <button className="btn btn-success w-100">{activeTab === 'comprar' ? 'Buscar' : 'Publicar'}</button>
+                <button 
+                  className="btn btn-success w-100"
+                  onClick={() => {
+                    if (activeTab === 'comprar') {
+                      navigate('/Buscar'); // Redirecciona a la página de búsqueda
+                    } else {
+                      navigate('/publicar'); // Redirecciona a la página de publicar
+                    }
+                  }}
+                >
+                  {activeTab === 'comprar' ? 'Buscar' : 'Publicar'}
+                </button>
               </div>
             </div>
           </div>
