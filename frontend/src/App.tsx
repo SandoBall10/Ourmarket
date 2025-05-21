@@ -10,6 +10,7 @@ import Compradores from './components/Guia/Compradores';
 import Conocenos from './components/Guia/Conocenos';
 import Publicaciones from './components/Opciones/Publicaciones';
 import Perfil from './components/Opciones/Perfil';
+import Chats from './components/Chats/Chats';
 
 const App: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ const App: React.FC = () => {
       <Route path="/conocenos" element={<Conocenos />} />
       <Route path="/publicaciones" element={<Publicaciones />} />
       <Route path="/perfil" element={<Perfil />} />
+      <Route path="/chats" element={<Chats />} />
     </Routes>
   );
 };
