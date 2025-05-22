@@ -63,13 +63,13 @@
   border: none;
   border-radius: 10px;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .publicacion-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .imagen-container {
@@ -311,13 +311,56 @@ select::-ms-expand {
   background-color: #f8f9fa;
 }
 
+/* Estilos para el hover y active de los botones de filtros */
+.more-filters-btn:hover,
+.more-filters-btn:active,
+.more-filters-btn:focus,
+.more-filters-btn[aria-expanded="true"] {
+  background-color: #0d4e42 !important;
+  color: white !important;
+  border-color: #0d4e42 !important;
+}
+
+.ver-mapa-btn:hover,
+.ver-mapa-btn:active,
+.ver-mapa-btn:focus,
+.ver-mapa-btn[aria-expanded="true"],
+.ordenar-btn:hover,
+.ordenar-btn:active,
+.ordenar-btn:focus,
+.ordenar-btn[aria-expanded="true"] {
+  background-color: #0d4e42 !important;
+  color: white !important;
+  border-color: #0d4e42 !important;
+}
+
+/* Si están usando la misma clase more-filters-btn, asegurarse de que todas las variantes estén cubiertas */
+button.more-filters-btn:hover,
+button.more-filters-btn:active,
+button.more-filters-btn:focus,
+button.more-filters-btn[aria-expanded="true"] {
+  background-color: #0d4e42 !important;
+  color: white !important;
+  border-color: #0d4e42 !important;
+}
+
 .bell-container {
   width: 48px;
 }
 
 .create-alert-btn {
-  width: 48px;
+  min-width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background-color: white;
+  border-color: #dee2e6;
+  color: #333;
   padding: 0;
+}
+
+.create-alert-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #ced4da;
 }
 
 .results-header {
@@ -326,6 +369,234 @@ select::-ms-expand {
   border-radius: 6px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
   margin-bottom: 1.5rem;
+}
+
+.z-index-dropdown {
+  z-index: 1050;
+}
+
+.tipo-dropdown {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-height: 350px;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+  left: 0;
+  right: 0;
+}
+
+.form-check-input:checked {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.form-check-label {
+  cursor: pointer;
+  font-size: 15px;
+  padding-left: 5px;
+}
+
+.dropdown-header {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-limpiar {
+  background: transparent;
+  border: none;
+  color: #333;
+  font-weight: 500;
+  padding: 8px 16px;
+}
+
+.btn-ver-resultados {
+  background-color: #0d4e42 !important;
+  border-color: #0d4e42 !important;
+  color: white;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 4px;
+  width: 160px;
+}
+
+.btn-ver-resultados:hover {
+  background-color: #0a3c33 !important;
+}
+
+/* Para el botón de búsqueda principal */
+.search-button:hover, 
+.search-button:active, 
+.search-button:focus {
+  background-color: #0a3c33 !important;
+  border-color: #0a3c33 !important;
+}
+
+/* Para los botones "Ver resultados" dentro de los dropdowns */
+.btn-ver-resultados:hover {
+  background-color: #0a3c33 !important;
+  border-color: #0a3c33 !important;
+}
+
+/* Estilos para las opciones de dormitorio */
+.dormitorio-options {
+  margin: 15px 0;
+}
+
+.dormitorio-option {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #f9f9f9;
+}
+
+.dormitorio-option:hover {
+  background-color: #f8f9fa;
+}
+
+.dormitorio-option.selected {
+  font-weight: 500;
+  color: #28a745;
+}
+
+/* Estilos adicionales para el selector de dormitorios */
+.dormitorios-range-container .form-control {
+  height: 45px;
+  background-color: white;
+  border-color: #dee2e6;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: normal;
+  color: #495057;
+}
+
+.dormitorio-selector {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px !important;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9rem;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dormitorio-selector:hover {
+  background-color: #f1f3f5;
+}
+
+.min-dormitorios-dropdown,
+.max-dormitorios-dropdown {
+  z-index: 1060;
+  max-height: 220px;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.dropdown-header {
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-buttons {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-ver-resultados {
+  height: 38px;
+  font-size: 14px;
+}
+
+/* Estilos para el selector de precio */
+.precio-range-container .form-control {
+  height: 45px;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
+}
+
+.moneda-options .form-check-input:checked {
+  background-color: #0d4e42;
+  border-color: #0d4e42;
+}
+
+.form-check-input {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+/* Estilos para el dropdown de más filtros */
+.mas-filtros-dropdown {
+  width: 600px !important; /* Ancho aumentado de 400px a 450px */
+  max-height: 80vh;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  z-index: 1060;
+  right: 0;
+  padding: 0;
+}
+
+/* Contenido interno con más padding para que se vea más espacioso */
+.mas-filtros-dropdown .p-4 {
+  padding: 1.75rem !important;
+}
+
+/* Mejorar la apariencia de los campos de entrada */
+.mas-filtros-dropdown .form-control {
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+}
+
+/* Añadir más espacio entre secciones */
+.mas-filtros-dropdown .filter-section {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+}
+
+/* Ajustar el divisor entre secciones */
+.mas-filtros-dropdown .filter-section:not(:last-child) {
+  border-bottom: 1px solid #eaeaea;
+}
+
+/* Aumentar tamaño del título de la sección */
+.mas-filtros-dropdown .dropdown-header h6 {
+  font-size: 1.1rem;
+}
+
+/* Hacer los títulos de cada filtro más visibles */
+.mas-filtros-dropdown h6.fw-bold {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #0d4e42;
+}
+
+/* Estilo para el botón de teléfono */
+.contact-phone-btn {
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Estilos responsivos */
