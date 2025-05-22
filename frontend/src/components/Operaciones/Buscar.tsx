@@ -343,45 +343,125 @@ const Buscar: React.FC = () => {
       </Navbar>
 
       <div className="publicaciones-container">
-        <div className="filtros-section" data-aos="fade-down">
-          <h2>Publicaciones</h2>
-          <div className="row g-3">
-            <div className="col-12 col-md-7">
+        {/* Campo de búsqueda grande sin título */}
+        <div className="search-section container py-3">
+          <div className="big-search-bar">
+            <div className="input-group search-input-group">
               <Form.Control
                 type="text"
-                placeholder="Buscar por título o ubicación"
+                placeholder="Ingresa departamentos o distritos"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
+                className="search-input form-control-lg"
               />
-            </div>
-            <div className="col-12 col-md-3">
-              <Form.Select
-                value={filtroTipo}
-                onChange={(e) => setFiltroTipo(e.target.value)}
-                className="filtro-select"
-              >
-                <option value="todos">Todos los tipos</option>
-                <option value="casa">Casas</option>
-                <option value="departamento">Departamentos</option>
-                <option value="terreno">Terrenos</option>
-              </Form.Select>
-            </div>
-            <div className="col-12 col-md-2">
-              <Button
-                variant="success"
-                className="buscar-btn w-100"
-                onClick={() => {
-                  // Realizar acción de búsqueda
-                }}
-              >
-                <i className="bi bi-search me-2"></i>
-                Buscar
+              <Button variant="success" size="lg" className="search-button">
+                <i className="bi bi-search"></i>
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="publicaciones-grid">
+        {/* Filtros justo debajo */}
+        <div className="filters-container container mt-4">
+          <div className="row g-3">
+            {/* Dropdown de Tipo */}
+            <div className="col-md-3">
+              <label className="filter-label">Tipo de propiedad</label>
+              <Form.Select
+                value={filtroTipo}
+                onChange={(e) => setFiltroTipo(e.target.value)}
+                className="filter-select form-control-clean"
+              >
+                <option value="todos">Todos</option>
+                <option value="casa">Casa</option>
+                <option value="departamento">Departamento</option>
+                <option value="terreno">Terreno</option>
+              </Form.Select>
+            </div>
+            
+            {/* Dropdown de Dormitorios */}
+            <div className="col-md-3">
+              <label className="filter-label">Dormitorios</label>
+              <div className="custom-select-container">
+    <Form.Select 
+      className="filter-select form-control-clean"
+      onChange={(e) => {
+        // Manejar el cambio de valor aquí
+        console.log("Dormitorios seleccionados:", e.target.value);
+      }}
+    >
+      <option value="">Sin mínimo</option>
+      <option value="1">1 dormitorio</option>
+      <option value="2">2 dormitorios</option>
+      <option value="3">3 dormitorios</option>
+      <option value="4">4 dormitorios</option>
+      <option value="5">5 dormitorios</option>
+    </Form.Select>
+  </div>
+            </div>
+            
+            {/* Dropdown de Precio */}
+            <div className="col-md-3">
+              <label className="filter-label">Precio</label>
+              <Form.Select className="filter-select form-control-clean">
+                <option value="">Todos</option>
+                <option value="0-100000">Hasta $100,000</option>
+                <option value="100000-200000">$100,000 - $200,000</option>
+                <option value="200000-300000">$200,000 - $300,000</option>
+                <option value="300000+">Más de $300,000</option>
+              </Form.Select>
+            </div>
+            
+            {/* Botones filtros y alertas */}
+            <div className="col-md-3">
+              <div className="d-flex gap-3">
+                <div className="flex-grow-1">
+                  <label className="filter-label">Más opciones</label>
+                  <Button 
+                    variant="outline-secondary" 
+                    className="more-filters-btn form-control-clean text-start d-flex align-items-center"
+                  >
+                    <i className="bi bi-sliders me-2"></i>
+                    <span>Más filtros</span>
+                    <i className="bi bi-chevron-down ms-auto"></i>
+                  </Button>
+                </div>
+                
+                <div className="bell-container">
+                  <label className="filter-label">Alertas</label>
+                  <Button 
+                    variant="outline-secondary" 
+                    className="create-alert-btn form-control-clean d-flex align-items-center justify-content-center"
+                  >
+                    <i className="bi bi-bell"></i>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Contador de resultados */}
+        <div className="container mt-3">
+          <div className="results-header d-flex justify-content-between align-items-center">
+            <div className="results-count">
+              <strong>{publicacionesFiltradas.length}</strong> propiedades encontradas
+            </div>
+            <div className="results-actions d-flex align-items-center gap-2">
+              <Button variant="outline-secondary" size="sm" className="view-map-btn">
+                <i className="bi bi-map me-1"></i> Ver mapa
+              </Button>
+              <div className="dropdown">
+                <Button variant="outline-secondary" size="sm" className="dropdown-toggle">
+                  Ordenar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contenido de las publicaciones */}
+        <div className="publicaciones-grid container mt-3">
           {isLoading ? (
             <div className="loading-spinner">
               <div className="spinner-border text-primary" role="status">
