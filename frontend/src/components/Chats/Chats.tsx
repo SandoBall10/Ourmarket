@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Navbar, Nav, NavDropdown } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import './Chats.css';
@@ -22,12 +23,17 @@ interface Contact {
 }
 
 const Chats: React.FC = () => {
+  const navigate = useNavigate();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Simulación de autenticación
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+  const [user, setUser] = useState<{ name: string }>({ name: 'Usuario' });
 
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
@@ -66,8 +72,146 @@ const Chats: React.FC = () => {
     setNewMessage('');
   };
 
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUser({ name: '' });
+    navigate('/login');
+  };
+
   return (
     <div className="chat-page">
+      {/* NAVBAR */}
+      <Navbar bg="white" expand="lg" className="w-100 border-bottom">
+        <Container fluid className="px-4">
+          <Navbar.Brand as={Link} to="/">
+            <img
+              src="/logo.png"
+              alt="InmoMarket"
+              height="30"
+              className="d-inline-block align-top"
+            />
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="navbar-nav" />
+          <Navbar.Collapse id="navbar-nav">
+            <Nav className="me-auto">
+              {/* Menú Comprar */}
+              <div className="nav-item mega-dropdown">
+                <Nav.Link
+                  as={Link}
+                  to="/buscar"
+                  className="nav-link-text"
+                  id="comprar-dropdown"
+                >
+                  Comprar <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
+                {/* Aquí puedes agregar el mega menú si lo necesitas */}
+              </div>
+              {/* Menú Vender */}
+              <div className="nav-item mega-dropdown">
+                <Nav.Link
+                  as={Link}
+                  to="/publicar"
+                  className="nav-link-text"
+                  id="vender-dropdown"
+                >
+                  Vender <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
+                {/* Aquí puedes agregar el mega menú si lo necesitas */}
+              </div>
+              {/* Menú Servicios */}
+              <div className="nav-item mega-dropdown">
+                <Nav.Link
+                  className="nav-link-text"
+                  id="servicios-dropdown"
+                >
+                  InmoMarket te ayuda <i className="fas fa-chevron-down fa-xs"></i>
+                </Nav.Link>
+                {/* Aquí puedes agregar el mega menú si lo necesitas */}
+              </div>
+            </Nav>
+            <Nav className="ms-auto">
+              {/* Notificaciones */}
+              <Nav.Link href="#" className="me-2">
+                <span className="nav-link-text">Notificaciones <i className="far fa-bell"></i></span>
+              </Nav.Link>
+              {/* Ingresar o Avatar de Usuario */}
+              {isLoggedIn && user ? (
+                <NavDropdown
+                  title={
+                    <div className="avatar-container">
+                      <div className="user-avatar">
+                        {user.name?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                      <i className="fas fa-chevron-down avatar-arrow"></i>
+                    </div>
+                  }
+                  id="user-dropdown"
+                  align="end"
+                  className="custom-dropdown"
+                >
+                  <NavDropdown.Item as={Link} to="/" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="fas fa-home"></i></div>
+                    <span>Inicio</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item as={Link} to="/publicaciones" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
+                    <span>Mis publicaciones</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/mis-favoritos" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-heart"></i></div>
+                    <span>Favoritos</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/chats" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-comments"></i></div>
+                    <span>Mis chats</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/historial" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-eye"></i></div>
+                    <span>Historial</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-user"></i></div>
+                    <span>Mi cuenta</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item
+                    onClick={() => {
+                      document.body.click();
+                      navigate('/perfil', { state: { activeSection: 'notificaciones' } });
+                    }}
+                    className="dropdown-item-custom"
+                  >
+                    <div className="icon-wrapper"><i className="fas fa-cog"></i></div>
+                    <span>Ajustes de notificaciones</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item as={Link} to="/ayuda" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="far fa-question-circle"></i></div>
+                    <span>Ayuda</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item onClick={handleLogout} className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="fas fa-sign-out-alt"></i></div>
+                    <span>Cerrar sesión</span>
+                  </NavDropdown.Item>
+                </NavDropdown>
+              ) : (
+                <Nav.Link href="#">
+                  <Button
+                    variant="success"
+                    className="btn-ingresar"
+                    onClick={() => navigate('/login')}
+                  >
+                    Ingresar
+                  </Button>
+                </Nav.Link>
+              )}
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+
+      {/* CHAT */}
       <Container fluid className="chat-wrapper">
         <Row className="h-100">
           <Col md={4} lg={3} className="chat-sidebar" data-aos="fade-right">
@@ -88,9 +232,7 @@ const Chats: React.FC = () => {
                 .map((contact) => (
                   <div
                     key={contact.id}
-                    className={`contact-item ${
-                      selectedContact?.id === contact.id ? 'active' : ''
-                    }`}
+                    className={`contact-item ${selectedContact?.id === contact.id ? 'active' : ''}`}
                     onClick={() => setSelectedContact(contact)}
                     data-aos="fade-up"
                   >
@@ -121,9 +263,7 @@ const Chats: React.FC = () => {
                     <div className="contact-info">
                       <h5>{selectedContact.name}</h5>
                       <small
-                        className={
-                          selectedContact.isOnline ? 'text-success' : 'text-muted'
-                        }
+                        className={selectedContact.isOnline ? 'text-success' : 'text-muted'}
                       >
                         {selectedContact.isOnline ? 'En línea' : 'Desconectado'}
                       </small>
@@ -135,9 +275,7 @@ const Chats: React.FC = () => {
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`message ${
-                        message.senderId === 'currentUser' ? 'sent' : 'received'
-                      }`}
+                      className={`message ${message.senderId === 'currentUser' ? 'sent' : 'received'}`}
                       data-aos="fade-up"
                     >
                       <div className="message-content">
@@ -175,96 +313,13 @@ const Chats: React.FC = () => {
         </Row>
       </Container>
 
+      {/* FOOTER */}
       <footer className="footer-section">
-        <div className="footer-top">
-          <Container>
-            <Row className="footer-row">
-              <Col lg={4} md={6} className="mb-4 mb-md-0">
-                <div className="footer-brand">
-                  <h2 className="text-white mb-3">InmoMarket</h2>
-                  <p className="footer-desc">
-                    La plataforma inmobiliaria que conecta a compradores y
-                    vendedores para hacer realidad sus sueños inmobiliarios.
-                  </p>
-                  <div className="footer-social">
-                    <a href="#" className="social-icon">
-                      <i className="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" className="social-icon">
-                      <i className="fab fa-instagram"></i>
-                    </a>
-                    <a href="#" className="social-icon">
-                      <i className="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" className="social-icon">
-                      <i className="fab fa-linkedin-in"></i>
-                    </a>
-                    <a href="#" className="social-icon">
-                      <i className="fab fa-youtube"></i>
-                    </a>
-                  </div>
-                </div>
-              </Col>
-
-              <Col lg={2} md={6} className="mb-4 mb-lg-0">
-                <h5 className="footer-heading">Comprar</h5>
-                <ul className="footer-links">
-                  <li><a href="#">Departamentos</a></li>
-                  <li><a href="#">Casas</a></li>
-                  <li><a href="#">Terrenos</a></li>
-                </ul>
-              </Col>
-
-              <Col lg={2} md={6} className="mb-4 mb-lg-0">
-                <h5 className="footer-heading">Vender</h5>
-                <ul className="footer-links">
-                  <li><a href="#">Publicar Propiedad</a></li>
-                  <li><a href="#">Consejos de Venta</a></li>
-                  <li><a href="#">Valoración de Inmuebles</a></li>
-                  <li><a href="#">Publicaciones Destacadas</a></li>
-                </ul>
-              </Col>
-
-              <Col lg={4} md={6}>
-                <h5 className="footer-heading">Suscríbete</h5>
-                <p className="footer-newsletter-text">
-                  Recibe las mejores ofertas inmobiliarias en tu correo
-                </p>
-                <div className="footer-newsletter">
-                  <input type="email" placeholder="Tu correo electrónico" className="footer-input" />
-                  <button className="footer-subscribe-btn">Suscribirse</button>
-                </div>
-                <div className="footer-contact mt-4">
-                  <div className="d-flex align-items-center mb-2">
-                    <i className="fas fa-phone-alt me-2"></i>
-                    <span>(01) 555-1234</span>
-                  </div>
-                  <div className="d-flex align-items-center">
-                    <i className="fas fa-envelope me-2"></i>
-                    <span>contacto@inmomarket.com</span>
-                  </div>
-                </div>
-              </Col>
-            </Row>
-          </Container>
-        </div>
-
-        <div className="footer-bottom">
-          <Container>
-            <Row className="align-items-center">
-              <Col md={6} className="text-center text-md-start">
-                <p className="mb-md-0">
-                  &copy; {new Date().getFullYear()} InmoMarket. Todos los derechos reservados.
-                </p>
-              </Col>
-              <Col md={6} className="text-center text-md-end footer-links-bottom">
-                <a href="#">Política de Privacidad</a>
-                <a href="#">Términos y Condiciones</a>
-                <a href="#">Mapa del Sitio</a>
-              </Col>
-            </Row>
-          </Container>
-        </div>
+        <Container fluid>
+          <p className="text-center mb-0">
+            © {new Date().getFullYear()} InmoMarket. Todos los derechos reservados.
+          </p>
+        </Container>
       </footer>
     </div>
   );

@@ -969,48 +969,6 @@ const Buscar: React.FC = () => {
                           </div>
                         </div>
                         
-                        {/* Tipo de anunciante */}
-                        <div className="filter-section">
-                          <h6 className="mb-2 fw-bold">Tipo de anunciante</h6>
-                          <div className="d-flex flex-column mb-3">
-                            <div className="mb-2 form-check">
-                              <input
-                                type="radio"
-                                className="form-check-input"
-                                id="anunciante-todos"
-                                name="tipo-anunciante"
-                                checked={tipoAnunciante === 'todos'}
-                                onChange={() => setTipoAnunciante('todos')}
-                              />
-                              <label className="form-check-label" htmlFor="anunciante-todos">Todos</label>
-                            </div>
-                            
-                            <div className="mb-2 form-check">
-                              <input
-                                type="radio"
-                                className="form-check-input"
-                                id="anunciante-inmobiliaria"
-                                name="tipo-anunciante"
-                                checked={tipoAnunciante === 'inmobiliaria'}
-                                onChange={() => setTipoAnunciante('inmobiliaria')}
-                              />
-                              <label className="form-check-label" htmlFor="anunciante-inmobiliaria">Inmobiliaria</label>
-                            </div>
-                            
-                            <div className="form-check">
-                              <input
-                                type="radio"
-                                className="form-check-input"
-                                id="anunciante-dueno"
-                                name="tipo-anunciante"
-                                checked={tipoAnunciante === 'dueno'}
-                                onChange={() => setTipoAnunciante('dueno')}
-                              />
-                              <label className="form-check-label" htmlFor="anunciante-dueno">Dueño directo</label>
-                            </div>
-                          </div>
-                        </div>
-                        
                         {/* Antigüedad */}
                         <div className="filter-section">
                           <h6 className="mb-2 fw-bold">Antigüedad</h6>
@@ -1206,7 +1164,11 @@ const Buscar: React.FC = () => {
                   
                   {/* Botones de contacto */}
                   <div className="mt-3 d-flex gap-2">
-                    <Button variant="success" className="w-100 d-flex align-items-center justify-content-center">
+                    <Button 
+                      variant="success" 
+                      className="w-100 d-flex align-items-center justify-content-center"
+                      onClick={() => navigate(`/chats`, { state: { publicacionId: pub.id, publicacion: pub } })}
+                    >
                       <i className="bi bi-chat-text-fill me-2"></i>
                       <span>Contactar</span>
                     </Button>

@@ -331,11 +331,11 @@ const Principal: React.FC = () => {
                     if (activeTab === 'comprar') {
                       navigate('/Buscar'); // Redirecciona a la página de búsqueda
                     } else {
-                      navigate('/publicar'); // Redirecciona a la página de publicar
+                      navigate('/Vender'); // Redirecciona a la página de publicar
                     }
                   }}
                 >
-                  {activeTab === 'comprar' ? 'Buscar' : 'Publicar'}
+                  {activeTab === 'comprar' ? 'Buscar' : 'Siguinete'}
                 </button>
               </div>
             </div>
