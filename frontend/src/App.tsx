@@ -11,6 +11,7 @@ import Conocenos from './components/Guia/Conocenos';
 import Publicaciones from './components/Opciones/Publicaciones';
 import Perfil from './components/Opciones/Perfil';
 import Buscar from './components/Operaciones/Buscar';
+import Chats from './components/Chats/Chats';
 
 const App: React.FC = () => {
   return (
@@ -24,6 +25,7 @@ const App: React.FC = () => {
       <Route path="/publicaciones" element={<Publicaciones />} />
       <Route path="/perfil" element={<Perfil />} />
       <Route path="/buscar" element={<Buscar />} />
+      <Route path="/chats" element={<Chats />} />
     </Routes>
   );
 };
