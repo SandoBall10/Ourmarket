@@ -15,11 +15,6 @@ public class RolService {
     @Autowired
     private RolRepository rolRepository;
 
-    //crear un nuevo rol
-    public Rol crearRol(Rol rol) {
-        return rolRepository.save(rol);
-    }
-
     //listar todos los roles
     public List<Rol> listarRoles() {
         return rolRepository.findAll();
@@ -30,20 +25,4 @@ public class RolService {
         return rolRepository.findById(id);
     }
 
-    //actualizar un rol
-    public Rol actualizarRol(Integer id, Rol rolActualizado) {
-        Optional<Rol> rolExistente = rolRepository.findById(id);
-        if (rolExistente.isPresent()) {
-            Rol rol = rolExistente.get();
-            rol.setNombre(rolActualizado.getNombre());
-            return rolRepository.save(rol);
-        } else {
-            return null;
-        }
-    }
-
-    //eliminar un rol
-    public void eliminarRol(Integer id) {
-        rolRepository.deleteById(id);
-    }
 }

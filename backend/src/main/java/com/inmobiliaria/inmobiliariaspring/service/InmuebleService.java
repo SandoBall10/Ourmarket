@@ -39,22 +39,21 @@ public class InmuebleService {
         if (inmueble.getEstado() == null) {
             inmueble.setEstado(Estado.disponible); // Valor predeterminado: "disponible"
         }
-        if (inmueble.getAutorizado() == null) {
-            inmueble.setAutorizado(false); // Valor predeterminado: "false"
-        }
         // Usamos el Factory para crear el inmueble
         Inmueble nuevoInmueble = InmuebleFactory.crearInmueble(
-                inmueble.getTitulo(),
-                inmueble.getDescripcion(),
+                cliente.get(),
+                inmueble.getNum_habitaciones(),
+                inmueble.getServicios(),
+                inmueble.getTipo(),
+                inmueble.getArea(),
                 inmueble.getPrecio(),
-                Tipo.valueOf(inmueble.getTipo().name()),  // Aseguramos que el tipo esté bien
-                inmueble.getUbicacion(),
-                inmueble.getImagenes(),
-                cliente.get()
+                inmueble.getEstado(),
+                inmueble.getRegion(),
+                inmueble.getProvincia(),
+                inmueble.getDistrito(),
+                inmueble.getDireccion(),
+                inmueble.getImagenes()               
         );
-
-        // Aquí puedes llamar al observer para notificar
-        // NotificadorInmueble.notificarObservadores("Nuevo inmueble publicado: " + nuevoInmueble.getTitulo());
 
         return inmuebleRepository.save(nuevoInmueble);
     }
@@ -74,15 +73,28 @@ public class InmuebleService {
         Optional<Inmueble> inmuebleExistente = inmuebleRepository.findById(id);
         if (inmuebleExistente.isPresent()) {
             Inmueble inmueble = inmuebleExistente.get();
-            inmueble.setTitulo(inmuebleActualizado.getTitulo());
-            inmueble.setDescripcion(inmuebleActualizado.getDescripcion());
-            inmueble.setPrecio(inmuebleActualizado.getPrecio());
-            inmueble.setTipo(inmuebleActualizado.getTipo());
-            inmueble.setEstado(inmuebleActualizado.getEstado());
-            inmueble.setUbicacion(inmuebleActualizado.getUbicacion());
-            inmueble.setAutorizado(inmuebleActualizado.getAutorizado());
             inmueble.setCliente(inmuebleActualizado.getCliente());
-            inmueble.setImagenes(inmuebleActualizado.getImagenes());
+            inmueble.setNum_habitaciones(inmuebleActualizado.getNum_habitaciones());
+            inmueble.setServicios(inmuebleActualizado.getServicios());
+            inmueble.setTipo(inmuebleActualizado.getTipo());
+            inmueble.setArea(inmuebleActualizado.getArea());
+            inmueble.setPrecio(inmuebleActualizado.getPrecio());   
+            inmueble.setEstado(inmuebleActualizado.getEstado());
+            inmueble.setRegion(inmuebleActualizado.getRegion());
+            inmueble.setProvincia(inmuebleActualizado.getProvincia());
+            inmueble.setDistrito(inmuebleActualizado.getDistrito());
+            inmueble.setDireccion(inmuebleActualizado.getDireccion());
+            inmueble.setImagenes(inmuebleActualizado.getImagenes());      
+            
+            // Si es terreno, habitaciones y servicios deben ser null
+            if (inmuebleActualizado.getTipo() == Inmueble.Tipo.terreno) {
+                inmueble.setNum_habitaciones(null);
+                inmueble.setServicios(null);
+            } else {
+                inmueble.setNum_habitaciones(inmuebleActualizado.getNum_habitaciones());
+                inmueble.setServicios(inmuebleActualizado.getServicios());
+            }
+            
             return inmuebleRepository.save(inmueble);
         } else {
             return null;
@@ -92,19 +104,6 @@ public class InmuebleService {
     //eliminar un inmueble
     public void eliminarInmueble(Integer id) {
         inmuebleRepository.deleteById(id);
-    }
-
-    public Inmueble autorizarInmueble(Integer idInmueble) {
-        Inmueble inmueble = inmuebleRepository.findById(idInmueble)
-                .orElseThrow(() -> new RuntimeException("Inmueble no encontrado"));
-    
-                if (inmueble.getEstado().equals(Inmueble.Estado.valueOf("disponible"))) {
-                    inmueble.setEstado(Inmueble.Estado.valueOf("vendido")); // Cambia el estado a "vendido"
-        } else {
-            throw new RuntimeException("El inmueble ya ha sido procesado.");
-        }
-    
-        return inmuebleRepository.save(inmueble);
     }
 
     public Inmueble marcarComoVendido(Integer idInmueble) {

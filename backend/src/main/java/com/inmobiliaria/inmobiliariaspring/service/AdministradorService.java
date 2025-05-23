@@ -1,18 +1,57 @@
 package com.inmobiliaria.inmobiliariaspring.service;
 
-import com.inmobiliaria.inmobiliariaspring.model.Administrador;
-import com.inmobiliaria.inmobiliariaspring.repository.AdministradorRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.inmobiliaria.inmobiliariaspring.model.Administrador;
+import com.inmobiliaria.inmobiliariaspring.model.Rol;
+import com.inmobiliaria.inmobiliariaspring.repository.AdministradorRepository;
+import com.inmobiliaria.inmobiliariaspring.repository.RolRepository;
 
 @Service
 public class AdministradorService {
 
-    @Autowired
     private AdministradorRepository administradorRepository;
+
+    private RolRepository rolRepository;
+
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    public AdministradorService(AdministradorRepository administradorRepository, RolRepository rolRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.administradorRepository = administradorRepository;
+        this.rolRepository = rolRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public Administrador registrarAdministrador(Administrador admin) {
+        // Asigna el rol 1 (admin) por defecto
+        Rol rolAdmin = rolRepository.findById(1)
+            .orElseThrow(() -> new RuntimeException("Rol admin no encontrado"));
+        admin.setRol(rolAdmin);
+
+        // Encripta la contraseña antes de guardar
+        admin.setContrasena(passwordEncoder.encode(admin.getContrasena()));
+
+        return administradorRepository.save(admin);
+    }
+
+    // Método para login simple
+    public Optional<Administrador> login(String username, String contrasena) {
+        Optional<Administrador> admin = findByUsername(username);
+        if (admin.isPresent()) {
+            Administrador administrador = admin.get();
+            if (passwordEncoder.matches(contrasena, administrador.getContrasena())) {
+                return Optional.of(administrador);
+            }
+        }
+        return Optional.empty();
+    }
+
 
     public List<Administrador> findAll() {
         return administradorRepository.findAll();
@@ -24,10 +63,6 @@ public class AdministradorService {
 
     public Optional<Administrador> findByUsername(String username) {
         return administradorRepository.findByUsername(username);
-    }
-
-    public Administrador save(Administrador administrador) {
-        return administradorRepository.save(administrador);
     }
 
     public void deleteById(Integer id) {

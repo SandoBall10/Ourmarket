@@ -14,54 +14,70 @@ public class Inmueble {
     @Column(name = "id_inmueble")
     private Integer idInmueble;
 
-    @Column(nullable = false)
-    private String titulo;
+    @ManyToOne
+    @JoinColumn(name = "id_cliente")
+    private Cliente cliente;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String descripcion;
+    @Column(name = "numero_habitaciones", nullable = true)
+    private Integer num_habitaciones;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal precio;
+    @Column(name = "servicios", columnDefinition = "TEXT", nullable = true)
+    private String servicios;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Tipo tipo;
 
+    @Column(name = "area", precision = 10, scale = 2)   
+    private BigDecimal area; //area en m2
+
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal precio;
+
+   
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Estado estado;
 
-    @Column(nullable = false)
-    private String ubicacion;
+    @Column(name = "region", length = 50)
+    private String region;
 
-    @Column(name = "fecha_publicacion", nullable = false)
-    private LocalDateTime fechaPublicacion;
+    @Column(name = "provincia", length = 50)
+    private String provincia;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean autorizado = false;
+    @Column(name = "distrito", length = 50)
+    private String distrito;
 
-    @ManyToOne
-    @JoinColumn(name = "id_cliente")
-    private Cliente cliente;
+    @Column(name = "direccion", length = 50)
+    private String direccion;
 
     @Column(columnDefinition = "TEXT")
     private String imagenes;
 
+    @Column(name = "fecha_registro")
+    private LocalDateTime fechaRegistro;
+
     public Inmueble() {}
 
-    public Inmueble(String titulo, String descripcion, BigDecimal precio, Tipo tipo, Estado estado, 
-                    String ubicacion, LocalDateTime fechaPublicacion, Boolean autorizado, 
-                    String imagenes, Cliente cliente) {
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-        this.precio = precio;
-        this.tipo = tipo;
-        this.estado = estado != null ? estado : Estado.disponible;
-        this.ubicacion = ubicacion;
-        this.fechaPublicacion = fechaPublicacion != null ? fechaPublicacion : LocalDateTime.now();
-        this.autorizado = autorizado != null ? autorizado : false; // Si no se proporciona, usa "false"
-        this.imagenes = imagenes;
+    public Inmueble(Cliente cliente, Integer num_habitaciones, String servicios, Tipo tipo, 
+                    BigDecimal area, BigDecimal precio, Estado estado, 
+                    String region, String provincia, String distrito, String direccion, 
+                    String imagenes, LocalDateTime fechaRegistro) {
         this.cliente = cliente;
+        this.num_habitaciones = num_habitaciones;
+        this.servicios = servicios;
+        this.tipo = tipo;
+        this.area = area;
+        this.precio = precio;
+        this.estado = estado != null ? estado : Estado.disponible;
+        this.region = region;
+        this.provincia = provincia;
+        this.distrito = distrito;
+        this.direccion = direccion;
+        this.imagenes = imagenes;
+        this.fechaRegistro = fechaRegistro;
+
     }
 
     public enum Tipo {
@@ -81,28 +97,28 @@ public class Inmueble {
         this.idInmueble = idInmueble;
     }
 
-    public String getTitulo() {
-        return titulo;
+    public Cliente getCliente() {
+        return cliente;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public Integer getNum_habitaciones() {
+        return num_habitaciones;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setNum_habitaciones(Integer num_habitaciones) {
+        this.num_habitaciones = num_habitaciones;
     }
 
-    public BigDecimal getPrecio() {
-        return precio;
+    public String getServicios() {
+        return servicios;
     }
 
-    public void setPrecio(BigDecimal precio) {
-        this.precio = precio;
+    public void setServicios(String servicios) {
+        this.servicios = servicios;
     }
 
     public Tipo getTipo() {
@@ -113,6 +129,22 @@ public class Inmueble {
         this.tipo = tipo;
     }
 
+    public BigDecimal getArea() {
+        return area;
+    }
+
+    public void setArea(BigDecimal area) {
+        this.area = area;
+    }
+
+    public BigDecimal getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(BigDecimal precio) {
+        this.precio = precio;
+    }
+
     public Estado getEstado() {
         return estado;
     }
@@ -121,36 +153,36 @@ public class Inmueble {
         this.estado = estado;
     }
 
-    public String getUbicacion() {
-        return ubicacion;
+    public String getRegion() {
+        return region;
     }
 
-    public void setUbicacion(String ubicacion) {
-        this.ubicacion = ubicacion;
+    public void setRegion(String region) {
+        this.region = region;
     }
 
-    public LocalDateTime getFechaPublicacion() {
-        return fechaPublicacion;
+    public String getProvincia() {
+        return provincia;
     }
 
-    public void setFechaPublicacion(LocalDateTime fechaPublicacion) {
-        this.fechaPublicacion = fechaPublicacion;
+    public void setProvincia(String provincia) {
+        this.provincia = provincia;
     }
 
-    public Boolean getAutorizado() {
-        return autorizado;
+    public String getDistrito() {
+        return distrito;
     }
 
-    public void setAutorizado(Boolean autorizado) {
-        this.autorizado = autorizado;
+    public void setDistrito(String distrito) {
+        this.distrito = distrito;
     }
 
-    public Cliente getCliente() {
-        return cliente;
+    public String getDireccion() {
+        return direccion;
     }
 
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 
     public String getImagenes() {
@@ -159,5 +191,13 @@ public class Inmueble {
 
     public void setImagenes(String imagenes) {
         this.imagenes = imagenes;
+    }
+
+    public LocalDateTime getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
     }
 }

@@ -20,6 +20,16 @@ public class ClienteController {
         return ResponseEntity.ok(nuevoCliente);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<Cliente> iniciarSesion(@RequestBody Cliente loginRequest) {
+        Cliente cliente = clienteService.iniciarSesionClientePorEmail(loginRequest.getEmail(), loginRequest.getContrasena());
+        if (cliente != null) {
+            return ResponseEntity.ok(cliente);
+        } else {
+            return ResponseEntity.status(401).build();
+        }
+    }
+
     // Listar todos los clientes
     @GetMapping
     public List<Cliente> listarClientes() {

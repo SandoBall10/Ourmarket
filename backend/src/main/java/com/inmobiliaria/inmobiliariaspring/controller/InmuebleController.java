@@ -63,17 +63,6 @@ public class InmuebleController {
              return ResponseEntity.badRequest().body(null); // En caso de error (por ejemplo, si ya está vendido)
          }
      }
- 
-     // Aprobar un inmueble (administrador)
-     @PutMapping("/autorizar/{id}")
-     public ResponseEntity<Inmueble> autorizarInmueble(@PathVariable Integer id) {
-         try {
-             Inmueble inmuebleAutorizado = inmuebleService.autorizarInmueble(id); // Método para cambiar a "Aprobado"
-             return ResponseEntity.ok(inmuebleAutorizado);
-         } catch (RuntimeException e) {
-             return ResponseEntity.badRequest().body(null); // En caso de error
-         }
-     }
 }
 
 

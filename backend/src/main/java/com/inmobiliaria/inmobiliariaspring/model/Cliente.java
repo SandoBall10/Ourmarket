@@ -24,16 +24,16 @@ public class Cliente {
     @Column(name = "id_cliente")
     private Integer idCliente;
 
-    @Column(name = "nombre_completo", length = 30)
+    @Column(name = "nombre_completo", length = 100)
     private String nombreCompleto;
 
     @Column(name = "email", length = 100)
     private String email;
 
-    @Column(name = "contraseña", length = 30)
-    private String contraseña;
+    @Column(name = "contrasena", length = 100)
+    private String contrasena;
 
-    @Column(name = "telefono", length = 9, nullable = false)
+    @Column(name = "telefono", length = 15, nullable = false)
     private String telefono;
 
     @Enumerated(EnumType.STRING)
@@ -67,10 +67,10 @@ public class Cliente {
     } 
     
     // Constructor personalizado para usar en Factory
-    public Cliente(String nombreCompleto, String email, String contraseña, String telefono, TipoDocumento tipoDocumento, String numeroDocumento, Rol rol, LocalDateTime fechaRegistro) {
+    public Cliente(String nombreCompleto, String email, String contrasena, String telefono, TipoDocumento tipoDocumento, String numeroDocumento, Rol rol, LocalDateTime fechaRegistro) {
         this.nombreCompleto = nombreCompleto;
         this.email = email;
-        this.contraseña = contraseña;
+        this.contrasena = contrasena;
         this.telefono = telefono;
         this.tipoDocumento = tipoDocumento;  // 'DNI' o 'Carnet de Extranjería'
         this.numeroDocumento = numeroDocumento;  // Número de documento (DNI o Carnet de Extranjería)
@@ -103,12 +103,12 @@ public class Cliente {
         this.email = email;
     }
 
-    public String getContraseña() {
-        return contraseña;
+    public String getContrasena() {
+        return contrasena;
     }
 
-    public void setContraseña(String contraseña) {
-        this.contraseña = contraseña;
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
     }
 
     public String getTelefono() {
