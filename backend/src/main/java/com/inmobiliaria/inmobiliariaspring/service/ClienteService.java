@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.inmobiliaria.inmobiliariaspring.factory.ClienteFactory;
@@ -27,10 +28,11 @@ public class ClienteService {
     // Mapa para contar intentos fallidos por email (en memoria)
     private final Map<String, Integer> intentosFallidos = new ConcurrentHashMap<>();
 
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public ClienteService() {
-        this.passwordEncoder = new BCryptPasswordEncoder(); // Instancia de BCryptPasswordEncoder
+    @Autowired
+    public ClienteService(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = new BCryptPasswordEncoder(); 
     }
 
     // Crear cliente usando Factory
@@ -53,7 +55,7 @@ public class ClienteService {
         }
         // Crear el rol "cliente" directamente sin buscar en la base de datos
         Rol rolCliente = new Rol();
-        rolCliente.setIdRol(2); // Asegúrate de que este ID corresponde al rol "cliente" en tu base de datos
+        rolCliente.setIdRol(3); // Asegúrate de que este ID corresponde al rol "cliente" en tu base de datos
         rolCliente.setNombre("CLIENTE");
 
         // Encriptar la contraseña antes de usarla

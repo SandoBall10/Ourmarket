@@ -33,14 +33,6 @@ public class AdministradorController {
         return ResponseEntity.ok(nuevoAdmin);
     }
 
-
-    @PostMapping("/login")
-    public ResponseEntity<Administrador> login(@RequestBody Administrador loginRequest) {
-        Optional<Administrador> adminOpt = administradorService.login(loginRequest.getUsername(), loginRequest.getContrasena());
-        return adminOpt.map(ResponseEntity::ok)
-                        .orElseGet(() -> ResponseEntity.status(401).build());
-    }
-
     
     @GetMapping
     public List<Administrador> getAll() {

@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.inmobiliaria.inmobiliariaspring.model.Administrador;
 import com.inmobiliaria.inmobiliariaspring.model.Rol;
 import com.inmobiliaria.inmobiliariaspring.repository.AdministradorRepository;
@@ -15,22 +14,22 @@ import com.inmobiliaria.inmobiliariaspring.repository.RolRepository;
 @Service
 public class AdministradorService {
 
-    private AdministradorRepository administradorRepository;
+    private final AdministradorRepository administradorRepository;
 
-    private RolRepository rolRepository;
+    private final RolRepository rolRepository;
 
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AdministradorService(AdministradorRepository administradorRepository, RolRepository rolRepository, BCryptPasswordEncoder passwordEncoder) {
+    public AdministradorService(AdministradorRepository administradorRepository, RolRepository rolRepository, PasswordEncoder passwordEncoder) {
         this.administradorRepository = administradorRepository;
         this.rolRepository = rolRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     public Administrador registrarAdministrador(Administrador admin) {
-        // Asigna el rol 1 (admin) por defecto
-        Rol rolAdmin = rolRepository.findById(1)
+        // Asigna el rol 2 (admin) por defecto
+        Rol rolAdmin = rolRepository.findById(2)
             .orElseThrow(() -> new RuntimeException("Rol admin no encontrado"));
         admin.setRol(rolAdmin);
 
