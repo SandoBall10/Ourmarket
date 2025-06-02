@@ -119,6 +119,42 @@ const Vender: React.FC = () => {
   const [halfBathrooms, setHalfBathrooms] = useState(0);
   const [parkingSpaces, setParkingSpaces] = useState(0);
 
+  // Agrega esto con los otros estados al inicio del componente
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [uploadError, setUploadError] = useState<string>('');
+
+  // Agregar esta función dentro del componente
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    
+    // Verificar límite de archivos
+    if (uploadedFiles.length + files.length > 8) {
+      setUploadError("Solo puedes subir un máximo de 8 archivos");
+      return;
+    }
+    
+    // Verificar tamaño (500MB en total)
+    const totalSize = [...uploadedFiles, ...Array.from(files)].reduce(
+      (acc, file) => acc + file.size, 0
+    );
+    if (totalSize > 500 * 1024 * 1024) {
+      setUploadError("El tamaño total de los archivos no puede superar los 500MB");
+      return;
+    }
+    
+    setUploadError("");
+    
+    // Crear previsualizaciones
+    const newFiles = Array.from(files);
+    setUploadedFiles([...uploadedFiles, ...newFiles]);
+    
+    // Generar URLs para previsualización
+    const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
+    setPreviewUrls([...previewUrls, ...newPreviewUrls]);
+  };
+
   return (
 
     <div className="vender-page">
@@ -342,7 +378,7 @@ const Vender: React.FC = () => {
             </Card>
 
             {/* Detalle del aviso */}
-            <Card className="mt-4" style={{ borderRadius: '16px', boxShadow: '0 2px 16px #0001' }}>
+            <Card className="mt-4" style={{ borderRadius: '16px', boxShadow: '0 2px 16px #0001', height: '160px' }}>
               <Card.Body>
                 <Card.Title as="h6" className="mb-3 fw-bold">Detalle del aviso</Card.Title>
                 <div className="mb-2 text-secondary">
@@ -839,7 +875,116 @@ const Vender: React.FC = () => {
               {currentStep === 4 && (
                 <div className="step-content" data-aos="fade-in">
                   <h3>Añade fotos y videos de tu propiedad</h3>
-                  {/* Contenido del paso 4 */}
+                  <p className="text-muted mb-4">Las imágenes de alta calidad aumentan el interés en tu propiedad.</p>
+                  
+                  <Card className="mb-4 border-0 shadow-sm">
+                    <Card.Body className="p-4">
+                      <div className="file-upload-container text-center py-5">
+                        <div className="upload-icon mb-3">
+                          <i className="bi bi-cloud-arrow-up" style={{ fontSize: '2.5rem', color: '#6c757d' }}></i>
+                        </div>
+                        <h5 className="mb-3">Subir archivo</h5>
+                        
+                        <div className="d-flex justify-content-center">
+                          <Button 
+                            variant="primary" 
+                            className="position-relative"
+                          >
+                            <i className="bi bi-upload me-2"></i>
+                            Elegir archivos
+                            <Form.Control 
+                              type="file" 
+                              multiple 
+                              accept=".jpg,.jpeg,.png,.heic,.mp4"
+                              className="position-absolute top-0 start-0 opacity-0 w-100 h-100"
+                              style={{ cursor: 'pointer' }}
+                              onChange={handleFileChange}
+                            />
+                          </Button>
+                        </div>
+                        
+                        <div className="mt-3 text-secondary">
+                          <small>Máximo 8 archivos</small>
+                        </div>
+                        
+                        <div className="mt-4 text-secondary small">
+                          Archivos JPG, JPEG, PNG, HEIC, mp3, mp4
+                          <br />
+                          (Máximo tamaño de archivos 500 MB)
+                        </div>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                  
+                  {/* Preview area for uploaded files */}
+                  <div className="uploaded-files mb-4">
+                    <h5 className="mb-3">Archivos subidos ({uploadedFiles.length}/8)</h5>
+                    
+                    {uploadError && (
+                      <div className="alert alert-danger">{uploadError}</div>
+                    )}
+                    
+                    <div className="file-preview-grid">
+                      {uploadedFiles.length > 0 ? (
+                        <Row className="g-3">
+                          {previewUrls.map((url, index) => (
+                            <Col xs={6} md={3} key={index}>
+                              <div className="file-preview-item position-relative">
+                                {uploadedFiles[index].type.includes('image') ? (
+                                  <img src={url} alt={`Imagen ${index + 1}`} className="img-fluid rounded" />
+                                ) : (
+                                  <div className="video-preview rounded d-flex align-items-center justify-content-center">
+                                    <i className="bi bi-film" style={{fontSize: '2rem'}}></i>
+                                  </div>
+                                )}
+                                <Button 
+                                  variant="danger"
+                                  size="sm"
+                                  className="position-absolute top-0 end-0 rounded-circle p-1"
+                                  style={{margin: '5px'}}
+                                  onClick={() => {
+                                    const newFiles = [...uploadedFiles];
+                                    const newUrls = [...previewUrls];
+                                    URL.revokeObjectURL(newUrls[index]);
+                                    newFiles.splice(index, 1);
+                                    newUrls.splice(index, 1);
+                                    setUploadedFiles(newFiles);
+                                    setPreviewUrls(newUrls);
+                                  }}
+                                >
+                                  <i className="bi bi-x"></i>
+                                </Button>
+                              </div>
+                            </Col>
+                          ))}
+                        </Row>
+                      ) : (
+                        <div className="empty-state text-center py-4 text-secondary">
+                          <i className="bi bi-image me-2"></i>
+                          Aún no has subido ningún archivo
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="tips-section alert alert-info">
+                    <h5><i className="bi bi-lightbulb me-2"></i>Tips para buenas fotos</h5>
+                    <ul className="mb-0">
+                      <li>Utiliza luz natural para que los ambientes se vean más amplios</li>
+                      <li>Muestra todos los ambientes para dar una idea completa de la propiedad</li>
+                      <li>Asegúrate que las fotos estén nítidas y bien enfocadas</li>
+                      <li>Para videos, mantén una filmación estable y enfoca los mejores ángulos</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="text-end mt-4">
+                    <Form.Check 
+                      type="checkbox"
+                      id="terms-check"
+                      label="Certifico que tengo los derechos de todas las imágenes y videos subidos"
+                      className="mb-3 d-inline-block"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -854,15 +999,28 @@ const Vender: React.FC = () => {
                   Guardar y salir
                 </Button>
 
-                <Button
-                  variant="success"
-                  onClick={handleContinue}
-                  className="continue-btn"
-                  disabled={currentStep === 4}
-                >
-                  Continuar
-                  <i className="bi bi-arrow-right ms-2"></i>
-                </Button>
+                {currentStep === 4 ? (
+                  <Button
+                    variant="success"
+                    onClick={() => {
+                      // Aquí puedes agregar la lógica para publicar el anuncio
+                      // Por ejemplo: handlePublish()
+                    }}
+                    className="continue-btn"
+                  >
+                    Publicar
+                    <i className="bi bi-check-circle ms-2"></i>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="success"
+                    onClick={handleContinue}
+                    className="continue-btn"
+                  >
+                    Continuar
+                    <i className="bi bi-arrow-right ms-2"></i>
+                  </Button>
+                )}
               </div>
             </div>
           </Col>
