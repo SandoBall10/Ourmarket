@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Card, Navbar, Nav, NavDropdown } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Card, Navbar, Nav, NavDropdown, InputGroup } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import './Vender.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import peruUbigeo from '../Operaciones/peruUbigeo.json'; // Ajusta la ruta si es necesario
+import GoogleMapComponent from './MapaGoogle'; // Asegúrate de importar tu componente de mapa
 
 const Vender: React.FC = () => {
   const navigate = useNavigate();
@@ -112,6 +113,11 @@ const Vender: React.FC = () => {
       setDistrict('');
     }
   }, [department, province]);
+
+  const [bedrooms, setBedrooms] = useState(0);
+  const [bathrooms, setBathrooms] = useState(0);
+  const [halfBathrooms, setHalfBathrooms] = useState(0);
+  const [parkingSpaces, setParkingSpaces] = useState(0);
 
   return (
 
@@ -333,6 +339,27 @@ const Vender: React.FC = () => {
                 <i className="bi bi-image me-2"></i>
                 Fotos y videos
               </div>
+            </Card>
+
+            {/* Detalle del aviso */}
+            <Card className="mt-4" style={{ borderRadius: '16px', boxShadow: '0 2px 16px #0001' }}>
+              <Card.Body>
+                <Card.Title as="h6" className="mb-3 fw-bold">Detalle del aviso</Card.Title>
+                <div className="mb-2 text-secondary">
+                  <i className="bi bi-key me-2"></i>
+                  {operationType === 'venta' ? 'Venta' : operationType.charAt(0).toUpperCase() + operationType.slice(1)}
+                </div>
+                <div className="mb-2 text-secondary">
+                  <i className="bi bi-building me-2"></i>
+                  {propertyType
+                    ? `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)}${propertySubtype ? ' ' + propertySubtype.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : ''}`
+                    : 'Tipo de inmueble'}
+                </div>
+                <div className="mb-2 text-secondary">
+                  <i className="bi bi-geo-alt me-2"></i>
+                  {district ? district : 'Ubicación'}
+                </div>
+              </Card.Body>
             </Card>
           </Col>
 
@@ -564,16 +591,35 @@ const Vender: React.FC = () => {
                   
                   {/* You might want to add a map component here */}
                   <div className="map-container mb-4">
-                    {/* Map component would go here */}
-                    <div className="map-placeholder" style={{ 
-                      height: '300px', 
-                      backgroundColor: '#f8f9fa', 
-                      borderRadius: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <p className="text-muted">Mapa de ubicación</p>
+                    <h5 className="mb-3">¿Cómo quieres mostrar tu ubicación?</h5>
+                    <div className="d-flex mb-3">
+                      <Form.Check 
+                        type="radio"
+                        id="location-exact"
+                        name="location-type"
+                        label="Exacta"
+                        className="me-4"
+                        defaultChecked
+                      />
+                      <Form.Check 
+                        type="radio"
+                        id="location-approximate"
+                        name="location-type"
+                        label="Aproximada"
+                      />
+                    </div>
+
+                    <GoogleMapComponent 
+                      address={`${district && district + ', '}${province && province + ', '}${department}`}
+                      setCoordinates={(lat, lng) => {
+                        // Guarda las coordenadas en el estado
+                        console.log("Coordenadas seleccionadas:", lat, lng);
+                      }}
+                    />
+                    
+                    <div className="alert alert-info mt-3">
+                      <i className="bi bi-info-circle me-2"></i>
+                      Recuerda que al seleccionar "Aproximada" tu inmueble no aparecerá en el mapa de búsqueda
                     </div>
                   </div>
                 </div>
@@ -581,8 +627,212 @@ const Vender: React.FC = () => {
 
               {currentStep === 3 && (
                 <div className="step-content" data-aos="fade-in">
-                  <h3>Características de la propiedad</h3>
-                  {/* Contenido del paso 3 */}
+                  <h3>Características principales</h3>
+                  <p className="text-muted">Cuéntanos un poco más de tu inmueble.</p>
+
+                  <Row className="mb-4">
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label>Dormitorios (opcional)</Form.Label>
+                        <InputGroup>
+                          <Button 
+                            variant="light" 
+                            onClick={() => setBedrooms(Math.max(0, bedrooms - 1))}
+                          >-</Button>
+                          <Form.Control 
+                            type="number" 
+                            value={bedrooms}
+                            className="text-center"
+                            readOnly
+                          />
+                          <Button 
+                            variant="light" 
+                            onClick={() => setBedrooms(bedrooms + 1)}
+                          >+</Button>
+                        </InputGroup>
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label>Baños (opcional)</Form.Label>
+                        <InputGroup>
+                          <Button 
+                            variant="light" 
+                            onClick={() => setBathrooms(Math.max(0, bathrooms - 1))}
+                          >-</Button>
+                          <Form.Control 
+                            type="number" 
+                            value={bathrooms}
+                            className="text-center"
+                            readOnly
+                          />
+                          <Button 
+                            variant="light" 
+                            onClick={() => setBathrooms(bathrooms + 1)}
+                          >+</Button>
+                        </InputGroup>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Row className="mb-4">
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label>Medio baño (opcional)</Form.Label>
+                        <InputGroup>
+                          <Button 
+                            variant="light" 
+                            onClick={() => setHalfBathrooms(Math.max(0, halfBathrooms - 1))}
+                          >-</Button>
+                          <Form.Control 
+                            type="number" 
+                            value={halfBathrooms}
+                            className="text-center"
+                            readOnly
+                          />
+                          <Button 
+                            variant="light" 
+                            onClick={() => setHalfBathrooms(halfBathrooms + 1)}
+                          >+</Button>
+                        </InputGroup>
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label>Estacionamientos (opcional)</Form.Label>
+                        <InputGroup>
+                          <Button 
+                            variant="light" 
+                            onClick={() => setParkingSpaces(Math.max(0, parkingSpaces - 1))}
+                          >-</Button>
+                          <Form.Control 
+                            type="number" 
+                            value={parkingSpaces}
+                            className="text-center"
+                            readOnly
+                          />
+                          <Button 
+                            variant="light" 
+                            onClick={() => setParkingSpaces(parkingSpaces + 1)}
+                          >+</Button>
+                        </InputGroup>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <h4 className="mt-4 mb-3">Superficie</h4>
+                  <Row className="mb-4">
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label>Área construida</Form.Label>
+                        <InputGroup>
+                          <Form.Control type="number" placeholder="0" />
+                          <Form.Select style={{maxWidth: "80px"}}>
+                            <option value="m2">m²</option>
+                          </Form.Select>
+                        </InputGroup>
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label>Área terreno</Form.Label>
+                        <InputGroup>
+                          <Form.Control type="number" placeholder="0" />
+                          <Form.Select style={{maxWidth: "80px"}}>
+                            <option value="m2">m²</option>
+                          </Form.Select>
+                        </InputGroup>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <h4 className="mt-4">Antigüedad</h4>
+                  <div className="mb-4">
+                    <Form.Check
+                      type="radio"
+                      id="nuevo"
+                      name="antiguedad"
+                      label="A estrenar"
+                      className="mb-2"
+                      defaultChecked
+                    />
+                    <Form.Check
+                      type="radio"
+                      id="anos"
+                      name="antiguedad"
+                      label="Años de antigüedad"
+                      className="mb-2"
+                    />
+                    <Form.Check
+                      type="radio"
+                      id="construccion"
+                      name="antiguedad"
+                      label="En construcción"
+                      className="mb-2"
+                    />
+                  </div>
+
+                  <h4 className="mt-4">Precio</h4>
+                  <div className="mb-4">
+                    <Form.Label>Precio del inmueble</Form.Label>
+                    <Row>
+                      <Col md={6}>
+                        <InputGroup className="mb-3">
+                          <InputGroup.Text>S/.</InputGroup.Text>
+                          <Form.Control
+                            type="number"
+                            placeholder="0"
+                            min="0"
+                          />
+                        </InputGroup>
+                      </Col>
+                      <Col md={6}>
+                        <InputGroup>
+                          <InputGroup.Text>USD</InputGroup.Text>
+                          <Form.Control
+                            type="number"
+                            placeholder="0"
+                            min="0"
+                          />
+                        </InputGroup>
+                      </Col>
+                    </Row>
+
+                    <Form.Label>Mantenimiento (opcional)</Form.Label>
+                    <InputGroup style={{maxWidth: "250px"}}>
+                      <InputGroup.Text>S/.</InputGroup.Text>
+                      <Form.Control
+                        type="number"
+                        placeholder="0"
+                        min="0"
+                      />
+                    </InputGroup>
+                  </div>
+
+                  <h4 className="mt-4">Describe el inmueble</h4>
+                  <p className="text-muted">Asegúrate de incluir el tipo de inmueble y el tipo de operación de tu aviso.</p>
+                  <div className="mb-4">
+                    <Form.Group className="mb-3">
+                      <Form.Label>Título</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Completa el título de tu aviso."
+                      />
+                    </Form.Group>
+
+                    <Form.Group>
+                      <Form.Label>Descripción</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={4}
+                        placeholder="Escribe un mínimo de 150 caracteres"
+                      />
+                      <Form.Text className="text-end d-block">0</Form.Text>
+                    </Form.Group>
+                  </div>
                 </div>
               )}
 
