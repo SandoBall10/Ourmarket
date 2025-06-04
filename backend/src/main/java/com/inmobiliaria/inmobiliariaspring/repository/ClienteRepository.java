@@ -8,5 +8,4 @@ import com.inmobiliaria.inmobiliariaspring.model.Cliente;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
     Optional<Cliente> findByEmail(String email);
-    Optional<Cliente> findByTipoDocumento(String tipoDocumento);
 }

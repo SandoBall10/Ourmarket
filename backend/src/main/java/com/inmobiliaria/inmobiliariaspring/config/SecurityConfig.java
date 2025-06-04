@@ -45,11 +45,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> {
-                auth.requestMatchers(
-                        "/api/clientes/registrar",
-                        "/authenticate"
-                    ).permitAll()
+                auth.requestMatchers("/api/clientes/registrar","/authenticate").permitAll()
+                    .requestMatchers("/api/clientes/me").hasAnyRole("CLIENTE", "MASTER") // Solo CLIENTE puede acceder a /me
                     .requestMatchers("/api/roles/**", "/api/administradores/**").hasRole("MASTER")
+                    .requestMatchers("/api/clientes/**").hasAnyRole("MASTER", "ADMIN")
                     .requestMatchers("/api/publicaciones/*/autorizar").hasAnyRole("MASTER", "ADMIN")
                     .requestMatchers("/api/inmuebles/**", "/api/publicaciones/**", "/api/mensajes/**", "/api/favoritos/**")
                         .hasAnyRole("MASTER", "ADMIN", "CLIENTE")
@@ -71,6 +70,7 @@ public class SecurityConfig {
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

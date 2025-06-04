@@ -29,25 +29,21 @@ public class PublicacionService {
     @Autowired
     private AdministradorRepository administradorRepository;
 
-    //crear una publicacion usando factory
-    public Publicacion crearPublicacion(Integer idInmueble, String titulo, String descripcion, Integer idCliente) {
-        // Verifica si el inmueble y cliente existe en la base de datos
+    // Crear una publicación usando factory y email del cliente autenticado
+    public Publicacion crearPublicacion(Integer idInmueble, String titulo, String descripcion, String emailCliente) {
         Optional<Inmueble> inmueble = inmuebleRepository.findById(idInmueble);
-        Optional<Cliente> cliente = clienteRepository.findById(idCliente);
+        Cliente cliente = clienteRepository.findByEmail(emailCliente)
+            .orElseThrow(() -> new RuntimeException("Cliente no encontrado."));
 
-        // Valida ambos con un solo if
-        if (inmueble.isEmpty() || cliente.isEmpty()) {
-            throw new RuntimeException(
-                inmueble.isEmpty() ? "Inmueble no encontrado." : "Cliente no encontrado."
-            );
+        if (inmueble.isEmpty()) {
+            throw new RuntimeException("Inmueble no encontrado.");
         }
-    
-        // Usamos el Factory para crear la publicacion
+
         Publicacion nuevaPublicacion = PublicacionFactory.crearPublicacion(
             inmueble.get(),
             titulo,
             descripcion,
-            cliente.get()
+            cliente
         );
 
         return publicacionRepository.save(nuevaPublicacion);
@@ -89,10 +85,6 @@ public class PublicacionService {
 
         publicacion.setTitulo(publicacionActualizada.getTitulo());
         publicacion.setDescripcion(publicacionActualizada.getDescripcion());
-        publicacion.setInmueble(publicacionActualizada.getInmueble());
-        publicacion.setCliente(publicacionActualizada.getCliente());
-        
-
         return publicacionRepository.save(publicacion);
     }
 
