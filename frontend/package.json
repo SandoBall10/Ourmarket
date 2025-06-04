@@ -21,6 +21,7 @@
     "framer-motion": "^10.12.16",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.9",
+    "react-bootstrap-icons": "^1.11.6",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.6.0"
   },

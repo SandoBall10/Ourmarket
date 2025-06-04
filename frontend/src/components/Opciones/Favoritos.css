@@ -1,0 +1,247 @@
+/* Estilos generales */
+.favoritos-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.favoritos-container {
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
+}
+
+.favoritos-title {
+  font-weight: 700;
+  position: relative;
+  margin-bottom: 0;
+  font-size: 1.75rem;
+}
+
+/* Estilos de la barra de navegación */
+.navbar {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  height: 60px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.navbar-brand {
+  padding: 0;
+  margin-right: 1.5rem;
+}
+
+.nav-link-text {
+  font-weight: 500;
+  color: #333;
+  padding: 0.5rem 0.75rem;
+  transition: color 0.3s;
+  font-size: 0.95rem;
+}
+
+.nav-link-text:hover, .nav-link-text.active {
+  color: #136254;
+}
+
+.mega-dropdown {
+  position: relative;
+}
+
+.mega-menu-wrapper {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  display: none;
+  background-color: white;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  border-radius: 0 0 8px 8px;
+}
+
+.mega-dropdown:hover .mega-menu-wrapper {
+  display: block;
+}
+
+.avatar-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background-color: #136254;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+
+.avatar-arrow {
+  font-size: 10px;
+  color: #777;
+}
+
+.custom-dropdown .dropdown-menu {
+  padding: 0.5rem 0;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  border: none;
+  min-width: 220px;
+}
+
+.dropdown-item-custom {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: #333;
+}
+
+.dropdown-item-custom:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-item-custom .icon-wrapper {
+  width: 24px;
+  display: flex;
+  justify-content: center;
+  margin-right: 12px;
+  color: #666;
+}
+
+.btn-ingresar {
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+}
+
+/* Estilos de tarjetas de favoritos */
+.favorito-card {
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  border: none;
+  margin-bottom: 1rem;
+}
+
+.favorito-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.favorito-img-container {
+  height: 250px;
+  overflow: hidden;
+}
+
+.favorito-img {
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.favorito-card:hover .favorito-img {
+  transform: scale(1.05);
+}
+
+.btn-heart {
+  opacity: 0.9;
+  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-heart:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.empty-state-container {
+  animation: fadeIn 0.8s ease-out forwards;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 12px;
+  padding: 3rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+}
+
+.empty-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading-container {
+  min-height: 400px;
+}
+
+.desc-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}
+
+/* Animaciones */
+[data-aos="fade-up"] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+[data-aos="fade-up"].aos-animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .navbar-collapse {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    margin: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .favorito-img-container {
+    height: 200px;
+  }
+}
