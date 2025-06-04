@@ -218,17 +218,13 @@ const Principal: React.FC = () => {
                     <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
                     <span>Mis publicaciones</span>
                   </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/mis-favoritos" className="dropdown-item-custom">
+                  <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-heart"></i></div>
                     <span>Favoritos</span>
                   </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to="/chats" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-comments"></i></div>
                     <span>Mis chats</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/historial" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-eye"></i></div>
-                    <span>Historial</span>
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
@@ -248,7 +244,7 @@ const Principal: React.FC = () => {
                     <span>Ajustes de notificaciones</span>
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item as={Link} to="/ayuda" className="dropdown-item-custom">
+                  <NavDropdown.Item as={Link} to="/compradores" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-question-circle"></i></div>
                     <span>Ayuda</span>
                   </NavDropdown.Item>

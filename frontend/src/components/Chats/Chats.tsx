@@ -94,39 +94,53 @@ const Chats: React.FC = () => {
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">
             <Nav className="me-auto">
-              {/* Menú Comprar */}
+              {/* Menú Mis Publicaciones */}
               <div className="nav-item mega-dropdown">
                 <Nav.Link
                   as={Link}
-                  to="/buscar"
+                  to="/publicaciones"
                   className="nav-link-text"
                   id="comprar-dropdown"
                 >
-                  Comprar <i className="fas fa-chevron-down fa-xs"></i>
+                  Mis Publicaciones <i className="fas fa-chevron-down fa-xs"></i>
                 </Nav.Link>
-                {/* Aquí puedes agregar el mega menú si lo necesitas */}
+                <div className="mega-menu-wrapper">
+                </div>
               </div>
-              {/* Menú Vender */}
+
+              {/* Menú Favoritos */}
               <div className="nav-item mega-dropdown">
                 <Nav.Link
                   as={Link}
-                  to="/publicar"
-                  className="nav-link-text"
-                  id="vender-dropdown"
+                  to="/mis-favoritos"
+                  className="nav-link-text active"
+                  id="favoritos-dropdown"
                 >
-                  Vender <i className="fas fa-chevron-down fa-xs"></i>
+                  Favoritos <i className="fas fa-chevron-down fa-xs"></i>
                 </Nav.Link>
-                {/* Aquí puedes agregar el mega menú si lo necesitas */}
+                <div className="mega-menu-wrapper">
+                </div>
               </div>
-              {/* Menú Servicios */}
+
+              {/* Menú Mis Chats */}
               <div className="nav-item mega-dropdown">
                 <Nav.Link
+                  as={Link}
+                  to="/chats"
                   className="nav-link-text"
-                  id="servicios-dropdown"
+                  id="chats-dropdown"
                 >
-                  InmoMarket te ayuda <i className="fas fa-chevron-down fa-xs"></i>
+                  Mis Chats <i className="fas fa-chevron-down fa-xs"></i>
                 </Nav.Link>
-                {/* Aquí puedes agregar el mega menú si lo necesitas */}
+                <div className="mega-menu-wrapper">
+                </div>
+              </div>
+
+              {/* Menú Historial*/}
+              <div className="nav-item mega-dropdown">
+
+                <div className="mega-menu-wrapper">
+                </div>
               </div>
             </Nav>
             <Nav className="ms-auto">
@@ -158,17 +172,13 @@ const Chats: React.FC = () => {
                     <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
                     <span>Mis publicaciones</span>
                   </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/mis-favoritos" className="dropdown-item-custom">
+                  <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-heart"></i></div>
                     <span>Favoritos</span>
                   </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to="/chats" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-comments"></i></div>
                     <span>Mis chats</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/historial" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-eye"></i></div>
-                    <span>Historial</span>
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
@@ -186,7 +196,7 @@ const Chats: React.FC = () => {
                     <span>Ajustes de notificaciones</span>
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item as={Link} to="/ayuda" className="dropdown-item-custom">
+                  <NavDropdown.Item as={Link} to="/compradores" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-question-circle"></i></div>
                     <span>Ayuda</span>
                   </NavDropdown.Item>

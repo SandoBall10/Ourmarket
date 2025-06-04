@@ -289,7 +289,7 @@ const Vender: React.FC = () => {
                     <span>Ajustes de notificaciones</span>
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item as={Link} to="/ayuda" className="dropdown-item-custom">
+                  <NavDropdown.Item as={Link} to="/compradores" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-question-circle"></i></div>
                     <span>Ayuda</span>
                   </NavDropdown.Item>
