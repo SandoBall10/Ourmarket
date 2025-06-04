@@ -28,16 +28,11 @@ public class MensajeService {
     private InmuebleRepository inmuebleRepository;
 
     // Crear mensaje usando el Factory
-    public Mensaje crearMensaje(String contenido, Integer clienteId, Integer inmuebleId, TipoMensaje tipoMensaje) {
+    public Mensaje crearMensaje(String contenido,  Integer inmuebleId, Cliente cliente, TipoMensaje tipoMensaje) {
         // Validar que el contenido no sea nulo o vacío
         if (contenido == null || contenido.trim().isEmpty()) {
             throw new IllegalArgumentException("El contenido del mensaje no puede estar vacío.");
         }
-
-        // Verificar si el cliente existe
-        Cliente cliente = clienteRepository.findById(clienteId)
-            .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
-
         // Verificar si el inmueble existe
         Inmueble inmueble = inmuebleRepository.findById(inmuebleId)
             .orElseThrow(() -> new RuntimeException("Inmueble no encontrado"));
@@ -49,14 +44,39 @@ public class MensajeService {
         return mensajeRepository.save(nuevoMensaje);
     }
 
-    //listar todos los mensajes
-    public List<Mensaje> listarMensajes() {
-        return mensajeRepository.findAll();
+    // Listar mensajes de un inmueble según el usuario autenticado
+    public List<Mensaje> listarMensajesPorInmuebleParaUsuario(Integer inmuebleId, Cliente usuario) {
+        Inmueble inmueble = inmuebleRepository.findById(inmuebleId)
+            .orElseThrow(() -> new RuntimeException("Inmueble no encontrado"));
+
+        // Si el usuario es dueño del inmueble, ve todos los mensajes
+        if (inmueble.getCliente().getIdCliente().equals(usuario.getIdCliente())) {
+            return mensajeRepository.findByInmueble(inmueble);
+        }
+        // Si no, solo ve los mensajes que él envió sobre ese inmueble
+        return mensajeRepository.findByInmuebleAndCliente(inmueble, usuario);
     }
 
-    //obtener un mensaje por ID
     public Optional<Mensaje> obtenerMensajePorId(Integer id) {
         return mensajeRepository.findById(id);
+    }
+
+    public List<Mensaje> listarMensajesPorInmueble(Integer idInmueble) {
+    // Suponiendo que tienes un MensajeRepository con este método:
+    return mensajeRepository.findByInmueble_IdInmueble(idInmueble);
+}
+
+    public Optional<Mensaje> obtenerMensajePorIdParaCliente(Integer id, Cliente cliente) {
+        Optional<Mensaje> mensajeOpt = mensajeRepository.findById(id);
+        if (mensajeOpt.isPresent()) {
+            Mensaje mensaje = mensajeOpt.get();
+            boolean esRemitente = mensaje.getCliente().getIdCliente().equals(cliente.getIdCliente());
+            boolean esDueno = mensaje.getInmueble().getCliente().getIdCliente().equals(cliente.getIdCliente());
+            if (esRemitente || esDueno) {
+                return Optional.of(mensaje);
+            }
+        }
+        return Optional.empty();
     }
 
     //actualizar un mensaje

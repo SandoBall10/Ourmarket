@@ -24,13 +24,14 @@ public class InmuebleService {
     private ClienteRepository clienteRepository;
 
     // Crear un nuevo inmueble usando el Factory
-    public Inmueble crearInmueble(Inmueble inmueble) {
+    public Inmueble crearInmueble(Inmueble inmueble, String emailCliente) {
 
-        //Verifica si el cliente existe en la base de datos
-        Optional<Cliente> cliente = clienteRepository.findById(inmueble.getCliente().getIdCliente());
-        if (!cliente.isPresent()) {
-            throw new RuntimeException("Cliente no encontrado.");
-        }
+        // Busca el cliente por email
+        Cliente cliente = clienteRepository.findByEmail(emailCliente)
+        .orElseThrow(() -> new RuntimeException("Cliente no encontrado."));
+
+        // Fuerza el cliente, por si viene null en el JSON
+        inmueble.setCliente(cliente);
 
         // Asignar valores predeterminados si no se proporcionan
         if (inmueble.getTipo() == null) {
@@ -41,7 +42,7 @@ public class InmuebleService {
         }
         // Usamos el Factory para crear el inmueble
         Inmueble nuevoInmueble = InmuebleFactory.crearInmueble(
-                cliente.get(),
+                cliente,
                 inmueble.getNum_habitaciones(),
                 inmueble.getServicios(),
                 inmueble.getTipo(),
@@ -73,7 +74,7 @@ public class InmuebleService {
         Optional<Inmueble> inmuebleExistente = inmuebleRepository.findById(id);
         if (inmuebleExistente.isPresent()) {
             Inmueble inmueble = inmuebleExistente.get();
-            inmueble.setCliente(inmuebleActualizado.getCliente());
+            
             inmueble.setNum_habitaciones(inmuebleActualizado.getNum_habitaciones());
             inmueble.setServicios(inmuebleActualizado.getServicios());
             inmueble.setTipo(inmuebleActualizado.getTipo());
