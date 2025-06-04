@@ -40,6 +40,10 @@ public class InmuebleService {
         if (inmueble.getEstado() == null) {
             inmueble.setEstado(Estado.disponible); // Valor predeterminado: "disponible"
         }
+
+        // Siempre dejar imágenes en null al crear
+        inmueble.setImagenes(null);
+        
         // Usamos el Factory para crear el inmueble
         Inmueble nuevoInmueble = InmuebleFactory.crearInmueble(
                 cliente,
@@ -85,7 +89,6 @@ public class InmuebleService {
             inmueble.setProvincia(inmuebleActualizado.getProvincia());
             inmueble.setDistrito(inmuebleActualizado.getDistrito());
             inmueble.setDireccion(inmuebleActualizado.getDireccion());
-            inmueble.setImagenes(inmuebleActualizado.getImagenes());      
             
             // Si es terreno, habitaciones y servicios deben ser null
             if (inmuebleActualizado.getTipo() == Inmueble.Tipo.terreno) {
@@ -100,6 +103,13 @@ public class InmuebleService {
         } else {
             return null;
         }
+    }
+
+    public void actualizarImagenesInmueble(Integer id, String nombresImagenes) {
+        Inmueble inmueble = inmuebleRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Inmueble no encontrado"));
+        inmueble.setImagenes(nombresImagenes);
+        inmuebleRepository.save(inmueble);
     }
 
     //eliminar un inmueble
