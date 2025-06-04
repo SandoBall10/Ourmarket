@@ -39,7 +39,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 usernameOrEmail = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
-                // Puedes loggear el error si lo deseas
             }
         }
 
@@ -55,7 +54,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-
+        
         filterChain.doFilter(request, response);
     }
 }

@@ -1,6 +1,8 @@
 package com.inmobiliaria.inmobiliariaspring.controller;
 
-import com.inmobiliaria.inmobiliariaspring.util.JwtUtil;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,10 +11,16 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.inmobiliaria.inmobiliariaspring.dto.AuthRequest;
+import com.inmobiliaria.inmobiliariaspring.util.JwtUtil;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 public class AuthController {
@@ -28,15 +36,18 @@ public class AuthController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> createAuthenticationToken(
-            @RequestParam String usernameOrEmail,
-            @RequestParam String password) {
+            @RequestBody AuthRequest authRequest,
+            //@RequestParam String usernameOrEmail,
+            //@RequestParam String password,
+            @RequestParam(required = false, defaultValue = "false") boolean rememberMe,
+            HttpServletResponse resp) {
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(usernameOrEmail, password)
+                    new UsernamePasswordAuthenticationToken(authRequest.usernameOrEmail, authRequest.password)
             );
 
             final UserDetails userDetails = userDetailsService
-                    .loadUserByUsername(usernameOrEmail);
+                    .loadUserByUsername(authRequest.usernameOrEmail);
 
             String rol = userDetails.getAuthorities().iterator().next().getAuthority();
 
@@ -44,6 +55,16 @@ public class AuthController {
                     userDetails.getUsername(),
                     rol
             );
+            // Configurar la cookie si rememberMe es true (se usa jwt)
+            if(rememberMe){
+                Cookie cookie = new Cookie("jwt", jwt);
+                cookie.setHttpOnly(true);
+                // El setPath asegura que la cookie esté disponible en todas las rutas de la aplicación
+                cookie.setPath("/");
+                cookie.setMaxAge(60 * 60 * 24 * 7); // 1 semana
+                //cookie.setSecure(true); // Asegura que la cookie solo se envíe a través de HTTPS
+                resp.addCookie(cookie);
+            }
 
             Map<String, String> response = new HashMap<>();
             response.put("token", jwt);

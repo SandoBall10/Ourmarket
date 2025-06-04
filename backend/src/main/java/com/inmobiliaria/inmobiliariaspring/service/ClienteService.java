@@ -101,10 +101,6 @@ public class ClienteService {
         return clienteRepository.findById(id);
     }
 
-    // Obtener un cliente por tipo de documento
-    public Optional<Cliente> obtenerClientePorTipoDocumento(String tipoDocumento) {
-        return clienteRepository.findByTipoDocumento(tipoDocumento); // Método en el repositorio
-    }
 
     public Rol obtenerRolPorNombre(String nombreRol) {
         return rolRepository.findByNombre(nombreRol)
@@ -151,6 +147,24 @@ public class ClienteService {
     public void eliminarCliente(Integer id) {
         clienteRepository.deleteById(id);
     }
+
+    public Cliente actualizarSoloDatosPersonalesPorEmail(String email, Cliente clienteActualizado) {
+    Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
+    if (clienteOpt.isPresent()) {
+        Cliente cliente = clienteOpt.get();
+        // Solo permite actualizar nombre y teléfono (no email ni rol)
+        if (clienteActualizado.getNombreCompleto() != null) {
+            cliente.setNombreCompleto(clienteActualizado.getNombreCompleto());
+        }
+        if (clienteActualizado.getTelefono() != null) {
+            validarTelefono(clienteActualizado.getTelefono());
+            cliente.setTelefono(clienteActualizado.getTelefono());
+        }
+        // Si quieres permitir cambiar contraseña, agrega aquí la lógica
+        return clienteRepository.save(cliente);
+    }
+    return null;
+}
     
 
     // MÉTODOS DE VALIDACIÓN PARA TELEFONO Y TIPO DE DOCUMENTO, EMAIL Y FUERZA CONTRASENA
