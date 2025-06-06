@@ -1,6 +1,6 @@
 package com.inmobiliaria.inmobiliariaspring.config;
-import com.inmobiliaria.inmobiliariaspring.filter.JwtRequestFilter;
-import com.inmobiliaria.inmobiliariaspring.service.CustomerUserDetailsService;
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +17,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import com.inmobiliaria.inmobiliariaspring.filter.JwtRequestFilter;
+import com.inmobiliaria.inmobiliariaspring.service.CustomerUserDetailsService;
 
 @Configuration
 @EnableWebSecurity

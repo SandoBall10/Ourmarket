@@ -21,18 +21,47 @@ const Registro: React.FC = () => {
       alert('Debes aceptar los términos y condiciones y el uso de datos.');
       return;
     }
-    
+
     setIsLoading(true);
     try {
-      // Simular registro
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const cliente = {
+        nombreCompleto: name,
+        email: email,
+        contrasena: password,
+        telefono: phone,
+        tipoDocumento: documentType === 'DNI' ? 'DNI' : 'CARNET_EXTRANJERIA',
+        numeroDocumento: documentNumber,
+      };
+
+      const response = await fetch('http://localhost:8080/api/clientes/registrar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cliente),
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Error en el registro. Por favor, intenta nuevamente.';
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } else {
+            const text = await response.text();
+            errorMessage = text || errorMessage;
+          }
+        } catch (e) {
+          // Si falla el parseo, usa el mensaje por defecto
+        }
+        throw new Error(errorMessage);
+      }
+
       alert('¡Registro exitoso!');
       navigate('/login');
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error 
-    ? error.message 
-    : 'Error en el registro. Por favor, intenta nuevamente.';
-    alert(errorMessage);
+    } catch (error: any) {
+      alert(error.message || 'Error en el registro. Por favor, intenta nuevamente.');
     } finally {
       setIsLoading(false);
     }

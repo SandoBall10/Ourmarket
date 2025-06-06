@@ -10,29 +10,37 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    setTimeout(() => {
-      if (username === 'admin' && password === 'admin') {
-        setError('');
-        
-        // Guardar información del usuario en localStorage
-        localStorage.setItem('user', JSON.stringify({
-          name: username,
-          isLoggedIn: true,
-          avatarLetter: username.charAt(0).toUpperCase()
-        }));
-        
-        navigate('/'); // Redirige al componente Principal
-      } else {
-        setError('Usuario o contraseña incorrectos');
+ try {
+      const response = await fetch('http://localhost:8080/authenticate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usernameOrEmail: username, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Credenciales inválidas');
       }
+
+      const data = await response.json();
+      localStorage.setItem('user', JSON.stringify({
+        name: username,
+        isLoggedIn: true,
+        token: data.token,
+        rol: data.rol,
+      }));
+
+      navigate('/'); // Redirige al componente principal
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
+    } finally {
       setIsLoading(false);
-    }, 1000);
-  };
+  }
+};
 
   return (
     <div className="login-page">
