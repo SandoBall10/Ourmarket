@@ -205,7 +205,7 @@ const Principal: React.FC = () => {
                   title={
                     <div className="avatar-container">
                       <div className="user-avatar">
-                        {user.name.charAt(0).toUpperCase()}
+                        {user.name ? user.name.charAt(0).toUpperCase() : user.username ? user.username.charAt(0).toUpperCase() : '?'}
                       </div>
                       <i className="fas fa-chevron-down avatar-arrow"></i>
                     </div>

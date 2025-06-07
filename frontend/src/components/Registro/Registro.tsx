@@ -24,6 +24,7 @@ const Registro: React.FC = () => {
 
     setIsLoading(true);
     try {
+      // Crear objeto con el formato esperado por el backend
       const cliente = {
         nombreCompleto: name,
         email: email,
@@ -36,20 +37,25 @@ const Registro: React.FC = () => {
       const response = await fetch('http://localhost:8080/api/clientes/registrar', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(cliente),
       });
 
+      console.log('Respuesta del servidor:', response.status);
+      
       if (!response.ok) {
         let errorMessage = 'Error en el registro. Por favor, intenta nuevamente.';
         try {
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
             const errorData = await response.json();
+            console.error('Datos del error:', errorData);
             errorMessage = errorData.message || errorMessage;
           } else {
             const text = await response.text();
+            console.error('Respuesta de error:', text);
             errorMessage = text || errorMessage;
           }
         } catch (e) {
