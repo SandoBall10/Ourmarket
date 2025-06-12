@@ -6,22 +6,26 @@ import com.inmobiliaria.inmobiliariaspring.service.FavoritoService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequestMapping("/api/favoritos")
 public class FavoritoController {
+
     @Autowired
     private FavoritoService favoritoService;
 
-    // Agregar un favorito
     @PostMapping("/agregar")
+    @Operation(summary = "Agregar un favorito", description = "Agrega un inmueble a la lista de favoritos de un cliente.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Favorito agregado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado: Solo el cliente autenticado puede agregar un favorito")
+    })
     public ResponseEntity<FavoritoDTO> agregarFavorito(@RequestBody FavoritoDTO favoritoDTO) {
         Favorito favorito = new Favorito();
         favorito.setIdCliente(favoritoDTO.getIdCliente());
@@ -37,14 +41,21 @@ public class FavoritoController {
         return ResponseEntity.ok(respuesta);
     }
 
-    // Listar todos los favoritos
     @GetMapping
+    @Operation(summary = "Listar todos los favoritos", description = "Obtiene una lista de todos los favoritos registrados.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de favoritos obtenida exitosamente")
+    })
     public List<FavoritoDTO> listarFavoritos() {
         return favoritoService.listarFavoritos();
     }
 
-    // Obtener un favorito por cliente ID e inmueble ID
     @GetMapping("/{clienteId}/{inmuebleId}")
+    @Operation(summary = "Obtener un favorito", description = "Obtiene un favorito específico por cliente ID e inmueble ID.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Favorito encontrado"),
+        @ApiResponse(responseCode = "404", description = "Favorito no encontrado")
+    })
     public ResponseEntity<FavoritoDTO> obtenerFavorito(@PathVariable Integer clienteId, 
                                                        @PathVariable Integer inmuebleId) {
         return favoritoService.obtenerFavorito(clienteId, inmuebleId)
@@ -58,8 +69,13 @@ public class FavoritoController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    // Eliminar un favorito por cliente ID e inmueble ID
     @DeleteMapping("/eliminar/{clienteId}/{inmuebleId}")
+    @Operation(summary = "Eliminar un favorito", description = "Elimina un favorito específico por cliente ID e inmueble ID.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Favorito eliminado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Favorito no encontrado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado: Solo el cliente que agregó el favorito puede eliminarlo")
+    })
     public ResponseEntity<Void> eliminarFavorito(@PathVariable Integer clienteId, @PathVariable Integer inmuebleId) {
         favoritoService.eliminarFavorito(clienteId, inmuebleId);
         return ResponseEntity.noContent().build();

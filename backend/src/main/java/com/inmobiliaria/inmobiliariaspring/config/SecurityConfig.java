@@ -46,6 +46,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> {
+                auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
                 auth.requestMatchers("/api/clientes/registrar","/authenticate").permitAll()
                     .requestMatchers("/api/clientes/me").hasAnyRole("CLIENTE", "MASTER") // Solo CLIENTE puede acceder a /me
                     .requestMatchers("/api/roles/**", "/api/administradores/**").hasRole("MASTER")

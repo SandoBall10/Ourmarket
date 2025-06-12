@@ -8,14 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.inmobiliaria.inmobiliariaspring.dto.ActualizarMensajeDTO;
 import com.inmobiliaria.inmobiliariaspring.dto.MensajeDTO;
@@ -26,9 +19,14 @@ import com.inmobiliaria.inmobiliariaspring.model.Mensaje.TipoMensaje;
 import com.inmobiliaria.inmobiliariaspring.repository.ClienteRepository;
 import com.inmobiliaria.inmobiliariaspring.service.MensajeService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 @RestController
 @RequestMapping("/api/mensajes")
 public class MensajeController {
+
     @Autowired
     private MensajeService mensajeService;
 
@@ -37,6 +35,12 @@ public class MensajeController {
 
     // Crear mensaje (solo CLIENTE)
     @PostMapping("/crear")
+    @Operation(summary = "Crear mensaje", description = "Crea un nuevo mensaje asociado a un inmueble. Solo clientes pueden realizar esta acción.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Mensaje creado exitosamente"),
+        @ApiResponse(responseCode = "403", description = "Solo clientes pueden crear mensajes"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    })
     public ResponseEntity<MensajeDTO> crearMensaje(@RequestBody Map<String, Object> payload, Authentication authentication) {
         String username = authentication.getName();
         boolean esAdmin = authentication.getAuthorities().stream()
@@ -72,6 +76,11 @@ public class MensajeController {
 
     // Listar mensajes de un inmueble
     @GetMapping("/inmueble/{idInmueble}")
+    @Operation(summary = "Listar mensajes de un inmueble", description = "Obtiene todos los mensajes asociados a un inmueble. Los administradores/master ven todos los mensajes, mientras que los clientes solo ven los suyos.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Mensajes obtenidos exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Inmueble no encontrado")
+    })
     public ResponseEntity<List<MensajeDTO>> listarMensajesPorInmueble(
             @PathVariable Integer idInmueble,
             Authentication authentication) {
@@ -98,6 +107,12 @@ public class MensajeController {
 
     // Obtener mensaje por ID
     @GetMapping("/{id}")
+    @Operation(summary = "Obtener mensaje por ID", description = "Obtiene un mensaje específico por su ID. Los administradores/master tienen acceso completo, mientras que los clientes solo pueden acceder si son remitentes o dueños del inmueble.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Mensaje obtenido exitosamente"),
+        @ApiResponse(responseCode = "403", description = "No tienes permiso para acceder a este mensaje"),
+        @ApiResponse(responseCode = "404", description = "Mensaje no encontrado")
+    })
     public ResponseEntity<MensajeDTO> obtenerMensajePorId(@PathVariable Integer id, Authentication authentication) {
         String username = authentication.getName();
         boolean esAdmin = authentication.getAuthorities().stream()
@@ -124,6 +139,13 @@ public class MensajeController {
 
     // Actualizar mensaje
     @PutMapping("/actualizar/{id}")
+    @Operation(summary = "Actualizar mensaje", description = "Actualiza el contenido y tipo de un mensaje. Solo el remitente o un administrador/master puede realizar esta acción.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Mensaje actualizado exitosamente"),
+        @ApiResponse(responseCode = "403", description = "No tienes permiso para actualizar este mensaje"),
+        @ApiResponse(responseCode = "404", description = "Mensaje no encontrado"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    })
     public ResponseEntity<MensajeDTO> actualizarMensaje(@PathVariable Integer id, @RequestBody ActualizarMensajeDTO dto, Authentication authentication) {
         System.out.println("DTO recibido: contenido=" + dto.getContenido() + ", tipoMensaje=" + dto.getTipoMensaje());
         String username = authentication.getName();
@@ -156,6 +178,12 @@ public class MensajeController {
 
     // Eliminar mensaje
     @DeleteMapping("/eliminar/{id}")
+    @Operation(summary = "Eliminar mensaje", description = "Elimina un mensaje específico. Solo el remitente o un administrador/master puede realizar esta acción.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Mensaje eliminado exitosamente"),
+        @ApiResponse(responseCode = "403", description = "No tienes permiso para eliminar este mensaje"),
+        @ApiResponse(responseCode = "404", description = "Mensaje no encontrado")
+    })
     public ResponseEntity<Void> eliminarMensaje(@PathVariable Integer id, Authentication authentication) {
         String username = authentication.getName();
         boolean esAdmin = authentication.getAuthorities().stream()

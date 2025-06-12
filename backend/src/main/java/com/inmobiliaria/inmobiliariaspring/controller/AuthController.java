@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.inmobiliaria.inmobiliariaspring.dto.AuthRequest;
 import com.inmobiliaria.inmobiliariaspring.util.JwtUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -35,6 +38,12 @@ public class AuthController {
     private UserDetailsService userDetailsService;
 
     @PostMapping("/authenticate")
+    @Operation(summary = "Autenticar usuario", description = "Genera un token JWT para el usuario autenticado.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Autenticación exitosa"),
+        @ApiResponse(responseCode = "401", description = "Credenciales inválidas"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     public ResponseEntity<?> createAuthenticationToken(
             @RequestBody AuthRequest authRequest,
             //@RequestParam String usernameOrEmail,

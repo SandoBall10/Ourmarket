@@ -19,6 +19,10 @@ import com.inmobiliaria.inmobiliariaspring.mappers.InmuebleMapper;
 import com.inmobiliaria.inmobiliariaspring.model.Inmueble;
 import com.inmobiliaria.inmobiliariaspring.service.InmuebleService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 @RestController
 @RequestMapping("/api/inmuebles")
 public class InmuebleController {
@@ -26,15 +30,22 @@ public class InmuebleController {
     @Autowired
     private InmuebleService inmuebleService;
 
-    // Crear inmueble (asocia al usuario autenticado)
     @PostMapping("/crear")
+    @Operation(summary = "Crear un inmueble", description = "Crea un nuevo inmueble asociado al usuario autenticado.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Inmueble creado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    })
     public ResponseEntity<InmuebleDTO> crearInmueble(@RequestBody Inmueble inmueble, Authentication authentication) {
         Inmueble nuevoInmueble = inmuebleService.crearInmueble(inmueble, authentication.getName());
         return ResponseEntity.ok(InmuebleMapper.toDTO(nuevoInmueble));
     }
 
-    // Listar todos los inmuebles
     @GetMapping
+    @Operation(summary = "Listar todos los inmuebles", description = "Obtiene una lista de todos los inmuebles registrados.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de inmuebles obtenida exitosamente")
+    })
     public List<InmuebleDTO> listarInmuebles() {
         return inmuebleService.listarInmuebles()
                 .stream()
@@ -42,8 +53,12 @@ public class InmuebleController {
                 .collect(Collectors.toList());
     }
 
-    // Obtener inmueble por ID
     @GetMapping("/{id}")
+    @Operation(summary = "Obtener inmueble por ID", description = "Obtiene los datos de un inmueble específico por su ID.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Inmueble encontrado"),
+        @ApiResponse(responseCode = "404", description = "Inmueble no encontrado")
+    })
     public ResponseEntity<InmuebleDTO> obtenerInmueblePorId(@PathVariable Integer id) {
         return inmuebleService.obtenerInmueblePorId(id)
                 .map(InmuebleMapper::toDTO)
@@ -51,8 +66,13 @@ public class InmuebleController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Actualizar inmueble (solo dueño o admin/master)
     @PutMapping("/actualizar/{id}")
+    @Operation(summary = "Actualizar inmueble", description = "Actualiza los datos de un inmueble específico. Solo el dueño o un administrador/master puede realizar esta acción.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Inmueble actualizado exitosamente"),
+        @ApiResponse(responseCode = "403", description = "No tienes permiso para actualizar este inmueble"),
+        @ApiResponse(responseCode = "404", description = "Inmueble no encontrado")
+    })
     public ResponseEntity<InmuebleDTO> actualizarInmueble(@PathVariable Integer id, @RequestBody Inmueble inmuebleActualizado, Authentication authentication) {
         String emailUsuario = authentication.getName();
         boolean esAdmin = authentication.getAuthorities().stream()
@@ -69,8 +89,13 @@ public class InmuebleController {
         return ResponseEntity.ok(InmuebleMapper.toDTO(actualizado));
     }
 
-    // Eliminar inmueble (solo dueño o admin/master)
     @DeleteMapping("/eliminar/{id}")
+    @Operation(summary = "Eliminar inmueble", description = "Elimina un inmueble específico. Solo el dueño o un administrador/master puede realizar esta acción.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Inmueble eliminado exitosamente"),
+        @ApiResponse(responseCode = "403", description = "No tienes permiso para eliminar este inmueble"),
+        @ApiResponse(responseCode = "404", description = "Inmueble no encontrado")
+    })
     public ResponseEntity<?> eliminarInmueble(@PathVariable Integer id, Authentication authentication) {
         String emailUsuario = authentication.getName();
         boolean esAdmin = authentication.getAuthorities().stream()
@@ -88,6 +113,13 @@ public class InmuebleController {
     }
 
     @PostMapping("/{id}/imagenes")
+    @Operation(summary = "Subir imágenes a un inmueble", description = "Sube imágenes a un inmueble específico. Solo el dueño o un administrador/master puede realizar esta acción.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Imágenes subidas exitosamente"),
+        @ApiResponse(responseCode = "403", description = "No tienes permiso para modificar este inmueble"),
+        @ApiResponse(responseCode = "404", description = "Inmueble no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error al subir imágenes")
+    })
     public ResponseEntity<?> subirImagenes(
             @PathVariable Integer id,
             @RequestParam("imagenes") List<MultipartFile> imagenes,
@@ -132,8 +164,13 @@ public class InmuebleController {
         }
     }
 
-    // Marcar un inmueble como vendido (solo admin/master)
     @PutMapping("/marcar-como-vendido/{id}")
+    @Operation(summary = "Marcar inmueble como vendido", description = "Marca un inmueble como vendido. Solo un administrador/master puede realizar esta acción.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Inmueble marcado como vendido exitosamente"),
+        @ApiResponse(responseCode = "403", description = "No tienes permiso para realizar esta acción"),
+        @ApiResponse(responseCode = "400", description = "Error al marcar como vendido")
+    })
     public ResponseEntity<InmuebleDTO> marcarComoVendido(@PathVariable Integer id, Authentication authentication) {
         boolean esAdmin = authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
