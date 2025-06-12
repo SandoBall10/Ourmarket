@@ -1,5 +1,7 @@
 package com.inmobiliaria.inmobiliariaspring.service;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,9 +41,15 @@ public class ClienteService {
     public Cliente crearCliente(Cliente cliente) {
         // Validar formato de email
         validarEmail(cliente.getEmail());
-        
+
         // Validar teléfono
         validarTelefono(cliente.getTelefono());
+
+        // Validar género
+        validarGenero(cliente.getGenero());
+
+        // Validar fecha de nacimiento (mínimo 18 años)
+        validarFechaNacimiento(cliente.getFechaNacimiento());
 
         // Validar número de documento según tipo
         validarNumeroDocumento(cliente.getTipoDocumento(), cliente.getNumeroDocumento());
@@ -64,8 +72,10 @@ public class ClienteService {
         Cliente nuevoCliente = ClienteFactory.crearCliente(
             cliente.getNombreCompleto(),
             cliente.getEmail(),
-            contraseñaEncriptada, // usamos la contraseña encriptada
+            contraseñaEncriptada,
             cliente.getTelefono(),
+            cliente.getGenero(),
+            cliente.getFechaNacimiento(),
             cliente.getTipoDocumento(),
             cliente.getNumeroDocumento(),
             rolCliente
@@ -135,7 +145,17 @@ public class ClienteService {
             // Si la contraseña fue modificada, encriptarla antes de actualizarla
             if (clienteActualizado.getContrasena() != null && !clienteActualizado.getContrasena().isEmpty()) {
             cliente.setContrasena(passwordEncoder.encode(clienteActualizado.getContrasena()));
-}
+            }
+
+            // Actualizar género y fecha de nacimiento
+            if (clienteActualizado.getGenero() != null) {
+                validarGenero(clienteActualizado.getGenero());
+                cliente.setGenero(clienteActualizado.getGenero());
+            }
+            if (clienteActualizado.getFechaNacimiento() != null) {
+                validarFechaNacimiento(clienteActualizado.getFechaNacimiento());
+                cliente.setFechaNacimiento(clienteActualizado.getFechaNacimiento());
+            }
 
             return clienteRepository.save(cliente);
         } else {
@@ -152,15 +172,34 @@ public class ClienteService {
     Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
     if (clienteOpt.isPresent()) {
         Cliente cliente = clienteOpt.get();
-        // Solo permite actualizar nombre y teléfono (no email ni rol)
+        // Actualizar nombre
         if (clienteActualizado.getNombreCompleto() != null) {
             cliente.setNombreCompleto(clienteActualizado.getNombreCompleto());
         }
+        // Actualizar teléfono
         if (clienteActualizado.getTelefono() != null) {
             validarTelefono(clienteActualizado.getTelefono());
             cliente.setTelefono(clienteActualizado.getTelefono());
         }
-        // Si quieres permitir cambiar contraseña, agrega aquí la lógica
+        // Actualizar contraseña
+        if (clienteActualizado.getContrasena() != null && !clienteActualizado.getContrasena().isEmpty()) {
+            validarFuerzaContrasena(clienteActualizado.getContrasena());
+            cliente.setContrasena(passwordEncoder.encode(clienteActualizado.getContrasena()));
+        }
+        // Actualizar email
+        if (clienteActualizado.getEmail() != null && !clienteActualizado.getEmail().equals(cliente.getEmail())) {
+            validarEmail(clienteActualizado.getEmail());
+            if (clienteRepository.findByEmail(clienteActualizado.getEmail()).isPresent()) {
+                throw new RuntimeException("Este Email ya esta en uso");
+            }
+            cliente.setEmail(clienteActualizado.getEmail());
+        }
+        // Actualizar género
+        if (clienteActualizado.getGenero() != null) {
+            validarGenero(clienteActualizado.getGenero());
+            cliente.setGenero(clienteActualizado.getGenero());
+        }
+        // El cliente no puede cambiar su fecha de nacimiento ni su tipo de documento
         return clienteRepository.save(cliente);
     }
     return null;
@@ -168,7 +207,6 @@ public class ClienteService {
     
 
     // MÉTODOS DE VALIDACIÓN PARA TELEFONO Y TIPO DE DOCUMENTO, EMAIL Y FUERZA CONTRASENA
-
     // Validar teléfono (local o internacional)
     private void validarTelefono(String telefono) {
         if (telefono == null || !telefono.matches("^\\+?[0-9\\- ]{7,15}$")) {
@@ -201,6 +239,27 @@ public class ClienteService {
             if (numeroDocumento == null || !numeroDocumento.matches("^[A-Za-z0-9]{9,12}$")) {
                 throw new RuntimeException("El Carnet de Extranjería debe tener entre 9 y 12 caracteres alfanuméricos.");
             }
+        }
+    }
+
+    // Validar género (solo acepta los valores permitidos)
+    private void validarGenero(String genero) {
+        if (genero == null ||
+            !(genero.equalsIgnoreCase("Masculino") ||
+              genero.equalsIgnoreCase("Femenino") ||
+              genero.equalsIgnoreCase("Prefiero no decirlo"))) {
+            throw new RuntimeException("El género debe ser 'Masculino', 'Femenino' o 'Prefiero no decirlo'.");
+        }
+    }
+
+    // Validar fecha de nacimiento (mínimo 18 años)
+    private void validarFechaNacimiento(LocalDate fechaNacimiento) {
+        if (fechaNacimiento == null) {
+            throw new RuntimeException("La fecha de nacimiento es obligatoria.");
+        }
+        int edad = Period.between(fechaNacimiento, LocalDate.now()).getYears();
+        if (edad < 18) {
+            throw new RuntimeException("No puedes registrarte: debes tener al menos 18 años.");
         }
     }
     

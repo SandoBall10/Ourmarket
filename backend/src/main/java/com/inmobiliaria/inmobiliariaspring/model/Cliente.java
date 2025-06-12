@@ -1,5 +1,6 @@
 package com.inmobiliaria.inmobiliariaspring.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,6 +37,12 @@ public class Cliente {
     @Column(name = "telefono", length = 15, nullable = false)
     private String telefono;
 
+    @Column(name = "genero", length = 20)
+    private String genero;
+
+    @Column(name = "fecha_nacimiento", nullable = false)
+    private LocalDate fechaNacimiento;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_documento", nullable = false, length = 20)  // Cambiado a tipo de documento (DNI o Carnet de Extranjería)
     private TipoDocumento tipoDocumento;  // 'DNI' o 'Carnet de Extranjería'
@@ -67,13 +74,15 @@ public class Cliente {
     } 
     
     // Constructor personalizado para usar en Factory
-    public Cliente(String nombreCompleto, String email, String contrasena, String telefono, TipoDocumento tipoDocumento, String numeroDocumento, Rol rol, LocalDateTime fechaRegistro) {
+    public Cliente(String nombreCompleto, String email, String contrasena, String telefono, String genero, LocalDate fechaNacimiento, TipoDocumento tipoDocumento, String numeroDocumento, Rol rol, LocalDateTime fechaRegistro) {
         this.nombreCompleto = nombreCompleto;
         this.email = email;
         this.contrasena = contrasena;
         this.telefono = telefono;
-        this.tipoDocumento = tipoDocumento;  // 'DNI' o 'Carnet de Extranjería'
-        this.numeroDocumento = numeroDocumento;  // Número de documento (DNI o Carnet de Extranjería)
+        this.genero = genero;
+        this.fechaNacimiento = fechaNacimiento;
+        this.tipoDocumento = tipoDocumento;
+        this.numeroDocumento = numeroDocumento;
         this.rol = rol;
         this.fechaRegistro = fechaRegistro;
     }
@@ -117,6 +126,22 @@ public class Cliente {
     
     public void setTelefono(String telefono) {
         this.telefono = telefono;
+    }
+
+    public String getGenero() {
+    return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
+    public LocalDate getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
     }
 
     public TipoDocumento getTipoDocumento() {

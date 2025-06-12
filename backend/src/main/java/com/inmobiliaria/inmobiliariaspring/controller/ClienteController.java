@@ -65,7 +65,7 @@ public class ClienteController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Actualizar cliente (ADMIN/MASTER) 
+    // Actualizar cliente (ADMIN/MASTER)
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<ClienteDTO> actualizarCliente(@PathVariable Integer id, @RequestBody Cliente clienteActualizado) {
         Cliente actualizado = clienteService.actualizarCliente(id, clienteActualizado);
