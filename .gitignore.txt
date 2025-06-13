@@ -1,0 +1,9 @@
+# Node (React)
+frontend/node_modules/
+frontend/.env
+
+# VSCode settings
+.vscode/
+
+# Sistema
+.DS_Store
