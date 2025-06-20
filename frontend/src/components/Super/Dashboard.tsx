@@ -160,9 +160,7 @@ const Dashboard: React.FC = () => {
                     <table className="table table-hover">
                       <thead>
                         <tr>
-                          <th>Nombre</th>
-                          <th>Email</th>
-                          <th>Teléfono</th>
+                          <th>Nombre de Usuario</th>
                           <th>Fecha Registro</th>
                           <th>Acciones</th>
                         </tr>
@@ -172,8 +170,6 @@ const Dashboard: React.FC = () => {
                           administradores.map((admin) => (
                             <tr key={admin.id || admin.idAdministrador}>
                               <td>{admin.nombreCompleto || admin.username}</td>
-                              <td>{admin.email}</td>
-                              <td>{admin.telefono || 'N/A'}</td>
                               <td>{admin.fechaRegistro ? new Date(admin.fechaRegistro).toLocaleDateString() : 'N/A'}</td>
                               <td>
                                 <button className="btn btn-sm btn-outline-primary me-2">
