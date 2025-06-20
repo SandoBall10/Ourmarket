@@ -161,7 +161,7 @@ const Dashboard: React.FC = () => {
                       <thead>
                         <tr>
                           <th>Nombre de Usuario</th>
-                          <th>Fecha Registro</th>
+                          <th>Fecha de Creación</th>
                           <th>Acciones</th>
                         </tr>
                       </thead>
@@ -170,7 +170,17 @@ const Dashboard: React.FC = () => {
                           administradores.map((admin) => (
                             <tr key={admin.id || admin.idAdministrador}>
                               <td>{admin.nombreCompleto || admin.username}</td>
-                              <td>{admin.fechaRegistro ? new Date(admin.fechaRegistro).toLocaleDateString() : 'N/A'}</td>
+                              <td>
+                                {admin.fechaCreacion || admin.fecha_creacion 
+                                  ? new Date(admin.fechaCreacion || admin.fecha_creacion).toLocaleDateString('es-ES', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    }) 
+                                  : 'N/A'}
+                              </td>
                               <td>
                                 <button className="btn btn-sm btn-outline-primary me-2">
                                   <i className="bi bi-pencil"></i>
@@ -188,7 +198,7 @@ const Dashboard: React.FC = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={5} className="text-center">No hay administradores registrados</td>
+                            <td colSpan={3} className="text-center">No hay administradores registrados</td>
                           </tr>
                         )}
                       </tbody>
