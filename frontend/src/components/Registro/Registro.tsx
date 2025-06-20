@@ -101,18 +101,22 @@ const Registro: React.FC = () => {
   // Función para validar el número de documento según su tipo
   const validateDocumentNumber = (documentType: string, documentNumber: string) => {
     if (!documentNumber.trim()) return 'Completa este campo';
-    const cleanNumber = documentNumber.replace(/\D/g, '');
+    
     if (documentType === 'DNI') {
+      const cleanNumber = documentNumber.replace(/\D/g, '');
       if (cleanNumber.length !== 8) {
         return 'El DNI debe tener exactamente 8 dígitos';
       }
     } else if (documentType === 'CARNET_EXTRANJERIA') {
-      if (cleanNumber.length < 8 || cleanNumber.length > 12) {
-        return 'El Carnet de Extranjería debe tener entre 8 y 12 dígitos';
+      if (documentNumber.length < 9 || documentNumber.length > 12) {
+        return 'El Carnet de Extranjería debe tener entre 9 y 12 caracteres';
+      }
+      if (!/^[A-Za-z0-9]{9,12}$/.test(documentNumber)) {
+        return 'El Carnet de Extranjería debe tener caracteres alfanuméricos válidos';
       }
     }
     
-    return ''; // Documento válido
+    return ''; 
   };
 
   // Función para calcular la edad a partir de una fecha de nacimiento
@@ -122,8 +126,6 @@ const Registro: React.FC = () => {
     
     let age = today.getFullYear() - birthDateObj.getFullYear();
     const monthDiff = today.getMonth() - birthDateObj.getMonth();
-    
-    // Si aún no ha cumplido años este año, restar un año
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDateObj.getDate())) {
       age--;
     }
@@ -245,13 +247,11 @@ const Registro: React.FC = () => {
         email: email,
         contrasena: password,
         telefono: phone,
-        tipoDocumento: documentType,
+        tipoDocumento: documentType, // Envía el valor directamente, que ya debe ser "DNI" o "CARNET_EXTRANJERIA"
         numeroDocumento: documentNumber,
         fechaNacimiento: fechaFormateada,
         genero: genero,
-        // Cambiado a id_rol 3 para coincidir con la tabla
         id_rol: 3,
-        // Añadir fecha de registro actual
         fechaRegistro: new Date().toISOString()
       };
 
@@ -477,7 +477,7 @@ const Registro: React.FC = () => {
                   onChange={(e) => setDocumentType(e.target.value)}
                 >
                   <option value="DNI">DNI</option>
-                  <option value="Carnet de Extrangeria">Carnet de Extranjería</option>
+                  <option value="CARNET_EXTRANJERIA">Carnet de Extranjería</option>
                 </select>
               </div>
             </div>
