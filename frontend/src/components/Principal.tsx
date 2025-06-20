@@ -12,6 +12,7 @@ const Principal: React.FC = () => {
   // Add user state
   const [user, setUser] = useState<{ name: string, username: string } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null); // State to store user role
 
   // Check if user is logged in on component mount
   useEffect(() => {
@@ -22,6 +23,11 @@ const Principal: React.FC = () => {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setIsLoggedIn(true);
+        
+        // Extraer el rol del usuario
+        if (parsedUser.rol) {
+          setUserRole(parsedUser.rol);
+        }
       } catch (error) {
         console.error('Error parsing stored user:', error);
       }
@@ -227,6 +233,18 @@ const Principal: React.FC = () => {
                     <span>Mis chats</span>
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
+
+                  {/* Dashboard Admin (solo visible para ADMIN y MASTER) */}
+                  {(userRole === 'ROLE_ADMIN' || userRole === 'ROLE_MASTER') && (
+                    <>
+                      <NavDropdown.Item as={Link} to="/Dashboard" className="dropdown-item-custom">
+                        <div className="icon-wrapper"><i className="fas fa-tachometer-alt"></i></div>
+                        <span>Dashboard Admin</span>
+                      </NavDropdown.Item>
+                      <NavDropdown.Divider />
+                    </>
+                  )}
+
                   <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-user"></i></div>
                     <span>Mi cuenta</span>

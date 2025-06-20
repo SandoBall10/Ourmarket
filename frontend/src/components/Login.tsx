@@ -34,7 +34,12 @@ const Login: React.FC = () => {
         rol: data.rol,
       }));
 
-      navigate('/'); // Redirige al componente principal
+      // Redirección según el rol del usuario
+      if (data.rol === 'ROLE_MASTER' || data.rol === 'ROLE_ADMIN') {
+        navigate('/dashboard'); // Ambos van al mismo dashboard
+      } else {
+        navigate('/'); // Sólo para clientes normales
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
     } finally {

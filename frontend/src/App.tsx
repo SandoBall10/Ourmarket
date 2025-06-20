@@ -14,6 +14,7 @@ import Buscar from './components/Operaciones/Buscar';
 import Chats from './components/Chats/Chats';
 import Vender from './components/Operaciones/Vender';
 import Favoritos from './components/Opciones/Favoritos';
+import Dashboard from './components/Super/Dashboard';
 
 // Importación de AOS para animaciones
 import AOS from 'aos';
@@ -43,6 +44,7 @@ const App: React.FC = () => {
       <Route path="/chats" element={<Chats />} />
       <Route path="/vender" element={<Vender />} />
       <Route path="/favoritos" element={<Favoritos />} />
+      <Route path="/dashboard" element={<Dashboard />} />
     </Routes>
   );
 };
