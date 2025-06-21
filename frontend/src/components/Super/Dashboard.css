@@ -274,3 +274,53 @@
   width: 45px;
   justify-content: center;
 }
+/* Estilos para el modal de administrador */
+.modal-title i {
+  vertical-align: middle;
+}
+
+.input-group .input-group-text {
+  width: 40px;
+  justify-content: center;
+}
+
+/* Animación para el modal */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+  transform: none;
+}
+
+.modal-backdrop {
+  opacity: 0.5;
+}
+
+/* Estilos para los botones */
+.btn-success {
+  background-color: #1c6758;
+  border-color: #1c6758;
+  transition: all 0.3s;
+}
+
+.btn-success:hover {
+  background-color: #15574a;
+  border-color: #15574a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-success:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-outline-secondary {
+  transition: all 0.3s;
+}
+
+.btn-outline-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}

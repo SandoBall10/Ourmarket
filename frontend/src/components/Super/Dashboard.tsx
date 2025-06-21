@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Navbar, Container, Nav, NavDropdown, Button } from 'react-bootstrap';
+import { Navbar, Container, Nav, NavDropdown, Button, Modal, Form } from 'react-bootstrap';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
@@ -19,6 +19,14 @@ const Dashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState('perfil');
   const [isLoggedIn, setIsLoggedIn] = useState(true); // Siempre true en el dashboard
   const [user, setUser] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [newAdmin, setNewAdmin] = useState({
+    username: '',
+    contrasena: '',
+    rolId: 2 // Por defecto, rol de administrador normal (ID 2)
+  });
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   // Verificar permisos y obtener el rol y datos del usuario
@@ -121,6 +129,107 @@ const Dashboard: React.FC = () => {
     navigate('/login');
   };
 
+  // Funciones para el modal de creación de administrador
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setNewAdmin({ username: '', contrasena: '', rolId: 2 });
+    setSubmitError(null);
+  };
+
+  const handleShowModal = () => {
+    setShowModal(true);
+    setSubmitError(null);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewAdmin({
+      ...newAdmin,
+      [name]: value
+    });
+  };
+
+  const handleRolChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setNewAdmin({
+      ...newAdmin,
+      rolId: parseInt(e.target.value)
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validaciones básicas
+    if (!newAdmin.username || !newAdmin.contrasena) {
+      setSubmitError("Por favor complete todos los campos.");
+      return;
+    }
+
+    if (newAdmin.contrasena.length < 6) {
+      setSubmitError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Crear el administrador con el rol seleccionado
+      const adminData = {
+        username: newAdmin.username,
+        contrasena: newAdmin.contrasena,
+        rol: {
+          idRol: newAdmin.rolId
+        }
+      };
+
+      const response = await fetch('http://localhost:8080/api/administradores', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify(adminData)
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('No tienes permisos para crear administradores.');
+        } else {
+          const errorData = await response.text();
+          throw new Error(errorData || `Error ${response.status}: No se pudo crear el administrador.`);
+        }
+      }
+
+      // Éxito: cerrar modal y refrescar lista de administradores
+      handleCloseModal();
+      
+      // Refrescar la lista de administradores
+      if (activeSection === 'administradores') {
+        const updatedResponse = await fetch('http://localhost:8080/api/administradores', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (updatedResponse.ok) {
+          const data = await updatedResponse.json();
+          setAdministradores(data);
+        }
+      }
+
+      alert('Administrador creado correctamente');
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Error al crear el administrador');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Renderiza la sección correspondiente según activeSection
   const renderContent = () => {
     switch (activeSection) {
@@ -138,7 +247,7 @@ const Dashboard: React.FC = () => {
                 {userRole === 'ROLE_MASTER' && (
                   <button 
                     className="btn btn-success" 
-                    onClick={() => navigate('/dashboard/crear-administrador')}
+                    onClick={handleShowModal} // Cambiado para mostrar el modal
                   >
                     <i className="bi bi-person-plus-fill me-2"></i>
                     Crear Nuevo Administrador
@@ -469,6 +578,104 @@ const Dashboard: React.FC = () => {
           {renderContent()}
         </div>
       </div>
+
+      {/* Modal para crear nuevo administrador */}
+      <Modal show={showModal} onHide={handleCloseModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi bi-person-plus-fill me-2 text-success"></i>
+            Crear Nuevo Administrador
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {submitError && (
+            <div className="alert alert-danger">{submitError}</div>
+          )}
+          
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>Nombre de Usuario</Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-success text-white">
+                  <i className="bi bi-person"></i>
+                </span>
+                <Form.Control
+                  type="text"
+                  name="username"
+                  value={newAdmin.username}
+                  onChange={handleInputChange}
+                  placeholder="Nombre de usuario"
+                  required
+                />
+              </div>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Contraseña</Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-success text-white">
+                  <i className="bi bi-lock"></i>
+                </span>
+                <Form.Control
+                  type="password"
+                  name="contrasena"
+                  value={newAdmin.contrasena}
+                  onChange={handleInputChange}
+                  placeholder="Contraseña"
+                  required
+                />
+              </div>
+              <Form.Text className="text-muted">
+                La contraseña debe tener al menos 6 caracteres.
+              </Form.Text>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Rol</Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-success text-white">
+                  <i className="bi bi-shield"></i>
+                </span>
+                <Form.Select 
+                  value={newAdmin.rolId} 
+                  onChange={handleRolChange}
+                >
+                  <option value={2}>Administrador</option>
+                  <option value={1}>Master (Super Admin)</option>
+                </Form.Select>
+              </div>
+              <Form.Text className="text-muted">
+                El rol determina los permisos del usuario en el sistema.
+              </Form.Text>
+            </Form.Group>
+
+            <div className="d-flex justify-content-end mt-4">
+              <Button 
+                variant="outline-secondary" 
+                onClick={handleCloseModal}
+                className="me-2"
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                variant="success" 
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Creando...
+                  </>
+                ) : (
+                  'Crear Administrador'
+                )}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
