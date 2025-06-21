@@ -27,6 +27,16 @@ const Dashboard: React.FC = () => {
   });
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editAdmin, setEditAdmin] = useState({
+    id: 0,
+    username: '',
+    contrasena: '',
+    rolId: 2
+  });
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [adminToDelete, setAdminToDelete] = useState<number | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   // Verificar permisos y obtener el rol y datos del usuario
@@ -230,6 +240,213 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Abrir el modal de edición con los datos del administrador seleccionado
+  const handleShowEditModal = (admin: any) => {
+    console.log("Datos completos del admin:", admin); // Para depuración
+    
+    // Extrae correctamente el ID observando todas las propiedades
+    let adminId = null;
+    if (admin.id_admin) adminId = admin.id_admin; 
+    else if (admin.idAdmin) adminId = admin.idAdmin;
+    else if (admin.id) adminId = admin.id;
+    else if (admin.idAdministrador) adminId = admin.idAdministrador;
+    
+    if (!adminId) {
+      console.error("No se pudo identificar el ID del administrador", admin);
+      alert("Error: No se pudo identificar el ID del administrador");
+      return;
+    }
+    
+    setEditAdmin({
+      id: adminId,
+      username: admin.username || admin.nombreCompleto || "",
+      contrasena: "",  // Vacío por defecto
+      rolId: admin.rol?.idRol || 2
+    });
+    
+    console.log("Datos capturados para edición:", {
+      id: adminId,
+      username: admin.username || admin.nombreCompleto || "",
+      rolId: admin.rol?.idRol || 2
+    });
+    
+    setShowEditModal(true);
+  };
+
+  // Cerrar el modal de edición
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+  };
+
+  // Manejar cambios en los campos del formulario de edición
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditAdmin({
+      ...editAdmin,
+      [name]: value
+    });
+  };
+
+  // Manejar cambios en el selector de rol
+  const handleEditRolChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setEditAdmin({
+      ...editAdmin,
+      rolId: parseInt(e.target.value)
+    });
+  };
+
+  // Enviar los cambios al backend
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validar datos
+    if (!editAdmin.username) {
+      alert("El nombre de usuario es obligatorio");
+      return;
+    }
+    
+    // Si hay contraseña, validar longitud
+    if (editAdmin.contrasena && editAdmin.contrasena.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+    
+    // Validar que el ID exista
+    if (!editAdmin.id) {
+      alert("Error: No se pudo identificar el administrador a editar");
+      return;
+    }
+    
+    setIsEditing(true);
+    
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // *** AQUÍ ESTÁ EL CAMBIO IMPORTANTE ***
+      // Estructura correcta del payload según lo que espera el backend
+      const updateData: any = {
+        username: editAdmin.username,
+        rol: {
+          idRol: editAdmin.rolId
+        }
+      };
+      
+      // Solo incluir contraseña si se ha especificado
+      if (editAdmin.contrasena && editAdmin.contrasena.trim() !== '') {
+        updateData.contrasena = editAdmin.contrasena;
+      }
+      
+      console.log(`Enviando petición a: http://localhost:8080/api/administradores/${editAdmin.id}`);
+      console.log("Datos a enviar:", JSON.stringify(updateData)); // Para depuración
+      
+      const response = await fetch(`http://localhost:8080/api/administradores/${editAdmin.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify(updateData)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error completo:", errorText); // Para depuración
+        throw new Error(`Error al actualizar el administrador: ${response.status}`);
+      }
+      
+      // Actualizar la lista de administradores
+      const updatedResponse = await fetch('http://localhost:8080/api/administradores', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (updatedResponse.ok) {
+        const data = await updatedResponse.json();
+        setAdministradores(data);
+      }
+      
+      setShowEditModal(false);
+      alert('Administrador actualizado correctamente');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al actualizar el administrador');
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
+  // Funciones para manejar la confirmación de eliminación
+  const handleShowDeleteModal = (adminId: number) => {
+    setAdminToDelete(adminId);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteConfirmModal(false);
+    setAdminToDelete(null);
+  };
+
+  const confirmDeleteAdmin = async () => {
+    if (!adminToDelete) return;
+    
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      const response = await fetch(`http://localhost:8080/api/administradores/${adminToDelete}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al eliminar el administrador');
+      }
+      
+      // Actualizar la lista después de eliminar
+      setAdministradores(prevAdmins => prevAdmins.filter(admin => 
+        (admin.id !== adminToDelete && admin.idAdministrador !== adminToDelete)
+      ));
+      
+      setShowDeleteConfirmModal(false);
+      alert('Administrador eliminado correctamente');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al eliminar el administrador');
+    }
+  };
+
+  // Verificar permisos específicos para editar administradores
+  useEffect(() => {
+    const checkEditPermissions = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        // Intentar obtener opciones/permisos
+        const response = await fetch('http://localhost:8080/api/administradores/permisos', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          console.log("Permisos verificados correctamente");
+        } else {
+          console.error("No se tienen los permisos necesarios:", response.status);
+        }
+      } catch (error) {
+        console.error("Error verificando permisos:", error);
+      }
+    };
+    
+    if (userRole === 'ROLE_MASTER') {
+      checkEditPermissions();
+    }
+  }, [userRole]);
+
   // Renderiza la sección correspondiente según activeSection
   const renderContent = () => {
     switch (activeSection) {
@@ -271,15 +488,16 @@ const Dashboard: React.FC = () => {
                         <tr>
                           <th>Nombre de Usuario</th>
                           <th>Fecha de Creación</th>
+                          <th>Última Actualización</th>
                           <th>Acciones</th>
                         </tr>
                       </thead>
                       <tbody>
                         {administradores.length > 0 ? (
                           administradores.map((admin) => (
-                            <tr key={admin.id || admin.idAdministrador}>
-                              <td>{admin.nombreCompleto || admin.username}</td>
-                              <td>
+                            <tr key={admin.idAdmin || admin.id_admin || admin.id || admin.idAdministrador}>
+                              <td>{admin.username || admin.nombreCompleto}</td>
+                              <td className="date-column">
                                 {admin.fechaCreacion || admin.fecha_creacion 
                                   ? new Date(admin.fechaCreacion || admin.fecha_creacion).toLocaleDateString('es-ES', {
                                       day: '2-digit',
@@ -290,14 +508,28 @@ const Dashboard: React.FC = () => {
                                     }) 
                                   : 'N/A'}
                               </td>
+                              <td className="date-column">
+                                {admin.fechaActualizacion || admin.fecha_actualizacion 
+                                  ? new Date(admin.fechaActualizacion || admin.fecha_actualizacion).toLocaleDateString('es-ES', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    }) 
+                                  : 'N/A'}
+                              </td>
                               <td>
-                                <button className="btn btn-sm btn-outline-primary me-2">
+                                <button 
+                                  className="btn btn-sm btn-outline-primary me-2"
+                                  onClick={() => handleShowEditModal(admin)}
+                                >
                                   <i className="bi bi-pencil"></i>
                                 </button>
                                 {userRole === 'ROLE_MASTER' && (
                                   <button 
                                     className="btn btn-sm btn-outline-danger"
-                                    onClick={() => handleDeleteAdmin(admin.id || admin.idAdministrador)}
+                                    onClick={() => handleShowDeleteModal(admin.idAdmin || admin.id || admin.idAdministrador)}
                                   >
                                     <i className="bi bi-trash"></i>
                                   </button>
@@ -307,7 +539,7 @@ const Dashboard: React.FC = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={3} className="text-center">No hay administradores registrados</td>
+                            <td colSpan={4} className="text-center">No hay administradores registrados</td>
                           </tr>
                         )}
                       </tbody>
@@ -526,8 +758,7 @@ const Dashboard: React.FC = () => {
           </div>
           
           <ul className="sidebar-menu">
-            {/* Código existente del menú lateral... */}
-            
+           
             <li className={activeSection === 'dashboard' ? 'active' : ''} 
                 onClick={() => setActiveSection('dashboard')}>
               <a href="#dashboard">
@@ -675,6 +906,118 @@ const Dashboard: React.FC = () => {
             </div>
           </Form>
         </Modal.Body>
+      </Modal>
+
+      {/* Modal para editar administrador */}
+      <Modal show={showEditModal} onHide={handleCloseEditModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi bi-pencil-square me-2 text-primary"></i>
+            Editar Administrador
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleEditSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>Nombre de Usuario</Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-primary text-white">
+                  <i className="bi bi-person"></i>
+                </span>
+                <Form.Control
+                  type="text"
+                  name="username"
+                  value={editAdmin.username}
+                  onChange={handleEditInputChange}
+                  placeholder="Nombre de usuario"
+                  required
+                />
+              </div>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Contraseña</Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-primary text-white">
+                  <i className="bi bi-lock"></i>
+                </span>
+                <Form.Control
+                  type="password"
+                  name="contrasena"
+                  value={editAdmin.contrasena}
+                  onChange={handleEditInputChange}
+                  placeholder="Dejar en blanco para mantener la actual"
+                />
+              </div>
+              <Form.Text className="text-muted">
+                Si no desea cambiar la contraseña, deje este campo en blanco.
+              </Form.Text>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Rol</Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-primary text-white">
+                  <i className="bi bi-shield"></i>
+                </span>
+                <Form.Select 
+                  value={editAdmin.rolId} 
+                  onChange={handleEditRolChange}
+                >
+                  <option value={2}>Administrador</option>
+                  <option value={1}>Master (Super Admin)</option>
+                </Form.Select>
+              </div>
+            </Form.Group>
+
+            <div className="d-flex justify-content-end mt-4">
+              <Button 
+                variant="outline-secondary" 
+                onClick={handleCloseEditModal}
+                className="me-2"
+                disabled={isEditing}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                variant="primary" 
+                type="submit"
+                disabled={isEditing}
+              >
+                {isEditing ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Guardando...
+                  </>
+                ) : (
+                  'Guardar Cambios'
+                )}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Modal de confirmación para eliminar */}
+      <Modal show={showDeleteConfirmModal} onHide={handleCloseDeleteModal} centered>
+        <Modal.Header closeButton className="bg-danger text-white">
+          <Modal.Title>
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            Confirmar Eliminación
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-1">¿Está seguro que desea eliminar este administrador?</p>
+          <p className="text-danger mb-0"><strong>Esta acción no se puede deshacer.</strong></p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={handleCloseDeleteModal}>
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={confirmDeleteAdmin}>
+            Eliminar
+          </Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );
