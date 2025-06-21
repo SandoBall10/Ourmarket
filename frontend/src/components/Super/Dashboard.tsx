@@ -23,7 +23,7 @@ const Dashboard: React.FC = () => {
   const [newAdmin, setNewAdmin] = useState({
     username: '',
     contrasena: '',
-    rolId: 2 // Por defecto, rol de administrador normal (ID 2)
+    rolId: 2  // Siempre rol 2 (Administrador)
   });
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -167,6 +167,7 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  // Modifica la función handleSubmit para usar siempre rol 2
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -187,14 +188,16 @@ const Dashboard: React.FC = () => {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       
-      // Crear el administrador con el rol seleccionado
+      // Usar siempre el rol 2 (Administrador)
       const adminData = {
         username: newAdmin.username,
         contrasena: newAdmin.contrasena,
         rol: {
-          idRol: newAdmin.rolId
+          idRol: 2  // Siempre usar rol 2 (Administrador)
         }
       };
+
+      console.log("Datos completos a enviar:", JSON.stringify(adminData));
 
       const response = await fetch('http://localhost:8080/api/administradores', {
         method: 'POST',
@@ -381,7 +384,7 @@ const Dashboard: React.FC = () => {
     if (!adminToDelete) return;
     
     try {
-      setIsDeleting(true); // Agregar este estado para mostrar un indicador de carga
+      setIsDeleting(true);
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       
       console.log("Eliminando administrador con ID:", adminToDelete);
@@ -400,14 +403,10 @@ const Dashboard: React.FC = () => {
       
       // Actualizar el estado local primero (UI inmediata)
       setAdministradores(prevAdmins => {
-        console.log("Administradores antes de eliminar:", prevAdmins.length);
         const updatedAdmins = prevAdmins.filter(admin => {
           const adminId = admin.idAdmin || admin.id_admin || admin.id || admin.idAdministrador;
-          const shouldKeep = adminId !== adminToDelete;
-          console.log(`Admin ID: ${adminId}, eliminar: ${!shouldKeep}`);
-          return shouldKeep;
+          return adminId !== adminToDelete;
         });
-        console.log("Administradores después de eliminar:", updatedAdmins.length);
         return updatedAdmins;
       });
       
@@ -427,7 +426,6 @@ const Dashboard: React.FC = () => {
       
       setShowDeleteConfirmModal(false);
       setAdminToDelete(null);
-      alert('Administrador eliminado correctamente');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al eliminar el administrador');
     } finally {
@@ -646,48 +644,6 @@ const Dashboard: React.FC = () => {
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">
             <Nav className="me-auto">
-              {/* Menú Mis Publicaciones */}
-              <div className="nav-item mega-dropdown">
-                <Nav.Link
-                  as={Link}
-                  to="/publicaciones"
-                  className="nav-link-text"
-                  id="comprar-dropdown"
-                >
-                  Mis Publicaciones <i className="fas fa-chevron-down fa-xs"></i>
-                </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
-              </div>
-
-              {/* Menú Favoritos */}
-              <div className="nav-item mega-dropdown">
-                <Nav.Link
-                  as={Link}
-                  to="/mis-favoritos"
-                  className="nav-link-text active"
-                  id="favoritos-dropdown"
-                >
-                  Favoritos <i className="fas fa-chevron-down fa-xs"></i>
-                </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
-              </div>
-
-              {/* Menú Mis Chats */}
-              <div className="nav-item mega-dropdown">
-                <Nav.Link
-                  as={Link}
-                  to="/chats"
-                  className="nav-link-text"
-                  id="chats-dropdown"
-                >
-                  Mis Chats <i className="fas fa-chevron-down fa-xs"></i>
-                </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
-              </div>
-
               {/* Menú Historial*/}
               <div className="nav-item mega-dropdown">
                 <div className="mega-menu-wrapper">
@@ -879,22 +835,22 @@ const Dashboard: React.FC = () => {
               </Form.Text>
             </Form.Group>
 
+            {/* Reemplaza el selector de rol con un campo estático */}
             <Form.Group className="mb-3">
               <Form.Label>Rol</Form.Label>
               <div className="input-group">
                 <span className="input-group-text bg-success text-white">
                   <i className="bi bi-shield"></i>
                 </span>
-                <Form.Select 
-                  value={newAdmin.rolId} 
-                  onChange={handleRolChange}
-                >
-                  <option value={2}>Administrador</option>
-                  <option value={1}>Master (Super Admin)</option>
-                </Form.Select>
+                <Form.Control
+                  type="text"
+                  value="Administrador (Rol 2)"
+                  disabled
+                  className="bg-light"
+                />
               </div>
               <Form.Text className="text-muted">
-                El rol determina los permisos del usuario en el sistema.
+                Los nuevos usuarios se crean con rol de Administrador por defecto.
               </Form.Text>
             </Form.Group>
 
@@ -964,7 +920,7 @@ const Dashboard: React.FC = () => {
                   name="contrasena"
                   value={editAdmin.contrasena}
                   onChange={handleEditInputChange}
-                  placeholder="coloca tu misma contraseña si no deseas cambiarla"
+                  placeholder="Contraseña Actual o Nueva"
                 />
               </div>
             </Form.Group>
