@@ -37,6 +37,7 @@ const Dashboard: React.FC = () => {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [adminToDelete, setAdminToDelete] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false); // Nuevo estado para eliminar
   const navigate = useNavigate();
 
   // Verificar permisos y obtener el rol y datos del usuario
@@ -392,28 +393,57 @@ const Dashboard: React.FC = () => {
     if (!adminToDelete) return;
     
     try {
+      setIsDeleting(true); // Agregar este estado para mostrar un indicador de carga
       const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      console.log("Eliminando administrador con ID:", adminToDelete);
       
       const response = await fetch(`http://localhost:8080/api/administradores/${adminToDelete}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${user.token}`
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
         }
       });
       
       if (!response.ok) {
-        throw new Error('Error al eliminar el administrador');
+        throw new Error(`Error al eliminar: ${response.status}`);
       }
       
-      // Actualizar la lista después de eliminar
-      setAdministradores(prevAdmins => prevAdmins.filter(admin => 
-        (admin.id !== adminToDelete && admin.idAdministrador !== adminToDelete)
-      ));
+      // Actualizar el estado local primero (UI inmediata)
+      setAdministradores(prevAdmins => {
+        console.log("Administradores antes de eliminar:", prevAdmins.length);
+        const updatedAdmins = prevAdmins.filter(admin => {
+          const adminId = admin.idAdmin || admin.id_admin || admin.id || admin.idAdministrador;
+          const shouldKeep = adminId !== adminToDelete;
+          console.log(`Admin ID: ${adminId}, eliminar: ${!shouldKeep}`);
+          return shouldKeep;
+        });
+        console.log("Administradores después de eliminar:", updatedAdmins.length);
+        return updatedAdmins;
+      });
+      
+      // También recargar datos del backend para asegurar sincronización
+      const updatedResponse = await fetch('http://localhost:8080/api/administradores', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (updatedResponse.ok) {
+        const data = await updatedResponse.json();
+        setAdministradores(data);
+      }
       
       setShowDeleteConfirmModal(false);
+      setAdminToDelete(null);
       alert('Administrador eliminado correctamente');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al eliminar el administrador');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -946,7 +976,7 @@ const Dashboard: React.FC = () => {
                   name="contrasena"
                   value={editAdmin.contrasena}
                   onChange={handleEditInputChange}
-                  placeholder="Contraseña"
+                  placeholder="coloca tu misma contraseña si no deseas cambiarla"
                 />
               </div>
             </Form.Group>
@@ -1011,8 +1041,19 @@ const Dashboard: React.FC = () => {
           <Button variant="outline-secondary" onClick={handleCloseDeleteModal}>
             Cancelar
           </Button>
-          <Button variant="danger" onClick={confirmDeleteAdmin}>
-            Eliminar
+          <Button 
+            variant="danger" 
+            onClick={confirmDeleteAdmin}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Eliminando...
+              </>
+            ) : (
+              'Eliminar'
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
