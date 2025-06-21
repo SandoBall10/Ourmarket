@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Navbar, Container, Nav, NavDropdown, Button, Modal, Form } from 'react-bootstrap';
+import { Navbar, Container, Nav, NavDropdown, Button, Modal, Form, Dropdown } from 'react-bootstrap';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
@@ -630,12 +630,12 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-main-container">
-      {/* NAVBAR */}
-      <Navbar bg="white" expand="lg" className="w-100 border-bottom dashboard-navbar">
+{/* Barra de Navegación */}
+      <Navbar bg="white" expand="lg" className="w-100 border-bottom">
         <Container fluid className="px-4">
-          <Navbar.Brand as={Link} to="/">
+          <Navbar.Brand href="#">
             <img
-              src="/logo.png"
+              src="/logo.png" // Actualizar con la ruta correcta de tu logo
               alt="InmoMarket"
               height="30"
               className="d-inline-block align-top"
@@ -644,19 +644,16 @@ const Dashboard: React.FC = () => {
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">
             <Nav className="me-auto">
-              {/* Menú Historial*/}
-              <div className="nav-item mega-dropdown">
-                <div className="mega-menu-wrapper">
-                </div>
-              </div>
+       
             </Nav>
+
             <Nav className="ms-auto">
               {/* Notificaciones */}
               <Nav.Link href="#" className="me-2">
                 <span className="nav-link-text">Notificaciones <i className="far fa-bell"></i></span>
               </Nav.Link>
-              {/* Avatar de Usuario */}
-              {user && (
+              {/* Ingresar o Avatar de Usuario */}
+              {isLoggedIn && user ? (
                 <NavDropdown
                   title={
                     <div className="avatar-container">
@@ -670,6 +667,7 @@ const Dashboard: React.FC = () => {
                   align="end"
                   className="custom-dropdown"
                 >
+                  {/* Botón de Inicio */}
                   <NavDropdown.Item as={Link} to="/" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="fas fa-home"></i></div>
                     <span>Inicio</span>
@@ -694,7 +692,9 @@ const Dashboard: React.FC = () => {
                   </NavDropdown.Item>
                   <NavDropdown.Item
                     onClick={() => {
+                      // Cerrar el dropdown
                       document.body.click();
+                      // Cambiar a la sección de notificaciones en Perfil
                       navigate('/perfil', { state: { activeSection: 'notificaciones' } });
                     }}
                     className="dropdown-item-custom"
@@ -712,6 +712,16 @@ const Dashboard: React.FC = () => {
                     <span>Cerrar sesión</span>
                   </NavDropdown.Item>
                 </NavDropdown>
+              ) : (
+                <Nav.Link href="#">
+                  <Button
+                    variant="success"
+                    className="btn-ingresar"
+                    onClick={() => navigate('/login')}
+                  >
+                    Ingresar
+                  </Button>
+                </Nav.Link>
               )}
             </Nav>
           </Navbar.Collapse>
@@ -720,45 +730,39 @@ const Dashboard: React.FC = () => {
 
       {/* CONTENIDO DEL DASHBOARD */}
       <div className="dashboard-container">
-        {/* Sidebar existente */}
+        {/* Sidebar con fondo blanco */}
         <div className="dashboard-sidebar">
-          {/* Código existente del sidebar... */}
           <div className="sidebar-header">
             <h3>
-              <i className="bi bi-gear me-2"></i>
-              Panel de Control
+              <i className="bi bi-gear-fill"></i>
+              <span>Panel de Control</span>
             </h3>
-            <p className="user-role">{userRole === 'ROLE_MASTER' ? 'Master' : 'Administrador'}</p>
+            <div className="user-role">{userRole === 'ROLE_MASTER' ? 'Master' : 'Administrador'}</div>
           </div>
-          
+
           <ul className="sidebar-menu">
-           
-            <li className={activeSection === 'dashboard' ? 'active' : ''} 
-                onClick={() => setActiveSection('dashboard')}>
-              <a href="#dashboard">
-                <i className="bi bi-speedometer2"></i> Dashboard
+            <li className={activeSection === 'dashboard' ? 'active' : ''}>
+              <a href="#" onClick={() => setActiveSection('dashboard')}>
+                <i className="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
               </a>
             </li>
-            
-            {/* Sección Administradores - Solo visible para rol MASTER */}
-            {(userRole === 'ROLE_MASTER') && (
-              <li className={activeSection === 'administradores' ? 'active' : ''} 
-                  onClick={() => setActiveSection('administradores')}>
-                <a href="#administradores">
-                  <i className="bi bi-person-badge"></i> Administradores
-                </a>
-              </li>
-            )}
-            
+            <li className={activeSection === 'administradores' ? 'active' : ''}>
+              <a href="#" onClick={() => setActiveSection('administradores')}>
+                <i className="bi bi-people-fill"></i>
+                <span>Administradores</span>
+              </a>
+            </li>
             <li>
-              <Link to="/">
-                <i className="bi bi-house-door"></i> Ir al Sitio Web
+              <Link to="/Principal" className="sidebar-link">
+                <i className="bi bi-shop"></i>
+                <span>Ir al Sitio Web</span>
               </Link>
             </li>
-            
-            <li onClick={handleLogout}>
-              <a href="#logout">
-                <i className="bi bi-box-arrow-right"></i> Cerrar Sesión
+            <li>
+              <a href="#" onClick={handleLogout}>
+                <i className="bi bi-box-arrow-right"></i>
+                <span>Cerrar Sesión</span>
               </a>
             </li>
           </ul>

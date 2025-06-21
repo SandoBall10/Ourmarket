@@ -19,6 +19,7 @@ import Dashboard from './components/Super/Dashboard';
 // Importación de AOS para animaciones
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import 'animate.css';
 
 const App: React.FC = () => {
   // Inicializar AOS para animaciones al cargar la aplicación
