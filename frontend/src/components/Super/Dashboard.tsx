@@ -946,12 +946,9 @@ const Dashboard: React.FC = () => {
                   name="contrasena"
                   value={editAdmin.contrasena}
                   onChange={handleEditInputChange}
-                  placeholder="Dejar en blanco para mantener la actual"
+                  placeholder="Contraseña"
                 />
               </div>
-              <Form.Text className="text-muted">
-                Si no desea cambiar la contraseña, deje este campo en blanco.
-              </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3">
