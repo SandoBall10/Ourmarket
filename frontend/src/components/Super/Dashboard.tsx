@@ -754,12 +754,6 @@ const Dashboard: React.FC = () => {
               </a>
             </li>
             <li>
-              <Link to="/Principal" className="sidebar-link">
-                <i className="bi bi-shop"></i>
-                <span>Ir al Sitio Web</span>
-              </Link>
-            </li>
-            <li>
               <a href="#" onClick={handleLogout}>
                 <i className="bi bi-box-arrow-right"></i>
                 <span>Cerrar Sesión</span>
