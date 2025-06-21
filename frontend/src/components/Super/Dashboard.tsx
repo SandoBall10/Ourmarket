@@ -288,14 +288,6 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  // Manejar cambios en el selector de rol
-  const handleEditRolChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setEditAdmin({
-      ...editAdmin,
-      rolId: parseInt(e.target.value)
-    });
-  };
-
   // Enviar los cambios al backend
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -323,13 +315,9 @@ const Dashboard: React.FC = () => {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       
-      // *** AQUÍ ESTÁ EL CAMBIO IMPORTANTE ***
-      // Estructura correcta del payload según lo que espera el backend
+      // Actualizar la estructura de datos - ya no incluye el rol
       const updateData: any = {
-        username: editAdmin.username,
-        rol: {
-          idRol: editAdmin.rolId
-        }
+        username: editAdmin.username
       };
       
       // Solo incluir contraseña si se ha especificado
@@ -978,22 +966,6 @@ const Dashboard: React.FC = () => {
                   onChange={handleEditInputChange}
                   placeholder="coloca tu misma contraseña si no deseas cambiarla"
                 />
-              </div>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Rol</Form.Label>
-              <div className="input-group">
-                <span className="input-group-text bg-primary text-white">
-                  <i className="bi bi-shield"></i>
-                </span>
-                <Form.Select 
-                  value={editAdmin.rolId} 
-                  onChange={handleEditRolChange}
-                >
-                  <option value={2}>Administrador</option>
-                  <option value={1}>Master (Super Admin)</option>
-                </Form.Select>
               </div>
             </Form.Group>
 
