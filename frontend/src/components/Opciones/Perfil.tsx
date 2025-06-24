@@ -11,8 +11,6 @@ const Perfil: React.FC = () => {
   const [profileData, setProfileData] = useState({
     nombre: '',
     apellido: '',
-    documento: '',
-    identificador: '',
     email: '',
     telefono: ''
   });
@@ -90,8 +88,6 @@ const Perfil: React.FC = () => {
       setProfileData({
         nombre: user.name || '',
         apellido: '',
-        documento: '',
-        identificador: '',
         email: '',
         telefono: ''
       });
@@ -515,44 +511,6 @@ const Perfil: React.FC = () => {
                                     value={profileData.apellido}
                                     onChange={handleInputChange}
                                     className="form-control-with-icon"
-                                  />
-                                </InputGroup>
-                              </Form.Group>
-                            </Col>
-                          </Row>
-
-                          <Row>
-                            <Col md={6} className="mb-3">
-                              <Form.Group>
-                                <Form.Label>Documento</Form.Label>
-                                <InputGroup className="input-group-custom">
-                                  <InputGroup.Text className="input-icon-wrapper">
-                                    <i className="bi bi-card-text"></i>
-                                  </InputGroup.Text>
-                                  <Form.Control
-                                    type="text"
-                                    name="documento"
-                                    value={profileData.documento}
-                                    onChange={handleInputChange}
-                                    className="form-control-with-icon"
-                                  />
-                                </InputGroup>
-                              </Form.Group>
-                            </Col>
-
-                            <Col md={6} className="mb-3">
-                              <Form.Group>
-                                <Form.Label>Identificador</Form.Label>
-                                <InputGroup className="input-group-custom">
-                                  <InputGroup.Text className="input-icon-wrapper">
-                                    <i className="bi bi-hash"></i>
-                                  </InputGroup.Text>
-                                  <Form.Control
-                                    type="text"
-                                    name="identificador"
-                                    value={profileData.identificador}
-                                    readOnly
-                                    className="form-control-with-icon bg-light"
                                   />
                                 </InputGroup>
                               </Form.Group>
