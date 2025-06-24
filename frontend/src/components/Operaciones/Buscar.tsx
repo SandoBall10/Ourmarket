@@ -286,11 +286,12 @@ const Buscar: React.FC = () => {
         <Container fluid className="px-4">
           <Navbar.Brand as={Link} to="/">
             <img
-              src="/logo.png" // Asegúrate de que esta ruta sea correcta
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm6ETphfVq-SfJmeaX42jYRIUxikXCNQvu56BxSPdkWxgHO2KAov9MXLWJRZWjbBgwOR4&usqp=CAU"
               alt="InmoMarket"
               height="30"
               className="d-inline-block align-top"
             />
+            <span className="fw-bold"> InmoMarket</span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">

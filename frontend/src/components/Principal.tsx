@@ -50,11 +50,12 @@ const Principal: React.FC = () => {
         <Container fluid className="px-4">
           <Navbar.Brand href="#">
             <img
-              src="imagen"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm6ETphfVq-SfJmeaX42jYRIUxikXCNQvu56BxSPdkWxgHO2KAov9MXLWJRZWjbBgwOR4&usqp=CAU"
               alt="InmoMarket"
               height="30"
               className="d-inline-block align-top"
             />
+            <span className="fw-bold"> InmoMarket</span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">
@@ -349,7 +350,7 @@ const Principal: React.FC = () => {
                     }
                   }}
                 >
-                  {activeTab === 'comprar' ? 'Buscar' : 'Siguinete'}
+                  {activeTab === 'comprar' ? 'Buscar' : 'Siguiente'}
                 </button>
               </div>
             </div>
