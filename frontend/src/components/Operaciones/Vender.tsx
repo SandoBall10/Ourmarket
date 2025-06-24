@@ -4,86 +4,67 @@ import { useNavigate, Link } from 'react-router-dom';
 import './Vender.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import peruUbigeo from '../Operaciones/peruUbigeo.json'; // Ajusta la ruta si es necesario
-import GoogleMapComponent from './MapaGoogle'; // Asegúrate de importar tu componente de mapa
+import peruUbigeo from '../Operaciones/peruUbigeo.json';
 
 const Vender: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [operationType, setOperationType] = useState<string>('venta');
+  const [operationType] = useState<string>('venta');
   const [propertyType, setPropertyType] = useState<string>('');
-  const [propertySubtype, setPropertySubtype] = useState<string>('');
+  const [propertySubtype] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
 
   // Mock user authentication state
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
-  const [user, setUser] = useState({ name: 'Usuario' });
+  const [user] = useState({ name: 'Usuario' });
 
   // Logout handler
   const handleLogout = () => {
-    // Implement logout functionality
     setIsLoggedIn(false);
     navigate('/login');
   };
 
-  // Efecto para inicializar AOS (animaciones)
   useEffect(() => {
     AOS.init({
       duration: 800,
       once: false
     });
-
-    // Simulación de obtener el nombre del usuario
     setUserName('usuario');
   }, []);
 
-  // Manejar cambio de paso
   const handleStepChange = (step: number) => {
-    if (step >= 1 && step <= 4) {
+    if (step >= 1 && step <= 5) {
       setCurrentStep(step);
     }
   };
 
-  // Add to existing state variables
-  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
-  // Add this function to handle validation
   const validateForm = () => {
-    const errors: {[key: string]: string} = {};
-
+    const errors: { [key: string]: string } = {};
     if (!propertyType) {
       errors.propertyType = 'Selecciona el tipo de inmueble.';
     }
-
-    if (propertyType && !propertySubtype) {
-      errors.propertySubtype = 'Selecciona el subtipo de inmueble.';
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  // Continuar al siguiente paso
   const handleContinue = () => {
     if (validateForm()) {
       handleStepChange(currentStep + 1);
     }
   };
 
-  // Guardar y salir
   const handleSaveAndExit = () => {
-    // Lógica para guardar el progreso
     navigate('/mis-publicaciones');
   };
 
   const [department, setDepartment] = useState('');
   const [province, setProvince] = useState('');
   const [district, setDistrict] = useState('');
-  const [urbanization, setUrbanization] = useState('');
   const [provinceOptions, setProvinceOptions] = useState<string[]>([]);
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
 
-  // Cuando cambia el departamento, actualiza las provincias
   useEffect(() => {
     if (department && peruUbigeo[department as keyof typeof peruUbigeo]) {
       setProvinceOptions(Object.keys(peruUbigeo[department as keyof typeof peruUbigeo]));
@@ -96,7 +77,6 @@ const Vender: React.FC = () => {
     }
   }, [department]);
 
-  // Nuevo useEffect para los distritos
   useEffect(() => {
     if (
       department &&
@@ -115,27 +95,24 @@ const Vender: React.FC = () => {
   }, [department, province]);
 
   const [bedrooms, setBedrooms] = useState(0);
-  const [bathrooms, setBathrooms] = useState(0);
-  const [halfBathrooms, setHalfBathrooms] = useState(0);
-  const [parkingSpaces, setParkingSpaces] = useState(0);
+  const [estado, setEstado] = useState<string>('disponible');
+  const [area, setArea] = useState<number>(0);
+  const [precio, setPrecio] = useState<number>(0);
+  const [servicios, setServicios] = useState<string>('');
 
-  // Agrega esto con los otros estados al inicio del componente
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string>('');
 
-  // Agregar esta función dentro del componente
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    
-    // Verificar límite de archivos
+
     if (uploadedFiles.length + files.length > 8) {
       setUploadError("Solo puedes subir un máximo de 8 archivos");
       return;
     }
-    
-    // Verificar tamaño (500MB en total)
+
     const totalSize = [...uploadedFiles, ...Array.from(files)].reduce(
       (acc, file) => acc + file.size, 0
     );
@@ -143,20 +120,101 @@ const Vender: React.FC = () => {
       setUploadError("El tamaño total de los archivos no puede superar los 500MB");
       return;
     }
-    
+
     setUploadError("");
-    
-    // Crear previsualizaciones
+
     const newFiles = Array.from(files);
     setUploadedFiles([...uploadedFiles, ...newFiles]);
-    
-    // Generar URLs para previsualización
     const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
     setPreviewUrls([...previewUrls, ...newPreviewUrls]);
   };
 
-  return (
+  // Aquí deberías cargar los inmuebles del usuario desde la API
+  const inmueblesCreados = [
+    { id: 1, nombre: "Casa en Miraflores" },
+    { id: 2, nombre: "Departamento en Surco" }
+  ];
 
+  const [inmuebleSeleccionado, setInmuebleSeleccionado] = useState<string>("");
+
+  // --- GUARDAR INMUEBLE ---
+  const handleGuardarInmueble = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      console.log("Token usado:", token);
+
+      if (!token) {
+        alert('Debes iniciar sesión');
+        return;
+      }
+
+      const inmuebleData = {
+        area,
+        direccion: department,
+        distrito: district,
+        estado: estado,
+        fecha_registro: new Date().toISOString(),
+        imagenes: [],
+        numero_habitaciones: bedrooms,
+        precio: precio,
+        provincia: province,
+        departamento: department,
+        servicios: servicios,
+        tipo: propertyType,
+        id_cliente: 1
+      };
+
+      console.log("Headers:", {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      });
+      console.log("Body:", inmuebleData);
+
+      const response = await fetch('http://localhost:8080/api/inmuebles/crear', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(inmuebleData)
+      });
+
+      if (!response.ok) {
+        alert('Error al crear el inmueble');
+        return;
+      }
+
+      const inmuebleCreado = await response.json();
+
+      // 2. Subir imágenes si hay archivos
+      if (uploadedFiles.length > 0) {
+        const formData = new FormData();
+        uploadedFiles.forEach(file => formData.append('imagenes', file));
+
+        const imgResponse = await fetch(`http://localhost:8080/api/inmuebles/${inmuebleCreado.id}/imagenes`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if (!imgResponse.ok) {
+          alert('El inmueble se creó, pero hubo un error subiendo las imágenes');
+          return;
+        }
+      }
+
+      alert('¡Inmueble guardado exitosamente!');
+      setCurrentStep(5);
+
+    } catch (error) {
+      alert('Ocurrió un error al guardar el inmueble');
+      console.error(error);
+    }
+  };
+
+  return (
     <div className="vender-page">
       {/* Barra de Navegación */}
       <Navbar bg="white" expand="lg" className="w-100 border-bottom">
@@ -182,11 +240,8 @@ const Vender: React.FC = () => {
                 >
                   Mis Publicaciones <i className="fas fa-chevron-down fa-xs"></i>
                 </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
+                <div className="mega-menu-wrapper"></div>
               </div>
-
-              {/* Menú Favoritos */}
               <div className="nav-item mega-dropdown">
                 <Nav.Link
                   as={Link}
@@ -196,11 +251,8 @@ const Vender: React.FC = () => {
                 >
                   Favoritos <i className="fas fa-chevron-down fa-xs"></i>
                 </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
+                <div className="mega-menu-wrapper"></div>
               </div>
-
-              {/* Menú Mis Chats */}
               <div className="nav-item mega-dropdown">
                 <Nav.Link
                   as={Link}
@@ -210,11 +262,8 @@ const Vender: React.FC = () => {
                 >
                   Mis Chats <i className="fas fa-chevron-down fa-xs"></i>
                 </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
+                <div className="mega-menu-wrapper"></div>
               </div>
-
-              {/* Menú Historial*/}
               <div className="nav-item mega-dropdown">
                 <Nav.Link
                   as={Link}
@@ -224,17 +273,13 @@ const Vender: React.FC = () => {
                 >
                   Historial <i className="fas fa-chevron-down fa-xs"></i>
                 </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
+                <div className="mega-menu-wrapper"></div>
               </div>
             </Nav>
-
             <Nav className="ms-auto">
-              {/* Notificaciones */}
               <Nav.Link href="#" className="me-2">
                 <span className="nav-link-text">Notificaciones <i className="far fa-bell"></i></span>
               </Nav.Link>
-              {/* Ingresar o Avatar de Usuario */}
               {isLoggedIn && user ? (
                 <NavDropdown
                   title={
@@ -249,7 +294,6 @@ const Vender: React.FC = () => {
                   align="end"
                   className="custom-dropdown"
                 >
-                  {/* Botón de Inicio */}
                   <NavDropdown.Item as={Link} to="/" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="fas fa-home"></i></div>
                     <span>Inicio</span>
@@ -278,9 +322,7 @@ const Vender: React.FC = () => {
                   </NavDropdown.Item>
                   <NavDropdown.Item
                     onClick={() => {
-                      // Cerrar el dropdown
                       document.body.click();
-                      // Cambiar a la sección de notificaciones en Perfil
                       navigate('/perfil', { state: { activeSection: 'notificaciones' } });
                     }}
                     className="dropdown-item-custom"
@@ -317,7 +359,7 @@ const Vender: React.FC = () => {
       {/* Progress Steps */}
       <div className="progress-steps-container">
         <div className="progress-bar-container">
-          <div className="progress-bar" style={{ width: `${(currentStep / 4) * 100}%` }}></div>
+          <div className="progress-bar" style={{ width: `${(currentStep / 5) * 100}%` }}></div>
         </div>
         <div className="steps-container">
           <div className={`step-item ${currentStep >= 1 ? 'active' : ''}`} onClick={() => handleStepChange(1)}>
@@ -327,7 +369,6 @@ const Vender: React.FC = () => {
             </div>
             <span className="step-title">Principales</span>
           </div>
-
           <div className={`step-item ${currentStep >= 2 ? 'active' : ''}`} onClick={() => handleStepChange(2)}>
             <div className="step-number">
               <span>2</span>
@@ -335,7 +376,6 @@ const Vender: React.FC = () => {
             </div>
             <span className="step-title">Multimedia</span>
           </div>
-
           <div className={`step-item ${currentStep >= 3 ? 'active' : ''}`} onClick={() => handleStepChange(3)}>
             <div className="step-number">
               <span>3</span>
@@ -343,13 +383,19 @@ const Vender: React.FC = () => {
             </div>
             <span className="step-title">Extras</span>
           </div>
-
           <div className={`step-item ${currentStep >= 4 ? 'active' : ''}`} onClick={() => handleStepChange(4)}>
             <div className="step-number">
               <span>4</span>
               {currentStep > 4 && <i className="bi bi-check-lg"></i>}
             </div>
-            <span className="step-title">Publicar</span>
+            <span className="step-title">Fotos y videos</span>
+          </div>
+          <div className={`step-item ${currentStep >= 5 ? 'active' : ''}`} onClick={() => handleStepChange(5)}>
+            <div className="step-number">
+              <span>5</span>
+              {currentStep > 5 && <i className="bi bi-check-lg"></i>}
+            </div>
+            <span className="step-title">Publiquemos</span>
           </div>
         </div>
       </div>
@@ -358,10 +404,10 @@ const Vender: React.FC = () => {
         <Row>
           {/* Sidebar de navegación */}
           <Col md={3}>
-            <Card className="sidebar-nav" data-aos="fade-right">
+            <Card className="sidebar-nav" data-aos="fade-right" style={{ minHeight: '300px' }}>
               <div className={`sidebar-item ${currentStep === 1 ? 'active' : ''}`} onClick={() => handleStepChange(1)}>
                 <i className="bi bi-house-door me-2"></i>
-                Operación y tipo de inmueble
+                Empecemos a crear tu inmueble
               </div>
               <div className={`sidebar-item ${currentStep === 2 ? 'active' : ''}`} onClick={() => handleStepChange(2)}>
                 <i className="bi bi-geo-alt me-2"></i>
@@ -375,9 +421,11 @@ const Vender: React.FC = () => {
                 <i className="bi bi-image me-2"></i>
                 Fotos y videos
               </div>
+              <div className={`sidebar-item ${currentStep === 5 ? 'active' : ''}`} onClick={() => handleStepChange(5)}>
+                <i className="bi bi-send-check me-2"></i>
+                Publiquemos
+              </div>
             </Card>
-
-            {/* Detalle del aviso */}
             <Card className="mt-4" style={{ borderRadius: '16px', boxShadow: '0 2px 16px #0001', height: '160px' }}>
               <Card.Body>
                 <Card.Title as="h6" className="mb-3 fw-bold">Detalle del aviso</Card.Title>
@@ -402,12 +450,31 @@ const Vender: React.FC = () => {
           {/* Contenido principal */}
           <Col md={9}>
             <div className="main-content" data-aos="fade-up">
-              <h2 className="greeting-text">¡Hola {userName}, empecemos a crear tu aviso!</h2>
+              <h2 className="greeting-text">¡Hola {userName}, empecemos a crear tu inmueble!</h2>
 
               {currentStep === 1 && (
                 <div className="step-content" data-aos="fade-in">
                   <h3 className="mb-4">Cuéntanos, sobre tu Inmueble</h3>
-
+                  <Form.Group className="mb-4">
+                    <Form.Label>¿Quieres publicar un inmueble ya creado?</Form.Label>
+                    <Form.Select
+                      value={inmuebleSeleccionado}
+                      onChange={e => {
+                        setInmuebleSeleccionado(e.target.value);
+                        if (e.target.value) {
+                          setCurrentStep(5);
+                        }
+                      }}
+                    >
+                      <option value="">No, deseo crear uno nuevo</option>
+                      {inmueblesCreados.map((inm) => (
+                        <option key={inm.id} value={inm.id}>{inm.nombre}</option>
+                      ))}
+                    </Form.Select>
+                    <Form.Text className="text-muted">
+                      Si seleccionas un inmueble, irás directo a la publicación.
+                    </Form.Text>
+                  </Form.Group>
                   <Form.Group className="mb-4">
                     <Form.Label><i className="bi bi-tags me-2"></i>Tipo de operación</Form.Label>
                     <div className="operation-info-card">
@@ -422,7 +489,6 @@ const Vender: React.FC = () => {
                       </div>
                     </div>
                   </Form.Group>
-
                   <Row className="mb-4">
                     <Col md={6}>
                       <Form.Group>
@@ -438,60 +504,6 @@ const Vender: React.FC = () => {
                         </Form.Select>
                       </Form.Group>
                     </Col>
-
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label><i className="bi bi-building-add me-2"></i>Subtipo de inmueble</Form.Label>
-                        <Form.Select
-                          value={propertySubtype}
-                          onChange={(e) => {
-                            setPropertySubtype(e.target.value);
-                            // Clear the error when user selects a value
-                            if (formErrors.propertySubtype) {
-                              setFormErrors({...formErrors, propertySubtype: ''});
-                            }
-                          }}
-                          disabled={!propertyType}
-                          isInvalid={!!formErrors.propertySubtype}
-                        >
-                          <option value="">Selecciona el subtipo de inmueble</option>
-                          {propertyType === 'casa' && (
-                            <>
-                              <option value="casa_standard">Casa de campo</option>
-                              <option value="casa_campo">Casa de ciudad</option>
-                              <option value="casa_playa">Casa de playa</option>
-                              <option value="duplex">Casa en condominio</option>
-                              <option value="duplex">Casa en quinta</option>
-                            </>
-                          )}
-                          {propertyType === 'departamento' && (
-                            <>
-                              <option value="depto_standard">Departamento de campo</option>
-                              <option value="depto_standard">Departamento de ciudad</option>
-                              <option value="depto_standard">Departamento de playa</option>
-                              <option value="depto_standard">Departamento Loft</option>
-                              <option value="penthouse">Departamento PentHouse</option>
-                              <option value="loft">Minidepartamento</option>
-                            </>
-                          )}
-                          {propertyType === 'terreno' && (
-                            <>
-                              <option value="terreno_comercial">Terreno Comercial</option>
-                              <option value="terreno_campestre">Terreno campestre</option>
-                              <option value="terreno_playa">Terreno de playa</option>
-                              <option value="terreno_eriazo">Terreno eriazo</option>
-                              <option value="terreno_industrial">Terreno industrial</option>
-                              <option value="terreno_residencial">Terreno residencial</option>
-                            </>
-                          )}
-                        </Form.Select>
-                        {formErrors.propertySubtype && (
-                          <Form.Control.Feedback type="invalid">
-                            {formErrors.propertySubtype}
-                          </Form.Control.Feedback>
-                        )}
-                      </Form.Group>
-                    </Col>
                   </Row>
                 </div>
               )}
@@ -499,14 +511,16 @@ const Vender: React.FC = () => {
               {currentStep === 2 && (
                 <div className="step-content" data-aos="fade-in">
                   <h3 className="mb-4">¿Dónde está ubicado tu inmueble?</h3>
-                  
                   <Form.Group className="mb-4">
-                    <Form.Label>Ingresa calle y número</Form.Label>
-                    <Form.Control 
-                      type="text" 
+                    <Form.Label>Ingresa la dirección del inmueble</Form.Label>
+                    <Form.Control
+                      type="text"
                       placeholder="Ingresa una dirección"
                       onChange={(e) => {
-                        // Add state handling for address
+                        setDepartment(e.target.value);
+                        if (formErrors.department) {
+                          setFormErrors({ ...formErrors, department: '' });
+                        }
                       }}
                       isInvalid={!!formErrors.address}
                     />
@@ -516,7 +530,6 @@ const Vender: React.FC = () => {
                       </Form.Control.Feedback>
                     )}
                   </Form.Group>
-                  
                   <Row className="mb-4">
                     <Col md={6}>
                       <Form.Group>
@@ -526,7 +539,7 @@ const Vender: React.FC = () => {
                           onChange={(e) => {
                             setDepartment(e.target.value);
                             if (formErrors.department) {
-                              setFormErrors({...formErrors, department: ''});
+                              setFormErrors({ ...formErrors, department: '' });
                             }
                           }}
                           isInvalid={!!formErrors.department}
@@ -543,7 +556,6 @@ const Vender: React.FC = () => {
                         )}
                       </Form.Group>
                     </Col>
-
                     <Col md={6}>
                       <Form.Group>
                         <Form.Label>Provincia</Form.Label>
@@ -552,7 +564,7 @@ const Vender: React.FC = () => {
                           onChange={(e) => {
                             setProvince(e.target.value);
                             if (formErrors.province) {
-                              setFormErrors({...formErrors, province: ''});
+                              setFormErrors({ ...formErrors, province: '' });
                             }
                           }}
                           disabled={!department}
@@ -571,7 +583,6 @@ const Vender: React.FC = () => {
                       </Form.Group>
                     </Col>
                   </Row>
-                  
                   <Row className="mb-4">
                     <Col md={6}>
                       <Form.Group>
@@ -581,7 +592,7 @@ const Vender: React.FC = () => {
                           onChange={(e) => {
                             setDistrict(e.target.value);
                             if (formErrors.district) {
-                              setFormErrors({...formErrors, district: ''});
+                              setFormErrors({ ...formErrors, district: '' });
                             }
                           }}
                           disabled={!province}
@@ -599,65 +610,8 @@ const Vender: React.FC = () => {
                         )}
                       </Form.Group>
                     </Col>
-
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Urbanización</Form.Label>
-                        <Form.Control
-                          type="text"
-                          placeholder="Ingresa la urbanización (opcional)"
-                          value={urbanization}
-                          onChange={(e) => {
-                            setUrbanization(e.target.value);
-                            if (formErrors.urbanization) {
-                              setFormErrors({...formErrors, urbanization: ''});
-                            }
-                          }}
-                          disabled={!district}
-                          isInvalid={!!formErrors.urbanization}
-                        />
-                        {formErrors.urbanization && (
-                          <Form.Control.Feedback type="invalid">
-                            {formErrors.urbanization}
-                          </Form.Control.Feedback>
-                        )}
-                      </Form.Group>
-                    </Col>
                   </Row>
                   
-                  {/* You might want to add a map component here */}
-                  <div className="map-container mb-4">
-                    <h5 className="mb-3">¿Cómo quieres mostrar tu ubicación?</h5>
-                    <div className="d-flex mb-3">
-                      <Form.Check 
-                        type="radio"
-                        id="location-exact"
-                        name="location-type"
-                        label="Exacta"
-                        className="me-4"
-                        defaultChecked
-                      />
-                      <Form.Check 
-                        type="radio"
-                        id="location-approximate"
-                        name="location-type"
-                        label="Aproximada"
-                      />
-                    </div>
-
-                    <GoogleMapComponent 
-                      address={`${district && district + ', '}${province && province + ', '}${department}`}
-                      setCoordinates={(lat, lng) => {
-                        // Guarda las coordenadas en el estado
-                        console.log("Coordenadas seleccionadas:", lat, lng);
-                      }}
-                    />
-                    
-                    <div className="alert alert-info mt-3">
-                      <i className="bi bi-info-circle me-2"></i>
-                      Recuerda que al seleccionar "Aproximada" tu inmueble no aparecerá en el mapa de búsqueda
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -665,152 +619,48 @@ const Vender: React.FC = () => {
                 <div className="step-content" data-aos="fade-in">
                   <h3>Características principales</h3>
                   <p className="text-muted">Cuéntanos un poco más de tu inmueble.</p>
-
                   <Row className="mb-4">
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Dormitorios (opcional)</Form.Label>
+                        <Form.Label>Numero de habitaciones</Form.Label>
                         <InputGroup>
-                          <Button 
-                            variant="light" 
+                          <Button
+                            variant="light"
                             onClick={() => setBedrooms(Math.max(0, bedrooms - 1))}
                           >-</Button>
-                          <Form.Control 
-                            type="number" 
+                          <Form.Control
+                            type="number"
                             value={bedrooms}
                             className="text-center"
                             readOnly
                           />
-                          <Button 
-                            variant="light" 
+                          <Button
+                            variant="light"
                             onClick={() => setBedrooms(bedrooms + 1)}
                           >+</Button>
                         </InputGroup>
                       </Form.Group>
                     </Col>
-
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Baños (opcional)</Form.Label>
-                        <InputGroup>
-                          <Button 
-                            variant="light" 
-                            onClick={() => setBathrooms(Math.max(0, bathrooms - 1))}
-                          >-</Button>
-                          <Form.Control 
-                            type="number" 
-                            value={bathrooms}
-                            className="text-center"
-                            readOnly
-                          />
-                          <Button 
-                            variant="light" 
-                            onClick={() => setBathrooms(bathrooms + 1)}
-                          >+</Button>
-                        </InputGroup>
-                      </Form.Group>
-                    </Col>
                   </Row>
-
-                  <Row className="mb-4">
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Medio baño (opcional)</Form.Label>
-                        <InputGroup>
-                          <Button 
-                            variant="light" 
-                            onClick={() => setHalfBathrooms(Math.max(0, halfBathrooms - 1))}
-                          >-</Button>
-                          <Form.Control 
-                            type="number" 
-                            value={halfBathrooms}
-                            className="text-center"
-                            readOnly
-                          />
-                          <Button 
-                            variant="light" 
-                            onClick={() => setHalfBathrooms(halfBathrooms + 1)}
-                          >+</Button>
-                        </InputGroup>
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Estacionamientos (opcional)</Form.Label>
-                        <InputGroup>
-                          <Button 
-                            variant="light" 
-                            onClick={() => setParkingSpaces(Math.max(0, parkingSpaces - 1))}
-                          >-</Button>
-                          <Form.Control 
-                            type="number" 
-                            value={parkingSpaces}
-                            className="text-center"
-                            readOnly
-                          />
-                          <Button 
-                            variant="light" 
-                            onClick={() => setParkingSpaces(parkingSpaces + 1)}
-                          >+</Button>
-                        </InputGroup>
-                      </Form.Group>
-                    </Col>
-                  </Row>
-
                   <h4 className="mt-4 mb-3">Superficie</h4>
                   <Row className="mb-4">
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Área construida</Form.Label>
+                        <Form.Label>Área </Form.Label>
                         <InputGroup>
-                          <Form.Control type="number" placeholder="0" />
-                          <Form.Select style={{maxWidth: "80px"}}>
-                            <option value="m2">m²</option>
-                          </Form.Select>
-                        </InputGroup>
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Área terreno</Form.Label>
-                        <InputGroup>
-                          <Form.Control type="number" placeholder="0" />
-                          <Form.Select style={{maxWidth: "80px"}}>
+                          <Form.Control
+                            type="number"
+                            placeholder="0"
+                            value={area}
+                            onChange={e => setArea(Number(e.target.value))}
+                          />
+                          <Form.Select style={{ maxWidth: "80px" }}>
                             <option value="m2">m²</option>
                           </Form.Select>
                         </InputGroup>
                       </Form.Group>
                     </Col>
                   </Row>
-
-                  <h4 className="mt-4">Antigüedad</h4>
-                  <div className="mb-4">
-                    <Form.Check
-                      type="radio"
-                      id="nuevo"
-                      name="antiguedad"
-                      label="A estrenar"
-                      className="mb-2"
-                      defaultChecked
-                    />
-                    <Form.Check
-                      type="radio"
-                      id="anos"
-                      name="antiguedad"
-                      label="Años de antigüedad"
-                      className="mb-2"
-                    />
-                    <Form.Check
-                      type="radio"
-                      id="construccion"
-                      name="antiguedad"
-                      label="En construcción"
-                      className="mb-2"
-                    />
-                  </div>
-
                   <h4 className="mt-4">Precio</h4>
                   <div className="mb-4">
                     <Form.Label>Precio del inmueble</Form.Label>
@@ -822,51 +672,36 @@ const Vender: React.FC = () => {
                             type="number"
                             placeholder="0"
                             min="0"
-                          />
-                        </InputGroup>
-                      </Col>
-                      <Col md={6}>
-                        <InputGroup>
-                          <InputGroup.Text>USD</InputGroup.Text>
-                          <Form.Control
-                            type="number"
-                            placeholder="0"
-                            min="0"
+                            value={precio}
+                            onChange={e => setPrecio(Number(e.target.value))}
                           />
                         </InputGroup>
                       </Col>
                     </Row>
-
-                    <Form.Label>Mantenimiento (opcional)</Form.Label>
-                    <InputGroup style={{maxWidth: "250px"}}>
-                      <InputGroup.Text>S/.</InputGroup.Text>
-                      <Form.Control
-                        type="number"
-                        placeholder="0"
-                        min="0"
-                      />
-                    </InputGroup>
                   </div>
-
-                  <h4 className="mt-4">Describe el inmueble</h4>
-                  <p className="text-muted">Asegúrate de incluir el tipo de inmueble y el tipo de operación de tu aviso.</p>
+                  <h4 className="mt-4">Estado</h4>
+                  <div className="mb-4">
+                    <Form.Group>
+                      <Form.Label>Selecciona el estado del inmueble</Form.Label>
+                      <Form.Select
+                        value={estado}
+                        onChange={(e) => setEstado(e.target.value)}
+                      >
+                        <option value="disponible">Disponible</option>
+                        <option value="vendido">Vendido</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </div>
+                  <h4 className="mt-4">Servicios</h4>
+                  <p className="text-muted">Comenta con que servicios cuenta tu inmueble, ya sea agua, luz o gas.</p>
                   <div className="mb-4">
                     <Form.Group className="mb-3">
-                      <Form.Label>Título</Form.Label>
                       <Form.Control
                         type="text"
-                        placeholder="Completa el título de tu aviso."
+                        placeholder="Agua, luz, gas..."
+                        value={servicios}
+                        onChange={e => setServicios(e.target.value)}
                       />
-                    </Form.Group>
-
-                    <Form.Group>
-                      <Form.Label>Descripción</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={4}
-                        placeholder="Escribe un mínimo de 150 caracteres"
-                      />
-                      <Form.Text className="text-end d-block">0</Form.Text>
                     </Form.Group>
                   </div>
                 </div>
@@ -876,7 +711,6 @@ const Vender: React.FC = () => {
                 <div className="step-content" data-aos="fade-in">
                   <h3>Añade fotos y videos de tu propiedad</h3>
                   <p className="text-muted mb-4">Las imágenes de alta calidad aumentan el interés en tu propiedad.</p>
-                  
                   <Card className="mb-4 border-0 shadow-sm">
                     <Card.Body className="p-4">
                       <div className="file-upload-container text-center py-5">
@@ -884,17 +718,16 @@ const Vender: React.FC = () => {
                           <i className="bi bi-cloud-arrow-up" style={{ fontSize: '2.5rem', color: '#6c757d' }}></i>
                         </div>
                         <h5 className="mb-3">Subir archivo</h5>
-                        
                         <div className="d-flex justify-content-center">
-                          <Button 
-                            variant="primary" 
+                          <Button
+                            variant="primary"
                             className="position-relative"
                           >
                             <i className="bi bi-upload me-2"></i>
                             Elegir archivos
-                            <Form.Control 
-                              type="file" 
-                              multiple 
+                            <Form.Control
+                              type="file"
+                              multiple
                               accept=".jpg,.jpeg,.png,.heic,.mp4"
                               className="position-absolute top-0 start-0 opacity-0 w-100 h-100"
                               style={{ cursor: 'pointer' }}
@@ -902,11 +735,9 @@ const Vender: React.FC = () => {
                             />
                           </Button>
                         </div>
-                        
                         <div className="mt-3 text-secondary">
                           <small>Máximo 8 archivos</small>
                         </div>
-                        
                         <div className="mt-4 text-secondary small">
                           Archivos JPG, JPEG, PNG, HEIC, mp3, mp4
                           <br />
@@ -915,15 +746,11 @@ const Vender: React.FC = () => {
                       </div>
                     </Card.Body>
                   </Card>
-                  
-                  {/* Preview area for uploaded files */}
                   <div className="uploaded-files mb-4">
                     <h5 className="mb-3">Archivos subidos ({uploadedFiles.length}/8)</h5>
-                    
                     {uploadError && (
                       <div className="alert alert-danger">{uploadError}</div>
                     )}
-                    
                     <div className="file-preview-grid">
                       {uploadedFiles.length > 0 ? (
                         <Row className="g-3">
@@ -934,14 +761,14 @@ const Vender: React.FC = () => {
                                   <img src={url} alt={`Imagen ${index + 1}`} className="img-fluid rounded" />
                                 ) : (
                                   <div className="video-preview rounded d-flex align-items-center justify-content-center">
-                                    <i className="bi bi-film" style={{fontSize: '2rem'}}></i>
+                                    <i className="bi bi-film" style={{ fontSize: '2rem' }}></i>
                                   </div>
                                 )}
-                                <Button 
+                                <Button
                                   variant="danger"
                                   size="sm"
                                   className="position-absolute top-0 end-0 rounded-circle p-1"
-                                  style={{margin: '5px'}}
+                                  style={{ margin: '5px' }}
                                   onClick={() => {
                                     const newFiles = [...uploadedFiles];
                                     const newUrls = [...previewUrls];
@@ -966,7 +793,6 @@ const Vender: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  
                   <div className="tips-section alert alert-info">
                     <h5><i className="bi bi-lightbulb me-2"></i>Tips para buenas fotos</h5>
                     <ul className="mb-0">
@@ -976,15 +802,49 @@ const Vender: React.FC = () => {
                       <li>Para videos, mantén una filmación estable y enfoca los mejores ángulos</li>
                     </ul>
                   </div>
-                  
                   <div className="text-end mt-4">
-                    <Form.Check 
+                    <Form.Check
                       type="checkbox"
                       id="terms-check"
                       label="Certifico que tengo los derechos de todas las imágenes y videos subidos"
                       className="mb-3 d-inline-block"
                     />
                   </div>
+                </div>
+              )}
+
+              {currentStep === 5 && (
+                <div className="step-content" data-aos="fade-in">
+                  <h3>¡Tu anuncio está listo para publicarse!</h3>
+                  <p className="text-muted">Revisa toda la información antes de publicar tu inmueble.</p>
+                  <div className="mb-4">
+                    <Form.Group className="mb-3">
+                      <Form.Label>Título</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Completa el título de tu aviso."
+                      />
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Descripción</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={4}
+                        placeholder="Escribe un mínimo de 150 caracteres"
+                      />
+                      <Form.Text className="text-end d-block">0</Form.Text>
+                    </Form.Group>
+                  </div>
+                  <Button
+                    variant="success"
+                    onClick={() => {
+                      // Lógica para publicar el anuncio
+                    }}
+                    className="continue-btn"
+                  >
+                    Publicar ahora
+                    <i className="bi bi-check-circle ms-2"></i>
+                  </Button>
                 </div>
               )}
 
@@ -998,20 +858,17 @@ const Vender: React.FC = () => {
                   <i className="bi bi-save me-2"></i>
                   Guardar y salir
                 </Button>
-
-                {currentStep === 4 ? (
+                {currentStep === 4 && (
                   <Button
                     variant="success"
-                    onClick={() => {
-                      // Aquí puedes agregar la lógica para publicar el anuncio
-                      // Por ejemplo: handlePublish()
-                    }}
+                    onClick={handleGuardarInmueble}
                     className="continue-btn"
                   >
-                    Publicar
+                    Guardar mi inmueble
                     <i className="bi bi-check-circle ms-2"></i>
                   </Button>
-                ) : (
+                )}
+                {currentStep < 4 && (
                   <Button
                     variant="success"
                     onClick={handleContinue}
@@ -1028,6 +885,6 @@ const Vender: React.FC = () => {
       </Container>
     </div>
   );
-};
+  };
 
 export default Vender;
