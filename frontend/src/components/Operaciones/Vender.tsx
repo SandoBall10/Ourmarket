@@ -192,9 +192,10 @@ const Vender: React.FC = () => {
         return;
       }
 
+      // 1. Primero creamos el inmueble
       const inmuebleData = {
         area,
-        direccion: department, // ¿Es esto correcto? La dirección debería ser más específica
+        direccion: department,
         distrito: district,
         estado: estado,
         fecha_registro: new Date().toISOString(),
@@ -204,37 +205,82 @@ const Vender: React.FC = () => {
         departamento: department,
         servicios: servicios,
         tipo: propertyType
-        // Eliminar id_cliente, el backend debe obtenerlo del token
       };
       
-      console.log("Enviando datos:", inmuebleData);
+      console.log("Enviando datos del inmueble:", inmuebleData);
       
-      // Hacer la petición con axios y mejor manejo de errores
+      // Configuración del token
+      const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      
+      // Hacer la petición para crear el inmueble
       const response = await axios.post(
         'http://localhost:8080/api/inmuebles/crear',
         inmuebleData,
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
+            'Authorization': authToken
           }
         }
       );
       
-      console.log("Respuesta del servidor:", response.data);
+      console.log("Respuesta del servidor (inmueble creado):", response.data);
       
-      // Si llegamos aquí, fue exitoso
-      setMessage({type: 'success', text: '¡Inmueble guardado exitosamente!'});
-      
-      // Lógica para subir imágenes...
-      if (uploadedFiles.length > 0 && response.data && response.data.idInmueble) {
-        // Tu código para subir imágenes...
+      // 2. Si el inmueble se creó correctamente y tenemos imágenes para subir, hacerlo
+      if (response.data && response.data.id && uploadedFiles.length > 0) {
+        setMessage({type: 'info', text: 'Inmueble creado, subiendo imágenes...'});
+        
+        // Crear el FormData para las imágenes
+        const formData = new FormData();
+        
+        // Agregar todas las imágenes con el mismo nombre de parámetro "imagenes"
+        uploadedFiles.forEach(file => {
+          formData.append('imagenes', file);
+        });
+        
+        console.log(`Enviando ${uploadedFiles.length} imágenes para el inmueble ${response.data.id}`);
+        
+        try {
+          // Hacer la petición para subir las imágenes
+          const imageResponse = await axios.post(
+            `http://localhost:8080/api/inmuebles/${response.data.id}/imagenes`,
+            formData,
+            {
+              headers: {
+                'Authorization': authToken,
+                'Content-Type': 'multipart/form-data'
+              }
+            }
+          );
+          
+          console.log("Respuesta de subida de imágenes:", imageResponse.data);
+          
+          setMessage({
+            type: 'success', 
+            text: '¡Inmueble e imágenes guardados exitosamente!'
+          });
+        } catch (imageError) {
+          console.error("Error al subir imágenes:", imageError);
+          
+          // Si fallan las imágenes pero el inmueble se creó, mostramos un mensaje mixto
+          setMessage({
+            type: 'warning', 
+            text: 'El inmueble se creó correctamente, pero hubo un problema al subir las imágenes.'
+          });
+        }
+      } else {
+        // Si no hay imágenes o no se obtuvo un ID, solo mostrar éxito del inmueble
+        setMessage({
+          type: 'success', 
+          text: '¡Inmueble guardado exitosamente!'
+        });
       }
       
+      // Avanzar al siguiente paso después de un breve retardo
       setTimeout(() => {
-        setMessage(null);
         setCurrentStep(5);
-      }, 1500);
+        setMessage(null); // Limpiar el mensaje después de cambiar de paso
+      }, 2000);
       
     } catch (error) {
       console.error('Error completo:', error);
@@ -261,7 +307,7 @@ const Vender: React.FC = () => {
           else {
             setMessage({
               type: 'danger', 
-              text: `Error: ${error.response.data.message || 'No se pudo crear el inmueble'}`
+              text: `Error: ${error.response.data.message || error.response.data || 'No se pudo crear el inmueble'}`
             });
           }
         } else {
