@@ -735,10 +735,13 @@ const Perfil: React.FC = () => {
                                     type="email"
                                     name="email"
                                     value={profileData.email}
-                                    onChange={handleInputChange}
-                                    className="form-control-with-icon"
+                                    readOnly={true}
+                                    className="form-control-with-icon bg-light"
                                   />
                                 </InputGroup>
+                                <Form.Text className="text-muted mt-1">
+                                  <i className="bi bi-info-circle me-1"></i> Para cambiar tu email, ve a la sección "Cambiar email"
+                                </Form.Text>
                               </Form.Group>
                             </Col>
 
