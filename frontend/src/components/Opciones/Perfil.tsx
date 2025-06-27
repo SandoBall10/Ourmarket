@@ -182,8 +182,6 @@ const Perfil: React.FC = () => {
           ...prev,
           currentEmail: response.data.email || ''
         }));
-        
-        // Mostrar mensaje de éxito
         setMessage({
           type: 'success',
           text: 'Datos del perfil cargados correctamente'
@@ -211,11 +209,6 @@ const Perfil: React.FC = () => {
           type: 'warning',
           text: 'Tu sesión ha expirado o el token es inválido. Por favor, inicia sesión nuevamente.'
         });
-        
-        // Opcional: Limpiar token y redirigir a login
-        // localStorage.removeItem('token');
-        // localStorage.removeItem('user');
-        // setTimeout(() => navigate('/login'), 2000);
       } else {
         setMessage({
           type: 'danger',
@@ -229,22 +222,15 @@ const Perfil: React.FC = () => {
     }
   };
 
-  // Método mejorado para actualizar el perfil
+  // Corregir la función handleProfileSubmit para actualizar correctamente el perfil
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      // Intentar obtener el token directamente o desde el objeto usuario
-      let token = localStorage.getItem('token');
+      setMessage({type: 'info', text: 'Actualizando perfil...'});
       
-      // Si no hay token directo, intentar recuperarlo del objeto user
-      if (!token) {
-        const userData = localStorage.getItem('user');
-        if (userData) {
-          const userObj = JSON.parse(userData);
-          token = userObj.token;
-        }
-      }
+      // Obtener el token actual
+      let token = localStorage.getItem('token');
       
       if (!token) {
         console.error('No hay token de autenticación');
@@ -255,83 +241,96 @@ const Perfil: React.FC = () => {
         return;
       }
       
-      // Configurar headers con el token en el formato correcto
-      const config = {
-        headers: {
-          'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      };
+      // PASO IMPORTANTE: Si el token no empieza con Bearer, asegúrate de agregarlo
+      // Este es un problema común que causa errores 403
+      const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
       
-      // Crear objeto con los datos a actualizar (según estructura de Cliente)
-      const clienteActualizado = {
+      console.log("Token a utilizar:", authToken);
+      console.log("Enviando datos al servidor:", {
         nombreCompleto: profileData.nombreCompleto,
-        email: profileData.email,
         telefono: profileData.telefono
-      };
+      });
       
-      // URL base del backend - ajusta según tu configuración
-      const baseURL = 'http://localhost:8080'; // Cambia esto si tu backend está en otra URL
-      
-      console.log("Enviando datos al servidor:", clienteActualizado);
-      
-      // Enviar al backend
+      // Configurar la petición correctamente - enviando SOLO nombreCompleto y telefono
       const response = await axios.put(
-        `${baseURL}/api/clientes/me`, 
-        clienteActualizado, 
-        config
+        'http://localhost:8080/api/clientes/me',
+        {
+          nombreCompleto: profileData.nombreCompleto,
+          telefono: profileData.telefono
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authToken
+          }
+        }
       );
       
-      console.log("Respuesta de actualización:", response.data);
+      console.log("Respuesta del servidor:", response.data);
       
-      // Actualizar estado con respuesta del servidor
-      if (response.data) {
-        setProfileData({
-          nombreCompleto: response.data.nombreCompleto || '',
-          email: response.data.email || '',
-          telefono: response.data.telefono || ''
-        });
-        
-        // Actualizar también en localStorage si es necesario
-        const userData = localStorage.getItem('user');
-        if (userData) {
-          const userObj = JSON.parse(userData);
-          userObj.name = response.data.nombreCompleto;
-          localStorage.setItem('user', JSON.stringify(userObj));
-        }
-        
-        // Mostrar mensaje de éxito
-        setMessage({
-          type: 'success',
-          text: 'Perfil actualizado correctamente'
-        });
-      }
+      // Actualizar el estado y mostrar mensaje de éxito
+      setProfileData({
+        ...profileData,
+        nombreCompleto: response.data.nombreCompleto,
+        telefono: response.data.telefono
+      });
       
-      setTimeout(() => {
-        setMessage(null);
-      }, 3000);
-      
-    } catch (error) {
-      console.error('Error al actualizar perfil:', error);
-      
-      // Mostrar información detallada del error para depuración
-      if (axios.isAxiosError(error)) {
-        console.error('Status:', error.response?.status);
-        console.error('Data:', error.response?.data);
+      // Actualizar datos en localStorage si es necesario
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const userObj = JSON.parse(userData);
+        userObj.name = response.data.nombreCompleto;
+        localStorage.setItem('user', JSON.stringify(userObj));
       }
       
       setMessage({
-        type: 'danger',
-        text: 'Error al actualizar el perfil. Intenta de nuevo más tarde.'
+        type: 'success',
+        text: 'Perfil actualizado correctamente'
       });
       
       setTimeout(() => {
         setMessage(null);
       }, 3000);
+    } catch (error) {
+      console.error('Error al actualizar perfil:', error);
+      
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+        
+        if (error.response?.status === 403) {
+          setMessage({
+            type: 'danger',
+            text: 'No tienes permiso para actualizar estos datos.'
+          });
+        } else if (error.response?.status === 401) {
+          setMessage({
+            type: 'warning',
+            text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'
+          });
+          
+          // Opcional: Redireccionar al login después de un tiempo
+          // setTimeout(() => navigate('/login'), 2000);
+        } else {
+          setMessage({
+            type: 'danger',
+            text: `Error: ${error.response?.data?.message || 'No se pudo actualizar el perfil'}`
+          });
+        }
+      } else {
+        setMessage({
+          type: 'danger',
+          text: 'Error al conectar con el servidor'
+        });
+      }
+      
+      setTimeout(() => {
+        setMessage(null);
+      }, 5000);
     }
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -342,43 +341,199 @@ const Perfil: React.FC = () => {
       return;
     }
 
-    // Aquí irían las llamadas a API para cambiar contraseña
-    setMessage({
-      type: 'success',
-      text: 'Contraseña actualizada correctamente'
-    });
+    try {
+      let token = localStorage.getItem('token');
+      if (!token) {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const userObj = JSON.parse(userData);
+          token = userObj.token;
+        }
+      }
+      if (!token) {
+        setMessage({
+          type: 'warning',
+          text: 'Sesión no iniciada. No se pueden guardar los cambios.'
+        });
+        return;
+      }
 
-    // Reiniciar campos
-    setPasswordData({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    });
+      const config = {
+        headers: {
+          'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      };
 
-    setTimeout(() => {
-      setMessage(null);
-    }, 3000);
+      // Solo envía la nueva contraseña
+      const body = {
+        contrasena: passwordData.newPassword
+      };
+
+      const baseURL = 'http://localhost:8080';
+      const response = await axios.put(`${baseURL}/api/clientes/me`, body, config);
+
+      setMessage({
+        type: 'success',
+        text: 'Contraseña actualizada correctamente'
+      });
+
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Error al actualizar contraseña:', error);
+      
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+      }
+      
+      setMessage({
+        type: 'danger',
+        text: 'Error al actualizar la contraseña. Intenta de nuevo más tarde.'
+      });
+      
+      setTimeout(() => {
+        setMessage(null);
+      }, 5000);
+    }
   };
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Aquí irían las llamadas a API para cambiar email
-    setMessage({
-      type: 'success',
-      text: 'Email actualizado correctamente. Se ha enviado un correo de verificación.'
-    });
+    if (!emailData.newEmail || !emailData.password) {
+      setMessage({
+        type: 'warning',
+        text: 'Por favor, completa todos los campos requeridos'
+      });
+      return;
+    }
 
-    // Reiniciar campos
-    setEmailData(prev => ({
-      currentEmail: prev.newEmail,
-      newEmail: '',
-      password: ''
-    }));
+    try {
+      setMessage({type: 'info', text: 'Actualizando email...'});
+      
+      // Obtener el token actual
+      let token = localStorage.getItem('token');
+      if (!token) {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const userObj = JSON.parse(userData);
+          token = userObj.token;
+        }
+      }
+      
+      if (!token) {
+        setMessage({
+          type: 'warning',
+          text: 'Sesión no iniciada. No se pueden guardar los cambios.'
+        });
+        return;
+      }
 
-    setTimeout(() => {
-      setMessage(null);
-    }, 3000);
+      // Asegurarnos de formatear el token correctamente
+      const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+
+      console.log("Token para actualizar email:", authToken);
+      
+      // Modificamos el formato - probamos con la estructura exacta que muestra en la consola
+      // Esto es más cercano a lo que vemos que se envía en la consola
+      const body = {
+        email: emailData.newEmail,           // Cambiado de nuevoEmail a email
+        contrasena: emailData.password,      // Esto parece correcto
+        emailActual: emailData.currentEmail  // Esto parece correcto
+      };
+
+      console.log("Enviando datos para actualizar email:", body);
+
+      const baseURL = 'http://localhost:8080';
+      
+      // Probar con el endpoint general en lugar del específico de email
+      const response = await axios.put(
+        `${baseURL}/api/clientes/me`,  // Cambiamos el endpoint
+        body,
+        {
+          headers: {
+            'Authorization': authToken,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log("Respuesta de actualización de email:", response.data);
+
+      // Si llegamos aquí, la actualización fue exitosa
+      setProfileData(prev => ({
+        ...prev,
+        email: emailData.newEmail
+      }));
+      
+      // Actualizar datos en localStorage si es necesario
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const userObj = JSON.parse(userData);
+        userObj.email = emailData.newEmail;
+        localStorage.setItem('user', JSON.stringify(userObj));
+      }
+      
+      setMessage({
+        type: 'success',
+        text: 'Email actualizado correctamente'
+      });
+
+      // Reiniciar campos y actualizar el email actual
+      setEmailData({
+        currentEmail: emailData.newEmail,
+        newEmail: '',
+        password: ''
+      });
+      
+      // Recargar datos del perfil para confirmar que se actualizó
+      setTimeout(() => {
+        fetchProfileData();
+      }, 1000);
+
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Error al actualizar email:', error);
+      
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+        console.error('Headers:', error.response?.headers);
+        
+        // Mensaje más detallado para ayudar a diagnosticar
+        let errorMsg = 'Error al actualizar el email.';
+        if (error.response?.data?.mensaje) {
+          errorMsg += ` ${error.response.data.mensaje}`;
+        } else if (error.response?.data?.message) {
+          errorMsg += ` ${error.response.data.message}`;
+        }
+        
+        setMessage({
+          type: 'danger',
+          text: errorMsg
+        });
+      } else {
+        setMessage({
+          type: 'danger',
+          text: 'Error inesperado al conectar con el servidor'
+        });
+      }
+      
+      setTimeout(() => {
+        setMessage(null);
+      }, 5000);
+    }
   };
 
   const handleNotificationsSubmit = (e: React.FormEvent) => {
