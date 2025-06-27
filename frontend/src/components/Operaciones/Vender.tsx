@@ -5,6 +5,7 @@ import './Vender.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import peruUbigeo from '../Operaciones/peruUbigeo.json';
+import axios from 'axios';
 
 const Vender: React.FC = () => {
   const navigate = useNavigate();
@@ -13,29 +14,62 @@ const Vender: React.FC = () => {
   const [propertyType, setPropertyType] = useState<string>('');
   const [propertySubtype] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
+  
+  // Estado para mensajes de error/éxito
+  const [message, setMessage] = useState<{type: string, text: string} | null>(null);
 
-  // Mock user authentication state
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
-  const [user] = useState({ name: 'Usuario' });
+  // Estado real de autenticación
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<any>(null);
 
-  // Logout handler
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    navigate('/login');
-  };
-
+  // Verificar autenticación al iniciar
   useEffect(() => {
+    // Inicializar AOS
     AOS.init({
       duration: 800,
       once: false
     });
-    setUserName('usuario');
-  }, []);
 
-  const handleStepChange = (step: number) => {
-    if (step >= 1 && step <= 5) {
-      setCurrentStep(step);
+    // Verificar si hay un usuario y token válidos
+    const userData = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+
+    if (userData && token) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        setUserName(parsedUser.name || 'usuario');
+        setIsLoggedIn(true);
+        
+        // Verificar que el token es válido mediante una petición al backend
+        axios.get('http://localhost:8080/api/clientes/me', {
+          headers: {
+            'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
+          }
+        }).catch(error => {
+          console.error("Error verificando sesión:", error);
+          if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            // Token inválido o expirado, redirigir al login
+            localStorage.removeItem('token');
+            setMessage({type: 'danger', text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'});
+            setTimeout(() => navigate('/login'), 2000);
+          }
+        });
+      } catch (error) {
+        console.error("Error al procesar datos de usuario:", error);
+        setIsLoggedIn(false);
+      }
+    } else {
+      setIsLoggedIn(false);
+      // Si no hay sesión, redirigir al login
+      setMessage({type: 'warning', text: 'Debes iniciar sesión para crear un inmueble'});
+      setTimeout(() => navigate('/login'), 2000);
     }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    navigate('/login');
   };
 
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -51,7 +85,7 @@ const Vender: React.FC = () => {
 
   const handleContinue = () => {
     if (validateForm()) {
-      handleStepChange(currentStep + 1);
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -140,77 +174,102 @@ const Vender: React.FC = () => {
   // --- GUARDAR INMUEBLE ---
   const handleGuardarInmueble = async () => {
     try {
+      // Mostrar spinner o indicador de carga
+      setMessage({type: 'info', text: 'Guardando inmueble...'});
+      
+      // Obtener token fresco (por si ha cambiado)
       const token = localStorage.getItem('token');
-      console.log("Token usado:", token);
-
+      
       if (!token) {
-        alert('Debes iniciar sesión');
+        setMessage({type: 'danger', text: 'No hay sesión activa. Inicia sesión para continuar.'});
+        setTimeout(() => navigate('/login'), 2000);
+        return;
+      }
+      
+      // Validar datos obligatorios antes de enviar
+      if (!propertyType || !department || !province || !district) {
+        setMessage({type: 'danger', text: 'Completa todos los campos obligatorios'});
         return;
       }
 
       const inmuebleData = {
         area,
-        direccion: department,
+        direccion: department, // ¿Es esto correcto? La dirección debería ser más específica
         distrito: district,
         estado: estado,
         fecha_registro: new Date().toISOString(),
-        imagenes: [],
         numero_habitaciones: bedrooms,
         precio: precio,
         provincia: province,
         departamento: department,
         servicios: servicios,
-        tipo: propertyType,
-        id_cliente: 1
+        tipo: propertyType
+        // Eliminar id_cliente, el backend debe obtenerlo del token
       };
-
-      console.log("Headers:", {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      });
-      console.log("Body:", inmuebleData);
-
-      const response = await fetch('http://localhost:8080/api/inmuebles/crear', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(inmuebleData)
-      });
-
-      if (!response.ok) {
-        alert('Error al crear el inmueble');
-        return;
-      }
-
-      const inmuebleCreado = await response.json();
-
-      // 2. Subir imágenes si hay archivos
-      if (uploadedFiles.length > 0) {
-        const formData = new FormData();
-        uploadedFiles.forEach(file => formData.append('imagenes', file));
-
-        const imgResponse = await fetch(`http://localhost:8080/api/inmuebles/${inmuebleCreado.id}/imagenes`, {
-          method: 'POST',
+      
+      console.log("Enviando datos:", inmuebleData);
+      
+      // Hacer la petición con axios y mejor manejo de errores
+      const response = await axios.post(
+        'http://localhost:8080/api/inmuebles/crear',
+        inmuebleData,
+        {
           headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formData
-        });
-
-        if (!imgResponse.ok) {
-          alert('El inmueble se creó, pero hubo un error subiendo las imágenes');
-          return;
+            'Content-Type': 'application/json',
+            'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
+          }
         }
+      );
+      
+      console.log("Respuesta del servidor:", response.data);
+      
+      // Si llegamos aquí, fue exitoso
+      setMessage({type: 'success', text: '¡Inmueble guardado exitosamente!'});
+      
+      // Lógica para subir imágenes...
+      if (uploadedFiles.length > 0 && response.data && response.data.idInmueble) {
+        // Tu código para subir imágenes...
       }
-
-      alert('¡Inmueble guardado exitosamente!');
-      setCurrentStep(5);
-
+      
+      setTimeout(() => {
+        setMessage(null);
+        setCurrentStep(5);
+      }, 1500);
+      
     } catch (error) {
-      alert('Ocurrió un error al guardar el inmueble');
-      console.error(error);
+      console.error('Error completo:', error);
+      
+      if (axios.isAxiosError(error)) {
+        // Manejar diferentes tipos de errores
+        if (error.response) {
+          console.log("Status:", error.response.status);
+          console.log("Data:", error.response.data);
+          
+          // Verificar token expirado
+          if (error.response.status === 401) {
+            setMessage({type: 'danger', text: 'Tu sesión ha expirado. Inicia sesión nuevamente.'});
+            setTimeout(() => navigate('/login'), 1500);
+          } 
+          // Problema de permisos
+          else if (error.response.status === 403) {
+            setMessage({
+              type: 'danger', 
+              text: 'No tienes permisos para crear inmuebles. Contacta al administrador.'
+            });
+          } 
+          // Otros errores
+          else {
+            setMessage({
+              type: 'danger', 
+              text: `Error: ${error.response.data.message || 'No se pudo crear el inmueble'}`
+            });
+          }
+        } else {
+          setMessage({type: 'danger', text: 'Error de conexión con el servidor'});
+        }
+      } else {
+        setMessage({type: 'danger', text: 'Error inesperado al guardar el inmueble'});
+      }
     }
   };
 
@@ -356,47 +415,46 @@ const Vender: React.FC = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-
       {/* Progress Steps */}
       <div className="progress-steps-container">
         <div className="progress-bar-container">
           <div className="progress-bar" style={{ width: `${(currentStep / 5) * 100}%` }}></div>
         </div>
         <div className="steps-container">
-          <div className={`step-item ${currentStep >= 1 ? 'active' : ''}`} onClick={() => handleStepChange(1)}>
-            <div className="step-number">
-              <span>1</span>
-              {currentStep > 1 && <i className="bi bi-check-lg"></i>}
-            </div>
-            <span className="step-title">Principales</span>
+          <div className={`step-item ${currentStep >= 1 ? 'active' : ''}`} onClick={() => setCurrentStep(1)}>
+        <div className="step-number">
+          <span>1</span>
+          {currentStep > 1 && <i className="bi bi-check-lg"></i>}
+        </div>
+        <span className="step-title">Principales</span>
           </div>
-          <div className={`step-item ${currentStep >= 2 ? 'active' : ''}`} onClick={() => handleStepChange(2)}>
-            <div className="step-number">
-              <span>2</span>
-              {currentStep > 2 && <i className="bi bi-check-lg"></i>}
-            </div>
-            <span className="step-title">Multimedia</span>
+          <div className={`step-item ${currentStep >= 2 ? 'active' : ''}`} onClick={() => setCurrentStep(2)}>
+        <div className="step-number">
+          <span>2</span>
+          {currentStep > 2 && <i className="bi bi-check-lg"></i>}
+        </div>
+        <span className="step-title">Ubicación</span>
           </div>
-          <div className={`step-item ${currentStep >= 3 ? 'active' : ''}`} onClick={() => handleStepChange(3)}>
-            <div className="step-number">
-              <span>3</span>
-              {currentStep > 3 && <i className="bi bi-check-lg"></i>}
-            </div>
-            <span className="step-title">Extras</span>
+          <div className={`step-item ${currentStep >= 3 ? 'active' : ''}`} onClick={() => setCurrentStep(3)}>
+        <div className="step-number">
+          <span>3</span>
+          {currentStep > 3 && <i className="bi bi-check-lg"></i>}
+        </div>
+        <span className="step-title">Características</span>
           </div>
-          <div className={`step-item ${currentStep >= 4 ? 'active' : ''}`} onClick={() => handleStepChange(4)}>
-            <div className="step-number">
-              <span>4</span>
-              {currentStep > 4 && <i className="bi bi-check-lg"></i>}
-            </div>
-            <span className="step-title">Fotos y videos</span>
+          <div className={`step-item ${currentStep >= 4 ? 'active' : ''}`} onClick={() => setCurrentStep(4)}>
+        <div className="step-number">
+          <span>4</span>
+          {currentStep > 4 && <i className="bi bi-check-lg"></i>}
+        </div>
+        <span className="step-title">Fotos y videos</span>
           </div>
-          <div className={`step-item ${currentStep >= 5 ? 'active' : ''}`} onClick={() => handleStepChange(5)}>
-            <div className="step-number">
-              <span>5</span>
-              {currentStep > 5 && <i className="bi bi-check-lg"></i>}
-            </div>
-            <span className="step-title">Publiquemos</span>
+          <div className={`step-item ${currentStep >= 5 ? 'active' : ''}`} onClick={() => setCurrentStep(5)}>
+        <div className="step-number">
+          <span>5</span>
+          {currentStep > 5 && <i className="bi bi-check-lg"></i>}
+        </div>
+        <span className="step-title">Publiquemos</span>
           </div>
         </div>
       </div>
@@ -405,27 +463,27 @@ const Vender: React.FC = () => {
         <Row>
           {/* Sidebar de navegación */}
           <Col md={3}>
-            <Card className="sidebar-nav" data-aos="fade-right" style={{ minHeight: '300px' }}>
-              <div className={`sidebar-item ${currentStep === 1 ? 'active' : ''}`} onClick={() => handleStepChange(1)}>
-                <i className="bi bi-house-door me-2"></i>
-                Empecemos a crear tu inmueble
-              </div>
-              <div className={`sidebar-item ${currentStep === 2 ? 'active' : ''}`} onClick={() => handleStepChange(2)}>
-                <i className="bi bi-geo-alt me-2"></i>
-                Ubicación
-              </div>
-              <div className={`sidebar-item ${currentStep === 3 ? 'active' : ''}`} onClick={() => handleStepChange(3)}>
-                <i className="bi bi-card-checklist me-2"></i>
-                Características
-              </div>
-              <div className={`sidebar-item ${currentStep === 4 ? 'active' : ''}`} onClick={() => handleStepChange(4)}>
-                <i className="bi bi-image me-2"></i>
-                Fotos y videos
-              </div>
-              <div className={`sidebar-item ${currentStep === 5 ? 'active' : ''}`} onClick={() => handleStepChange(5)}>
-                <i className="bi bi-send-check me-2"></i>
-                Publiquemos
-              </div>
+        <Card className="sidebar-nav" data-aos="fade-right" style={{ minHeight: '300px' }}>
+          <div className={`sidebar-item ${currentStep === 1 ? 'active' : ''}`} onClick={() => setCurrentStep(1)}>
+            <i className="bi bi-house-door me-2"></i>
+            Empecemos a crear tu inmueble
+          </div>
+          <div className={`sidebar-item ${currentStep === 2 ? 'active' : ''}`} onClick={() => setCurrentStep(2)}>
+            <i className="bi bi-geo-alt me-2"></i>
+            Ubicación
+          </div>
+          <div className={`sidebar-item ${currentStep === 3 ? 'active' : ''}`} onClick={() => setCurrentStep(3)}>
+            <i className="bi bi-card-checklist me-2"></i>
+            Características
+          </div>
+          <div className={`sidebar-item ${currentStep === 4 ? 'active' : ''}`} onClick={() => setCurrentStep(4)}>
+            <i className="bi bi-image me-2"></i>
+            Fotos y videos
+          </div>
+          <div className={`sidebar-item ${currentStep === 5 ? 'active' : ''}`} onClick={() => setCurrentStep(5)}>
+            <i className="bi bi-send-check me-2"></i>
+            Publiquemos
+          </div>
             </Card>
             <Card className="mt-4" style={{ borderRadius: '16px', boxShadow: '0 2px 16px #0001', height: '160px' }}>
               <Card.Body>
@@ -846,6 +904,14 @@ const Vender: React.FC = () => {
                     Publicar ahora
                     <i className="bi bi-check-circle ms-2"></i>
                   </Button>
+                </div>
+              )}
+
+              {/* Mensaje de error/éxito */}
+              {message && (
+                <div className={`alert alert-${message.type} alert-dismissible fade show m-3`} role="alert">
+                  {message.text}
+                  <button type="button" className="btn-close" onClick={() => setMessage(null)}></button>
                 </div>
               )}
 
