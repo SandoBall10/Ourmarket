@@ -27,12 +27,16 @@ const Login: React.FC = () => {
       }
 
       const data = await response.json();
+
+      // Guardar el usuario
       localStorage.setItem('user', JSON.stringify({
         name: username,
         isLoggedIn: true,
-        token: data.token,
         rol: data.rol,
       }));
+
+      // Guardar el token por separado
+      localStorage.setItem('token', data.token);
 
       // Redirección según el rol del usuario
       if (data.rol === 'ROLE_MASTER' || data.rol === 'ROLE_ADMIN') {

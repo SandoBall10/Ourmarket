@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { Container, Row, Col, Form, Card, ListGroup, Alert, InputGroup, Navbar, Nav, NavDropdown, Button } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Perfil.css';
+import axios from 'axios'; // Asegúrate que axios está importado
 
 const Perfil: React.FC = () => {
   const location = useLocation();
   // Estado para los datos del perfil y navegación
   const navigate = useNavigate();
   const [profileData, setProfileData] = useState({
-    nombre: '',
-    apellido: '',
+    nombreCompleto: '',
     email: '',
     telefono: ''
   });
@@ -78,24 +78,32 @@ const Perfil: React.FC = () => {
     })
   };
 
-  // Cargar datos del usuario desde localStorage o API
+  // Cargar datos del usuario desde localStorage y del backend
   useEffect(() => {
     const userData = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    
+    console.log("¿Existe usuario en localStorage?", !!userData);
+    console.log("¿Existe token en localStorage?", !!token);
+    
     if (userData) {
-      const user = JSON.parse(userData);
-      setUser(user);
-      setIsLoggedIn(true);
-      setProfileData({
-        nombre: user.name || '',
-        apellido: '',
-        email: '',
-        telefono: ''
+      try {
+        const parsedUser = JSON.parse(userData);
+        console.log("Usuario cargado:", parsedUser);
+        setUser(parsedUser);
+        setIsLoggedIn(true);
+        
+        // Llamar a la función para obtener los datos completos del perfil
+        fetchProfileData();
+      } catch (error) {
+        console.error('Error al parsear datos de usuario:', error);
+      }
+    } else {
+      setIsLoggedIn(false);
+      setMessage({
+        type: 'info',
+        text: 'Inicia sesión para ver tu perfil completo'
       });
-
-      setEmailData(prev => ({
-        ...prev,
-        currentEmail: ''
-      }));
     }
   }, []);
 
@@ -106,50 +114,221 @@ const Perfil: React.FC = () => {
     }
   }, [location.state]);
 
-  // Handlers existentes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  // Método mejorado para obtener datos del perfil
+  const fetchProfileData = async () => {
+    try {
+      console.log("Intentando obtener datos del perfil...");
+      
+      // Intentar obtener el token directamente o desde el objeto usuario
+      let token = localStorage.getItem('token');
+      
+      // Si no hay token directo, intentar recuperarlo del objeto user
+      if (!token) {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const userObj = JSON.parse(userData);
+          token = userObj.token;
+          
+          // Si encontramos el token en user, guardémoslo también por separado para futuras solicitudes
+          if (token) {
+            localStorage.setItem('token', token);
+          }
+        }
+      }
+      
+      console.log("Token disponible:", !!token);
+      
+      if (!token) {
+        console.error('No hay token de autenticación');
+        setMessage({
+          type: 'warning',
+          text: 'Sesión no iniciada. Algunos datos podrían no estar disponibles.'
+        });
+        return;
+      }
+      
+      // Configurar headers con el token en el formato correcto
+      const config = {
+        headers: {
+          'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      };
+      
+      console.log("Headers de autenticación:", config.headers);
+      
+      // URL base del backend - ajusta según tu configuración
+      const baseURL = 'http://localhost:8080'; // Cambia esto si tu backend está en otra URL
+      const url = `${baseURL}/api/clientes/me`;
+      
+      console.log("Llamando a API:", url);
+      
+      // Hacer la petición al backend
+      const response = await axios.get(url, config);
+      
+      console.log("Respuesta del backend:", response.data);
+      
+      // Verificar la estructura de la respuesta
+      if (response.data) {
+        // Estructura de ClienteDTO según tu backend
+        setProfileData({
+          nombreCompleto: response.data.nombreCompleto || '',
+          email: response.data.email || '',
+          telefono: response.data.telefono || ''
+        });
+        
+        // Actualizar también el email en el estado de cambio de email
+        setEmailData(prev => ({
+          ...prev,
+          currentEmail: response.data.email || ''
+        }));
+        
+        // Mostrar mensaje de éxito
+        setMessage({
+          type: 'success',
+          text: 'Datos del perfil cargados correctamente'
+        });
+        
+        setTimeout(() => {
+          setMessage(null);
+        }, 3000);
+      } else {
+        throw new Error("Formato de respuesta del servidor incorrecto");
+      }
+    } catch (error) {
+      console.error('Error al obtener datos del perfil:', error);
+      
+      // Mostrar información detallada del error para depuración
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+        console.error('Headers:', error.response?.headers);
+      }
+      
+      // Verificar si es un error de autenticación (401)
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setMessage({
+          type: 'warning',
+          text: 'Tu sesión ha expirado o el token es inválido. Por favor, inicia sesión nuevamente.'
+        });
+        
+        // Opcional: Limpiar token y redirigir a login
+        // localStorage.removeItem('token');
+        // localStorage.removeItem('user');
+        // setTimeout(() => navigate('/login'), 2000);
+      } else {
+        setMessage({
+          type: 'danger',
+          text: 'Error al cargar los datos del perfil. Intenta de nuevo más tarde.'
+        });
+      }
+      
+      setTimeout(() => {
+        setMessage(null);
+      }, 5000);
+    }
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswordData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEmailData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleNotificationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setNotificationSettings(prev => ({
-      ...prev,
-      [name]: checked
-    }));
-  };
-
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  // Método mejorado para actualizar el perfil
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí irían las llamadas a API para actualizar perfil
-    setMessage({
-      type: 'success',
-      text: 'Perfil actualizado correctamente'
-    });
-
-    setTimeout(() => {
-      setMessage(null);
-    }, 3000);
+    
+    try {
+      // Intentar obtener el token directamente o desde el objeto usuario
+      let token = localStorage.getItem('token');
+      
+      // Si no hay token directo, intentar recuperarlo del objeto user
+      if (!token) {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const userObj = JSON.parse(userData);
+          token = userObj.token;
+        }
+      }
+      
+      if (!token) {
+        console.error('No hay token de autenticación');
+        setMessage({
+          type: 'warning',
+          text: 'Sesión no iniciada. No se pueden guardar los cambios.'
+        });
+        return;
+      }
+      
+      // Configurar headers con el token en el formato correcto
+      const config = {
+        headers: {
+          'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      };
+      
+      // Crear objeto con los datos a actualizar (según estructura de Cliente)
+      const clienteActualizado = {
+        nombreCompleto: profileData.nombreCompleto,
+        email: profileData.email,
+        telefono: profileData.telefono
+      };
+      
+      // URL base del backend - ajusta según tu configuración
+      const baseURL = 'http://localhost:8080'; // Cambia esto si tu backend está en otra URL
+      
+      console.log("Enviando datos al servidor:", clienteActualizado);
+      
+      // Enviar al backend
+      const response = await axios.put(
+        `${baseURL}/api/clientes/me`, 
+        clienteActualizado, 
+        config
+      );
+      
+      console.log("Respuesta de actualización:", response.data);
+      
+      // Actualizar estado con respuesta del servidor
+      if (response.data) {
+        setProfileData({
+          nombreCompleto: response.data.nombreCompleto || '',
+          email: response.data.email || '',
+          telefono: response.data.telefono || ''
+        });
+        
+        // Actualizar también en localStorage si es necesario
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const userObj = JSON.parse(userData);
+          userObj.name = response.data.nombreCompleto;
+          localStorage.setItem('user', JSON.stringify(userObj));
+        }
+        
+        // Mostrar mensaje de éxito
+        setMessage({
+          type: 'success',
+          text: 'Perfil actualizado correctamente'
+        });
+      }
+      
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error al actualizar perfil:', error);
+      
+      // Mostrar información detallada del error para depuración
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+      }
+      
+      setMessage({
+        type: 'danger',
+        text: 'Error al actualizar el perfil. Intenta de nuevo más tarde.'
+      });
+      
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+    }
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -225,6 +404,38 @@ const Perfil: React.FC = () => {
     setUser(null);
     navigate('/login');
   };
+
+  function handleInputChange(event: ChangeEvent<HTMLInputElement>): void {
+    const { name, value } = event.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+
+  function handlePasswordChange(event: ChangeEvent<HTMLInputElement>): void {
+    const { name, value } = event.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+
+  function handleEmailChange(event: ChangeEvent<HTMLInputElement>): void {
+    const { name, value } = event.target;
+    setEmailData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+
+  function handleNotificationChange(event: ChangeEvent<HTMLInputElement>): void {
+    const { name, checked } = event.target;
+    setNotificationSettings(prev => ({
+      ...prev,
+      [name]: checked
+    }));
+  }
 
   return (
     <motion.div
@@ -480,35 +691,17 @@ const Perfil: React.FC = () => {
                           <p className="text-muted mb-4">Completa con tus datos personales.</p>
 
                           <Row>
-                            <Col md={6} className="mb-3">
+                            <Col md={12} className="mb-3">
                               <Form.Group>
-                                <Form.Label>Nombre</Form.Label>
+                                <Form.Label>Nombre Completo</Form.Label>
                                 <InputGroup className="input-group-custom">
                                   <InputGroup.Text className="input-icon-wrapper">
                                     <i className="bi bi-person-fill"></i>
                                   </InputGroup.Text>
                                   <Form.Control
                                     type="text"
-                                    name="nombre"
-                                    value={profileData.nombre}
-                                    onChange={handleInputChange}
-                                    className="form-control-with-icon"
-                                  />
-                                </InputGroup>
-                              </Form.Group>
-                            </Col>
-
-                            <Col md={6} className="mb-3">
-                              <Form.Group>
-                                <Form.Label>Apellido</Form.Label>
-                                <InputGroup className="input-group-custom">
-                                  <InputGroup.Text className="input-icon-wrapper">
-                                    <i className="bi bi-person-badge"></i>
-                                  </InputGroup.Text>
-                                  <Form.Control
-                                    type="text"
-                                    name="apellido"
-                                    value={profileData.apellido}
+                                    name="nombreCompleto"
+                                    value={profileData.nombreCompleto}
                                     onChange={handleInputChange}
                                     className="form-control-with-icon"
                                   />
