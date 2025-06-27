@@ -93,15 +93,16 @@ const Vender: React.FC = () => {
     navigate('/mis-publicaciones');
   };
 
-  const [department, setDepartment] = useState('');
+  const [region, setRegion] = useState('');
+  const [address, setAddress] = useState('');
   const [province, setProvince] = useState('');
   const [district, setDistrict] = useState('');
   const [provinceOptions, setProvinceOptions] = useState<string[]>([]);
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
 
   useEffect(() => {
-    if (department && peruUbigeo[department as keyof typeof peruUbigeo]) {
-      setProvinceOptions(Object.keys(peruUbigeo[department as keyof typeof peruUbigeo]));
+    if (region && peruUbigeo[region as keyof typeof peruUbigeo]) {
+      setProvinceOptions(Object.keys(peruUbigeo[region as keyof typeof peruUbigeo]));
       setProvince('');
       setDistrict('');
     } else {
@@ -109,26 +110,26 @@ const Vender: React.FC = () => {
       setProvince('');
       setDistrict('');
     }
-  }, [department]);
+  }, [region]);
 
   useEffect(() => {
     if (
-      department &&
+      region &&
       province &&
-      peruUbigeo[department as keyof typeof peruUbigeo] &&
-      (peruUbigeo[department as keyof typeof peruUbigeo] as Record<string, string[]>)[province]
+      peruUbigeo[region as keyof typeof peruUbigeo] &&
+      (peruUbigeo[region as keyof typeof peruUbigeo] as Record<string, string[]>)[province]
     ) {
       setDistrictOptions(
-        (peruUbigeo[department as keyof typeof peruUbigeo] as Record<string, string[]>)[province]
+        (peruUbigeo[region as keyof typeof peruUbigeo] as Record<string, string[]>)[province]
       );
       setDistrict('');
     } else {
       setDistrictOptions([]);
       setDistrict('');
     }
-  }, [department, province]);
+  }, [region, province]);
 
-  const [bedrooms, setBedrooms] = useState(0);
+  const [bedrooms, setBedrooms] = useState<number>(0);
   const [estado, setEstado] = useState<string>('disponible');
   const [area, setArea] = useState<number>(0);
   const [precio, setPrecio] = useState<number>(0);
@@ -187,7 +188,7 @@ const Vender: React.FC = () => {
       }
       
       // Validar datos obligatorios antes de enviar
-      if (!propertyType || !department || !province || !district) {
+      if (!propertyType || !region || !province || !district) {
         setMessage({type: 'danger', text: 'Completa todos los campos obligatorios'});
         return;
       }
@@ -195,14 +196,14 @@ const Vender: React.FC = () => {
       // 1. Primero creamos el inmueble
       const inmuebleData = {
         area,
-        direccion: department,
+        direccion: address,
         distrito: district,
         estado: estado,
         fecha_registro: new Date().toISOString(),
-        numero_habitaciones: bedrooms,
+        num_habitaciones: bedrooms,
         precio: precio,
         provincia: province,
-        departamento: department,
+        region: region, // <-- Cambiado de "departamento" a "region"
         servicios: servicios,
         tipo: propertyType
       };
@@ -622,9 +623,9 @@ const Vender: React.FC = () => {
                       type="text"
                       placeholder="Ingresa una dirección"
                       onChange={(e) => {
-                        setDepartment(e.target.value);
-                        if (formErrors.department) {
-                          setFormErrors({ ...formErrors, department: '' });
+                        setAddress(e.target.value);
+                        if (formErrors.address) {
+                          setFormErrors({ ...formErrors, address: '' });
                         }
                       }}
                       isInvalid={!!formErrors.address}
@@ -638,25 +639,25 @@ const Vender: React.FC = () => {
                   <Row className="mb-4">
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Departamento</Form.Label>
+                        <Form.Label>Región</Form.Label>
                         <Form.Select
-                          value={department}
+                          value={region}
                           onChange={(e) => {
-                            setDepartment(e.target.value);
-                            if (formErrors.department) {
-                              setFormErrors({ ...formErrors, department: '' });
+                            setRegion(e.target.value);
+                            if (formErrors.region) {
+                              setFormErrors({ ...formErrors, region: '' });
                             }
                           }}
-                          isInvalid={!!formErrors.department}
+                          isInvalid={!!formErrors.region}
                         >
-                          <option value="">Selecciona un departamento</option>
-                          {Object.keys(peruUbigeo).map((dept) => (
-                            <option key={dept} value={dept}>{dept}</option>
+                          <option value="">Selecciona una región</option>
+                          {Object.keys(peruUbigeo).map((reg) => (
+                            <option key={reg} value={reg}>{reg}</option>
                           ))}
                         </Form.Select>
-                        {formErrors.department && (
+                        {formErrors.region && (
                           <Form.Control.Feedback type="invalid">
-                            {formErrors.department}
+                            {formErrors.region}
                           </Form.Control.Feedback>
                         )}
                       </Form.Group>
@@ -672,7 +673,7 @@ const Vender: React.FC = () => {
                               setFormErrors({ ...formErrors, province: '' });
                             }
                           }}
-                          disabled={!department}
+                          disabled={!region}
                           isInvalid={!!formErrors.province}
                         >
                           <option value="">Selecciona una provincia</option>
