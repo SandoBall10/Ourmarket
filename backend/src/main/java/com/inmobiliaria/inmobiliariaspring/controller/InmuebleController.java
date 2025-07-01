@@ -1,10 +1,12 @@
 package com.inmobiliaria.inmobiliariaspring.controller;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.inmobiliaria.inmobiliariaspring.dto.InmuebleDTO;
 import com.inmobiliaria.inmobiliariaspring.mappers.InmuebleMapper;
@@ -25,7 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequestMapping("/api/inmuebles")
-public class InmuebleController {
+public class InmuebleController implements WebMvcConfigurer {
 
     @Autowired
     private InmuebleService inmuebleService;
@@ -40,6 +44,8 @@ public class InmuebleController {
         Inmueble nuevoInmueble = inmuebleService.crearInmueble(inmueble, authentication.getName());
         return ResponseEntity.ok(InmuebleMapper.toDTO(nuevoInmueble));
     }
+
+    
 
     @GetMapping
     @Operation(summary = "Listar todos los inmuebles", description = "Obtiene una lista de todos los inmuebles registrados.")
@@ -122,46 +128,40 @@ public class InmuebleController {
     })
     public ResponseEntity<?> subirImagenes(
             @PathVariable Integer id,
-            @RequestParam("imagenes") List<MultipartFile> imagenes,
-            Authentication authentication) {
-        try {
-            // Validar dueño o admin/master
-            String emailUsuario = authentication.getName();
-            boolean esAdmin = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_MASTER"));
+            @RequestParam("imagenes") List<MultipartFile> imagenes) {
 
-            Inmueble inmueble = inmuebleService.obtenerInmueblePorId(id).orElse(null);
-            if (inmueble == null) return ResponseEntity.notFound().build();
-
-            if (!inmueble.getCliente().getEmail().equals(emailUsuario) && !esAdmin) {
-                return ResponseEntity.status(403).body("No tienes permiso para modificar este inmueble.");
-            }
-            
-            List<String> nombresArchivos = new ArrayList<>();
-            String carpetaDestino = "uploads/inmuebles"; // Cambia la ruta si lo necesitas
-
-            // Crear carpeta si no existe
-            Path carpetaPath = Paths.get(carpetaDestino);
-            if (!Files.exists(carpetaPath)) {
-                Files.createDirectories(carpetaPath);
-            }
-
-            for (MultipartFile imagen : imagenes) {
-                String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
-                Path ruta = carpetaPath.resolve(nombreArchivo);
-                Files.copy(imagen.getInputStream(), ruta);
-                nombresArchivos.add(nombreArchivo);
-            }
-
-            // Guarda los nombres separados por coma en el campo 'imagenes'
-            String nombresConcatenados = String.join(",", nombresArchivos);
-            inmuebleService.actualizarImagenesInmueble(id, nombresConcatenados);
-
-            return ResponseEntity.ok("Imágenes subidas y campo actualizado correctamente.");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al subir imágenes: " + e.getMessage());
+        Optional<Inmueble> inmuebleOpt = inmuebleService.obtenerInmueblePorId(id);
+        if (inmuebleOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+        Inmueble inmueble = inmuebleOpt.get();
+
+        String uploadDir = System.getProperty("user.dir") + "/assets/inmuebles/";
+        File dir = new File(uploadDir);
+        if (!dir.exists()) dir.mkdirs();
+
+        StringBuilder nombres = new StringBuilder();
+        for (MultipartFile imagen : imagenes) {
+            if (!imagen.isEmpty()) {
+                String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
+                File destino = new File(uploadDir + nombreArchivo);
+                try {
+                    imagen.transferTo(destino);
+                    nombres.append(nombreArchivo).append(";");
+                } catch (Exception e) {
+                    return ResponseEntity.status(500).body("Error guardando imagen: " + nombreArchivo);
+                }
+            }
+        }
+
+        // Quitar el último punto y coma si hay imágenes
+        if (nombres.length() > 0) {
+            nombres.setLength(nombres.length() - 1);
+            inmueble.setImagenes(nombres.toString());
+            inmuebleService.actualizarImagenesInmueble(id, nombres.toString());
+        }
+
+        return ResponseEntity.ok("Imágenes subidas correctamente");
     }
 
     @PutMapping("/marcar-como-vendido/{id}")
@@ -184,5 +184,11 @@ public class InmuebleController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);
         }
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/assets/inmuebles/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/assets/inmuebles/");
     }
 }

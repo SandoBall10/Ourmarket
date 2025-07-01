@@ -14,13 +14,19 @@ const Vender: React.FC = () => {
   const [propertyType, setPropertyType] = useState<string>('');
   const [propertySubtype] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
-  
+  // 
   // Estado para mensajes de error/éxito
   const [message, setMessage] = useState<{type: string, text: string} | null>(null);
 
   // Estado real de autenticación
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [user, setUser] = useState<any>(null);
+  interface User {
+    name?: string;
+    // Agrega aquí otras propiedades relevantes del usuario si las conoces
+    // email?: string;
+    // id?: number;
+  }
+  const [user, setUser] = useState<User | null>(null);
 
   // Verificar autenticación al iniciar
   useEffect(() => {
@@ -37,7 +43,7 @@ const Vender: React.FC = () => {
     if (userData && token) {
       try {
         const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
+        setUser(parsedUser);    
         setUserName(parsedUser.name || 'usuario');
         setIsLoggedIn(true);
         
@@ -99,6 +105,48 @@ const Vender: React.FC = () => {
   const [district, setDistrict] = useState('');
   const [provinceOptions, setProvinceOptions] = useState<string[]>([]);
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
+interface Inmueble {
+  idInmueble: number;
+  direccion: string;
+  cliente?: {
+    idCliente: number;
+    email?: string;
+    // Puedes agregar más propiedades si las necesitas
+  };
+  // Agrega aquí otras propiedades si las necesitas
+}
+
+const [inmueblesCreados, setInmueblesCreados] = useState<{ id: number, nombre: string }[]>([]);
+
+useEffect(() => {
+  const fetchInmuebles = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+      const user = userData ? JSON.parse(userData) : null;
+      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      const response = await axios.get('http://localhost:8080/api/inmuebles', {
+        headers: { 'Authorization': authToken }
+      });
+      setInmueblesCreados(
+        (response.data as Inmueble[])
+          .filter(inm => {
+            if (user?.rol === 'ROLE_CLIENTE') {
+              // Filtra por email si es cliente
+              return inm.cliente && inm.cliente.email === user.name;
+            }
+          })
+          .map((inm) => ({
+            id: inm.idInmueble,
+            nombre: inm.direccion
+          }))
+      );
+    } catch {
+      setInmueblesCreados([]);
+    }
+  };
+  fetchInmuebles();
+}, []);
 
   useEffect(() => {
     if (region && peruUbigeo[region as keyof typeof peruUbigeo]) {
@@ -165,35 +213,29 @@ const Vender: React.FC = () => {
   };
 
   // Aquí deberías cargar los inmuebles del usuario desde la API
-  const inmueblesCreados = [
-    { id: 1, nombre: "Casa en Miraflores" },
-    { id: 2, nombre: "Departamento en Surco" }
-  ];
+  // const inmueblesCreados = [
+  //   { id: 1, nombre: "Casa en Miraflores" },
+  //   { id: 2, nombre: "Departamento en Surco" }
+  // ];
 
   const [inmuebleSeleccionado, setInmuebleSeleccionado] = useState<string>("");
 
   // --- GUARDAR INMUEBLE ---
   const handleGuardarInmueble = async () => {
     try {
-      // Mostrar spinner o indicador de carga
       setMessage({type: 'info', text: 'Guardando inmueble...'});
-      
-      // Obtener token fresco (por si ha cambiado)
       const token = localStorage.getItem('token');
-      
       if (!token) {
         setMessage({type: 'danger', text: 'No hay sesión activa. Inicia sesión para continuar.'});
         setTimeout(() => navigate('/login'), 2000);
         return;
       }
-      
-      // Validar datos obligatorios antes de enviar
       if (!propertyType || !region || !province || !district) {
         setMessage({type: 'danger', text: 'Completa todos los campos obligatorios'});
         return;
       }
 
-      // 1. Primero creamos el inmueble
+      // 1. Crear el inmueble (sin el campo imagenes)
       const inmuebleData = {
         area,
         direccion: address,
@@ -203,17 +245,12 @@ const Vender: React.FC = () => {
         num_habitaciones: bedrooms,
         precio: precio,
         provincia: province,
-        region: region, // <-- Cambiado de "departamento" a "region"
+        region: region,
         servicios: servicios,
         tipo: propertyType
       };
-      
-      console.log("Enviando datos del inmueble:", inmuebleData);
-      
-      // Configuración del token
+
       const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      
-      // Hacer la petición para crear el inmueble
       const response = await axios.post(
         'http://localhost:8080/api/inmuebles/crear',
         inmuebleData,
@@ -224,88 +261,73 @@ const Vender: React.FC = () => {
           }
         }
       );
-      
-      console.log("Respuesta del servidor (inmueble creado):", response.data);
-      
-      // 2. Si el inmueble se creó correctamente y tenemos imágenes para subir, hacerlo
-      if (response.data && response.data.id && uploadedFiles.length > 0) {
+
+      // 2. Subir imágenes si hay archivos (con reintentos)
+      if (response.data && response.data.idInmueble && uploadedFiles.length > 0) {
+
+        setInmuebleSeleccionado(String(response.data.idInmueble));
         setMessage({type: 'info', text: 'Inmueble creado, subiendo imágenes...'});
-        
-        // Crear el FormData para las imágenes
         const formData = new FormData();
-        
-        // Agregar todas las imágenes con el mismo nombre de parámetro "imagenes"
         uploadedFiles.forEach(file => {
           formData.append('imagenes', file);
         });
-        
-        console.log(`Enviando ${uploadedFiles.length} imágenes para el inmueble ${response.data.id}`);
-        
-        try {
-          // Hacer la petición para subir las imágenes
-          const imageResponse = await axios.post(
-            `http://localhost:8080/api/inmuebles/${response.data.id}/imagenes`,
-            formData,
-            {
-              headers: {
-                'Authorization': authToken,
-                'Content-Type': 'multipart/form-data'
+
+        let success = false, retries = 0;
+        const maxRetries = 4;
+        while (!success && retries < maxRetries) {
+          try {
+            await axios.post(
+              `http://localhost:8080/api/inmuebles/${response.data.idInmueble}/imagenes`,
+              formData,
+              {
+                headers: {
+                  'Authorization': authToken,
+                  'Content-Type': 'multipart/form-data'
+                }
               }
+            );
+            setMessage({
+              type: 'success', 
+              text: '¡Inmueble e imágenes guardados exitosamente!'
+            });
+            success = true;
+          } catch {
+            retries++;
+            if (retries < maxRetries) {
+              await new Promise(res => setTimeout(res, 600)); // espera 600ms antes de reintentar
+            } else {
+              setMessage({
+                type: 'warning', 
+                text: 'El inmueble se creó correctamente, pero hubo un problema al subir las imágenes.'
+              });
             }
-          );
-          
-          console.log("Respuesta de subida de imágenes:", imageResponse.data);
-          
-          setMessage({
-            type: 'success', 
-            text: '¡Inmueble e imágenes guardados exitosamente!'
-          });
-        } catch (imageError) {
-          console.error("Error al subir imágenes:", imageError);
-          
-          // Si fallan las imágenes pero el inmueble se creó, mostramos un mensaje mixto
-          setMessage({
-            type: 'warning', 
-            text: 'El inmueble se creó correctamente, pero hubo un problema al subir las imágenes.'
-          });
+          }
         }
       } else {
-        // Si no hay imágenes o no se obtuvo un ID, solo mostrar éxito del inmueble
         setMessage({
           type: 'success', 
           text: '¡Inmueble guardado exitosamente!'
         });
       }
-      
-      // Avanzar al siguiente paso después de un breve retardo
+
       setTimeout(() => {
         setCurrentStep(5);
-        setMessage(null); // Limpiar el mensaje después de cambiar de paso
+        setMessage(null);
       }, 2000);
-      
+
     } catch (error) {
       console.error('Error completo:', error);
-      
       if (axios.isAxiosError(error)) {
-        // Manejar diferentes tipos de errores
         if (error.response) {
-          console.log("Status:", error.response.status);
-          console.log("Data:", error.response.data);
-          
-          // Verificar token expirado
           if (error.response.status === 401) {
             setMessage({type: 'danger', text: 'Tu sesión ha expirado. Inicia sesión nuevamente.'});
             setTimeout(() => navigate('/login'), 1500);
-          } 
-          // Problema de permisos
-          else if (error.response.status === 403) {
+          } else if (error.response.status === 403) {
             setMessage({
               type: 'danger', 
               text: 'No tienes permisos para crear inmuebles. Contacta al administrador.'
             });
-          } 
-          // Otros errores
-          else {
+          } else {
             setMessage({
               type: 'danger', 
               text: `Error: ${error.response.data.message || error.response.data || 'No se pudo crear el inmueble'}`
@@ -319,6 +341,9 @@ const Vender: React.FC = () => {
       }
     }
   };
+
+  const [titulo, setTitulo] = useState<string>('');
+  const [descripcion, setDescripcion] = useState<string>('');
 
   return (
     <div className="vender-page">
@@ -929,6 +954,8 @@ const Vender: React.FC = () => {
                       <Form.Control
                         type="text"
                         placeholder="Completa el título de tu aviso."
+                        value={titulo}
+                        onChange={e => setTitulo(e.target.value)}
                       />
                     </Form.Group>
                     <Form.Group>
@@ -937,14 +964,46 @@ const Vender: React.FC = () => {
                         as="textarea"
                         rows={4}
                         placeholder="Escribe un mínimo de 150 caracteres"
+                        value={descripcion}
+                        onChange={e => setDescripcion(e.target.value)}
                       />
-                      <Form.Text className="text-end d-block">0</Form.Text>
+                      <Form.Text className="text-end d-block">{descripcion.length}</Form.Text>
                     </Form.Group>
                   </div>
                   <Button
                     variant="success"
-                    onClick={() => {
-                      // Lógica para publicar el anuncio
+                    onClick={async () => {
+                      if (!inmuebleSeleccionado) {
+                        setMessage({type: 'danger', text: 'Selecciona un inmueble para publicar.'});
+                        return;
+                      }
+                      if (titulo.trim().length < 5 || descripcion.trim().length < 20) {
+                        setMessage({type: 'danger', text: 'Completa el título y una descripción suficiente.'});
+                        return;
+                      }
+                      try {
+                        const token = localStorage.getItem('token');
+                        const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+                        const publicacion = {
+                          inmueble: { idInmueble: Number(inmuebleSeleccionado) },
+                          titulo,
+                          descripcion
+                        };
+                        await axios.post(
+                          'http://localhost:8080/api/publicaciones/publicar',
+                          publicacion,
+                          {
+                            headers: {
+                              'Authorization': authToken,
+                              'Content-Type': 'application/json'
+                            }
+                          }
+                        );
+                        setMessage({type: 'success', text: '¡Publicación creada exitosamente!'});
+                        // Opcional: redirigir o limpiar campos
+                      } catch {
+                        setMessage({type: 'danger', text: 'Error al crear la publicación.'});
+                      }
                     }}
                     className="continue-btn"
                   >

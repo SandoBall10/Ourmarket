@@ -12,7 +12,8 @@ public class PublicacionMapper {
         dto.setDescripcion(publicacion.getDescripcion());
         dto.setFechaPublicacion(publicacion.getFechaPublicacion());
         dto.setIdInmueble(publicacion.getInmueble() != null ? publicacion.getInmueble().getIdInmueble() : null);
-        dto.setIdCliente(publicacion.getCliente() != null ? publicacion.getCliente().getIdCliente() : null);
+        //dto.setIdCliente(publicacion.getCliente() != null ? publicacion.getCliente().getIdCliente() : null);
+        dto.setCliente(publicacion.getCliente() != null ? ClienteMapper.toDTO(publicacion.getCliente()) : null); // opcional
         dto.setNombreCliente(publicacion.getCliente() != null ? publicacion.getCliente().getNombreCompleto() : null);
         return dto;
     }

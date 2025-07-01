@@ -30,6 +30,7 @@ const Login: React.FC = () => {
 
       // Guardar el usuario
       localStorage.setItem('user', JSON.stringify({
+        id:data.id,
         name: username,
         isLoggedIn: true,
         rol: data.rol,

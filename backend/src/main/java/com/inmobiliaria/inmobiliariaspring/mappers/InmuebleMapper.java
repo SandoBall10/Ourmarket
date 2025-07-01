@@ -19,7 +19,7 @@ public class InmuebleMapper {
         dto.setDistrito(inmueble.getDistrito());
         dto.setDireccion(inmueble.getDireccion());
         dto.setImagenes(inmueble.getImagenes());
-        // dto.setIdCliente(inmueble.getCliente() != null ? inmueble.getCliente().getIdCliente() : null); // opcional
+        dto.setCliente(inmueble.getCliente() != null ? ClienteMapper.toDTO(inmueble.getCliente()) : null); // opcional
         return dto;
     }
 }

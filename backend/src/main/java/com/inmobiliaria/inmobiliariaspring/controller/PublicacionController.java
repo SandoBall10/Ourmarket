@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import com.inmobiliaria.inmobiliariaspring.dto.PublicacionDTO;
+import com.inmobiliaria.inmobiliariaspring.mappers.InmuebleMapper;
 import com.inmobiliaria.inmobiliariaspring.mappers.PublicacionMapper;
 import com.inmobiliaria.inmobiliariaspring.model.Publicacion;
 import com.inmobiliaria.inmobiliariaspring.service.PublicacionService;
@@ -24,6 +25,9 @@ public class PublicacionController {
 
     @Autowired
     private PublicacionService publicacionService;
+
+    @Autowired
+    private com.inmobiliaria.inmobiliariaspring.repository.InmuebleRepository inmuebleRepository;
 
     // Crear publicación
     @PostMapping("/publicar")
@@ -52,10 +56,20 @@ public class PublicacionController {
     public ResponseEntity<List<PublicacionDTO>> listarPublicaciones() {
         List<PublicacionDTO> dtos = publicacionService.listarPublicaciones()
             .stream()
-            .map(PublicacionMapper::toDTO)
-            .collect(Collectors.toList());
+        .map(pub -> {
+            PublicacionDTO dto = PublicacionMapper.toDTO(pub);
+            // Aquí obtienes el inmueble y lo asignas al DTO
+            if (pub.getInmueble() != null && pub.getInmueble().getIdInmueble() != null) {
+                inmuebleRepository.findById(pub.getInmueble().getIdInmueble()).ifPresent(
+                    inmueble -> dto.setInmueble(InmuebleMapper.toDTO(inmueble))
+                );
+            }
+            return dto;
+        })
+        .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
+    
 
     // Buscar publicación por ID
     @GetMapping("/{id}")

@@ -8,8 +8,10 @@ public class PublicacionDTO {
     private String descripcion;
     private LocalDateTime fechaPublicacion;
     private Integer idInmueble;
-    private Integer idCliente;
-    private String nombreCliente; // opcional
+    //private Integer idCliente;
+    private String nombreCliente;
+    private InmuebleDTO inmueble; // <-- agrega esto
+    private ClienteDTO cliente; // <-- Añade esta línea
 
     public PublicacionDTO() {
     }
@@ -55,12 +57,12 @@ public class PublicacionDTO {
         this.idInmueble = idInmueble;
     }
 
-    public Integer getIdCliente() {
-        return idCliente;
+    public ClienteDTO getCliente() {
+        return cliente;
     }
 
-    public void setIdCliente(Integer idCliente) {
-        this.idCliente = idCliente;
+    public void setCliente(ClienteDTO cliente) {
+        this.cliente = cliente;
     }
 
     public String getNombreCliente() {
@@ -69,6 +71,14 @@ public class PublicacionDTO {
 
     public void setNombreCliente(String nombreCliente) {
         this.nombreCliente = nombreCliente;
+    }
+
+    public InmuebleDTO getInmueble() {
+        return inmueble;
+    }
+
+    public void setInmueble(InmuebleDTO inmueble) {
+        this.inmueble = inmueble;
     }
 
 }

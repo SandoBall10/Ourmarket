@@ -74,7 +74,13 @@
 
 .imagen-container {
   position: relative;
-  padding-top: 66.67%; /* Aspect ratio 3:2 */
+  padding-top: 0 !important;
+  height: 180px;
+  width: 100%;
+  overflow: hidden;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: #eee;
 }
 
 .imagen-container img {
@@ -84,6 +90,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 }
 
 .estado-badge {
@@ -178,4 +186,21 @@
     grid-template-columns: 1fr;
     gap: 1rem;
   }
+}
+
+/* Publicaciones.css */
+.imagen-container,
+.carousel,
+.carousel-inner,
+.carousel-item {
+  height: 180px !important;
+  min-height: 180px !important;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 }

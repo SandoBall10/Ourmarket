@@ -42,7 +42,7 @@ public class InmuebleService {
         }
 
         // Siempre dejar imágenes en null al crear
-        inmueble.setImagenes(null);
+        //inmueble.setImagenes(null);
         
         // Usamos el Factory para crear el inmueble
         Inmueble nuevoInmueble = InmuebleFactory.crearInmueble(

@@ -4,6 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Publicaciones.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import axios from 'axios';
+import Carousel from 'react-bootstrap/Carousel';
+import Modal from 'react-bootstrap/Modal';
 
 interface Publicacion {
   id: number;
@@ -14,8 +17,10 @@ interface Publicacion {
   metros: number;
   habitaciones?: number;
   banos?: number;
-  imagen: string;
+  imagenes: string[];
   estado: 'activa' | 'vendida' | 'reservada';
+  descripcion?: string;
+  autorizado?: boolean; // <-- agrega esto
 }
 
 const Publicaciones: React.FC = () => {
@@ -35,6 +40,13 @@ const Publicaciones: React.FC = () => {
   
     const [user, setUser] = useState<User | null>(null);
 
+  // Nuevo estado para el modal
+  const [showModal, setShowModal] = useState(false);
+  const [publicacionEdit, setPublicacionEdit] = useState<Publicacion | null>(null);
+  const [editTitulo, setEditTitulo] = useState('');
+  const [editDescripcion, setEditDescripcion] = useState('');
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -49,31 +61,85 @@ const Publicaciones: React.FC = () => {
       setIsLoggedIn(true);
     }
 
-    // Simulación de carga de datos
+    // Cargar publicaciones reales
     const cargarPublicaciones = async () => {
+      setIsLoading(true);
       try {
-        setTimeout(() => {
-          setPublicaciones([
-            {
-              id: 1,
-              tipo: 'casa',
-              titulo: 'Casa moderna en zona residencial',
-              precio: 250000,
-              ubicacion: 'San Borja, Lima',
-              metros: 150,
-              habitaciones: 3,
-              banos: 2,
-              imagen: '/path-to-image.jpg',
-              estado: 'activa'
-            },
-            // Aquí puedes agregar más publicaciones de ejemplo
-          ]);
-          setIsLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Error al cargar publicaciones:', error);
-        setIsLoading(false);
+        const token = localStorage.getItem('token');
+        const user = userData ? JSON.parse(userData) : null;
+        const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        const response = await axios.get('http://localhost:8080/api/publicaciones', {
+          headers: { 'Authorization': authToken }
+        });
+
+        // Mapea la respuesta a tu interfaz Publicacion
+        interface ApiPublicacion {
+          idPublicacion?: number;
+          id?: number;
+          id_publicacion?: number;
+          titulo: string;
+          estado?: string;
+          descripcion?: string;
+          autorizado?: boolean;
+          inmueble?: {
+            tipo?: string;
+            precio?: number;
+            direccion?: string;
+            distrito?: string;
+            area?: number;
+            num_habitaciones?: number;
+            numero_habitaciones?: number;
+            num_banos?: number;
+            numero_banos?: number;
+            imagenes?: string;
+            cliente?: {
+              email?: string;
+              // otros campos si necesitas
+            }
+          };
+        }
+
+        let publicacionesMapeadas: Publicacion[] = response.data.map(
+          (pub: ApiPublicacion) => {
+          const inm = pub.inmueble || {};
+          let imagenes: string[] = [];
+          if (inm.imagenes) {
+            imagenes = inm.imagenes
+              .split(';')
+              .filter((img: string) => img.trim() !== '')
+              .map((img: string) => `http://localhost:8080/assets/inmuebles/${img}`);
+          }
+          return {
+            id: pub.idPublicacion ?? pub.id ?? pub.id_publicacion,
+            tipo: inm.tipo || 'casa',
+            titulo: pub.titulo,
+            precio: inm.precio ?? 0,
+            ubicacion: `${inm.direccion || ''}${inm.distrito ? ', ' + inm.distrito : ''}`,
+            metros: inm.area ?? 0,
+            habitaciones: inm.num_habitaciones ?? inm.numero_habitaciones,
+            banos: inm.num_banos ?? inm.numero_banos,
+            imagenes,
+            estado: pub.estado || 'activa',
+            descripcion: pub.descripcion || '', // <-- AGREGA ESTA LÍNEA
+            autorizado: pub.autorizado ?? false, // <-- agrega esto
+          };
+        });
+        // Filtrar si es cliente
+    if (user?.rol === 'ROLE_CLIENTE') {
+      // Filtra publicaciones del cliente autenticado usando el email
+      publicacionesMapeadas = publicacionesMapeadas.filter((_, idx) =>
+        response.data[idx]?.inmueble?.cliente?.email === user.name
+      );
+    }
+        setPublicaciones(publicacionesMapeadas);
+
+        // Filtra publicaciones según el usuario autenticado
+        // (Esta lógica ya está implementada fuera del useEffect)
+
+      } catch {
+        setPublicaciones([]);
       }
+      setIsLoading(false);
     };
 
     cargarPublicaciones();
@@ -95,6 +161,49 @@ const Publicaciones: React.FC = () => {
       pub.ubicacion.toLowerCase().includes(busqueda.toLowerCase());
     return cumpleTipo && cumpleEstado && cumpleBusqueda;
   });
+
+  // Función para guardar cambios en la publicación
+  const handleGuardarEdicion = async () => {
+    if (!publicacionEdit) return;
+    setSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      await axios.put(
+        `http://localhost:8080/api/publicaciones/${publicacionEdit.id}`,
+        {
+          ...publicacionEdit,
+          titulo: editTitulo,
+          descripcion: editDescripcion
+        },
+        {
+          headers: {
+            'Authorization': authToken,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      // Actualiza el estado local
+      setPublicaciones(prev =>
+        prev.map(p =>
+          p.id === publicacionEdit.id
+            ? { ...p, titulo: editTitulo, descripcion: editDescripcion }
+            : p
+        )
+      );
+      setShowModal(false);
+    } catch {
+      alert('Error al actualizar la publicación');
+    }
+    setSaving(false);
+  };
+
+  const handleEditar = (pub: Publicacion) => {
+    setPublicacionEdit(pub);
+    setEditTitulo(pub.titulo);
+    setEditDescripcion(pub.descripcion || '');
+    setShowModal(true);
+  };
 
   return (
     <div className="publicaciones-page">
@@ -307,48 +416,143 @@ const Publicaciones: React.FC = () => {
           ) : (
             publicacionesFiltradas.map(pub => (
               <Card key={pub.id} className="publicacion-card" data-aos="fade-up">
-                <div className="imagen-container">
-                  <Card.Img variant="top" src={pub.imagen} />
-                  <Badge className={`estado-badge estado-${pub.estado}`}>
-                    {pub.estado.toUpperCase()}
-                  </Badge>
-                </div>
-                <Card.Body>
-                  <Card.Title>{pub.titulo}</Card.Title>
-                  <div className="detalles">
-                    <p className="precio">$ {pub.precio.toLocaleString()}</p>
-                    <p className="ubicacion">
-                      <i className="bi bi-geo-alt-fill"></i> {pub.ubicacion}
-                    </p>
-                    <div className="caracteristicas">
-                      <span><i className="bi bi-rulers"></i> {pub.metros}m²</span>
-                      {pub.habitaciones && (
-                        <span><i className="bi bi-house-door"></i> {pub.habitaciones} hab.</span>
-                      )}
-                      {pub.banos && (
-                        <span><i className="bi bi-water"></i> {pub.banos} baños</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="acciones">
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={() => navigate(`/editar-publicacion/${pub.id}`)}
-                    >
-                      <i className="bi bi-pencil-fill"></i> Editar
-                    </Button>
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => {
-                        if (window.confirm('¿Estás seguro de eliminar esta publicación?')) {
-                          // Implementar lógica de eliminación
-                        }
+                <Card.Body style={{ padding: 0 }}>
+                  <div
+                    className="imagen-container"
+                    style={{
+                      height: 180,
+                      width: '100%',
+                      overflow: 'hidden',
+                      borderTopLeftRadius: 12,
+                      borderTopRightRadius: 12,
+                      position: 'relative',
+                      background: '#eee'
+                    }}
+                  >
+                    {pub.imagenes && pub.imagenes.length > 0 ? (
+                      <Carousel
+                        interval={null}
+                        indicators={pub.imagenes.length > 1}
+                        style={{ height: 180 }}
+                        controls={pub.imagenes.length > 1}
+                      >
+                        {pub.imagenes.map((img, idx) => (
+                          <Carousel.Item key={idx} style={{ height: 180 }}>
+                            <img
+                              src={img}
+                              alt={`Imagen ${idx + 1}`}
+                              style={{
+                                width: '100%',
+                                height: 180,
+                                objectFit: 'cover',
+                                borderTopLeftRadius: 12,
+                                borderTopRightRadius: 12
+                              }}
+                              onError={e => {
+                                (e.target as HTMLImageElement).src = 'http://localhost:8080/assets/inmuebles/img_default.jpg';
+                              }}
+                            />
+                          </Carousel.Item>
+                        ))}
+                      </Carousel>
+                    ) : (
+                      <div
+                        style={{
+                          width: '100%',
+                          height: 180,
+                          background: '#eee',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#aaa',
+                          borderTopLeftRadius: 12,
+                          borderTopRightRadius: 12
+                        }}
+                      >
+                        Sin imágenes
+                      </div>
+                    )}
+                    <Badge
+                      className={`estado-badge estado-${pub.estado}`}
+                      style={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        zIndex: 2,
+                        fontSize: 14,
+                        padding: '6px 16px'
                       }}
                     >
-                      <i className="bi bi-trash-fill"></i> Eliminar
-                    </Button>
+                      {pub.estado.toUpperCase()}
+                    </Badge>
+                  </div>
+                  {/* El resto del contenido de la tarjeta */}
+                  <div style={{ padding: 16 }}>
+                    <Card.Title>{pub.titulo}</Card.Title>
+                    {pub.autorizado === false ? (
+                      <Badge bg="warning" text="dark" className="mb-2">
+                        Pendiente de aprobación
+                      </Badge>
+                    ) : (
+                      <Badge bg="success" className="mb-2">
+                        Aprobado
+                      </Badge>
+                    )}
+                    <div className="detalles">
+                      <p className="precio">S/. {pub.precio.toLocaleString()}</p>
+                      <p className="ubicacion">
+                        <i className="bi bi-geo-alt-fill"></i> {pub.ubicacion}
+                      </p>
+                      <div className="caracteristicas">
+                        <span>
+                          <i className="bi bi-rulers"></i> {pub.metros}m²
+                        </span>
+                        {pub.habitaciones && (
+                          <span>
+                            <i className="bi bi-house-door"></i> {pub.habitaciones} hab.
+                          </span>
+                        )}
+                        {pub.banos && (
+                          <span>
+                            <i className="bi bi-water"></i> {pub.banos} baños
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="acciones">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => handleEditar(pub)}
+                      >
+                        <i className="bi bi-pencil-fill"></i> Editar
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={async () => {
+                          if (window.confirm('¿Estás seguro de eliminar esta publicación?')) {
+                            try {
+                              const token = localStorage.getItem('token');
+                              const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+                              await axios.delete(
+                                `http://localhost:8080/api/publicaciones/${pub.id}`,
+                                {
+                                  headers: {
+                                    'Authorization': authToken
+                                  }
+                                }
+                              );
+                              setPublicaciones(prev => prev.filter(p => p.id !== pub.id));
+                            } catch {
+                              alert('Error al eliminar la publicación');
+                            }
+                          }
+                        }}
+                      >
+                        <i className="bi bi-trash-fill"></i> Eliminar
+                      </Button>
+                    </div>
                   </div>
                 </Card.Body>
               </Card>
@@ -356,6 +560,47 @@ const Publicaciones: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Modal para editar publicación */}
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        centered
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Editar publicación</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Título</Form.Label>
+              <Form.Control
+                type="text"
+                value={editTitulo}
+                onChange={e => setEditTitulo(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Descripción</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                value={editDescripcion}
+                onChange={e => setEditDescripcion(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancelar
+          </Button>
+          <Button variant="success" onClick={handleGuardarEdicion} disabled={saving}>
+            Guardar cambios
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <footer className="bg-dark text-light py-4 mt-auto">
         <Container fluid>

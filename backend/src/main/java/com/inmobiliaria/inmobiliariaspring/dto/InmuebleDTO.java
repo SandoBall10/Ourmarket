@@ -15,6 +15,7 @@ public class InmuebleDTO {
     private String distrito;
     private String direccion;
     private String imagenes;
+    private ClienteDTO cliente; // <-- Añade esta línea
 
     public InmuebleDTO() {
     }
@@ -113,5 +114,13 @@ public class InmuebleDTO {
 
     public void setImagenes(String imagenes) {
         this.imagenes = imagenes;
+    }
+
+    public ClienteDTO getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(ClienteDTO cliente) {
+        this.cliente = cliente;
     }
 }
