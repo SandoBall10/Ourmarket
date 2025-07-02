@@ -40,26 +40,63 @@ const Dashboard: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false); // Nuevo estado para eliminar
   const navigate = useNavigate();
 
+  // Utilidad global para obtener el token correctamente formateado
+  const getAuthToken = () => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+  };
+
   // Verificar permisos y obtener el rol y datos del usuario
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!user.isLoggedIn || (user.rol !== 'ROLE_MASTER' && user.rol !== 'ROLE_ADMIN')) {
-      navigate('/login');
-      return;
-    }
-    setUserRole(user.rol);
-    setUser(user); // Establecer el usuario para el NavDropdown
+    const checkSession = () => {
+      try {
+        // Recuperar datos del usuario desde localStorage
+        const userStr = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+
+        if (!userStr || !token) {
+          console.log('No hay datos de usuario o token en localStorage');
+          navigate('/login');
+          return;
+        }
+
+        const user = JSON.parse(userStr);
+        
+        // Verificar que tiene rol adecuado
+        if (!user.isLoggedIn || (user.rol !== 'ROLE_MASTER' && user.rol !== 'ROLE_ADMIN')) {
+          console.log('Usuario sin rol adecuado');
+          navigate('/login');
+          return;
+        }
+        
+        // NO verificar token aquí - lo haremos solo cuando sea necesario
+        setUserRole(user.rol);
+        setUser(user);
+        
+        setUserData({
+          nombre: user.name?.split(' ')[0] || 'Usuario',
+          apellido: user.name?.split(' ')[1] || '',
+          email: user.email || 'email@ejemplo.com',
+          telefono: user.telefono || '',
+          documento: user.documento || 'DNI',
+          identificador: user.identificador || ''
+        });
+        
+        console.log('Sesión de usuario verificada correctamente:', user.rol);
+      } catch (error) {
+        console.error('Error al procesar datos del usuario:', error);
+        // NO redirigir automáticamente aquí
+      }
+    };
+
+    checkSession();
     
-    // Aquí deberías obtener los datos completos del usuario de la API
-    setUserData({
-      nombre: user.name?.split(' ')[0] || 'Usuario',
-      apellido: user.name?.split(' ')[1] || '',
-      email: user.email || 'email@ejemplo.com',
-      telefono: user.telefono || '',
-      documento: user.documento || 'DNI',
-      identificador: user.identificador || ''
-    });
-  }, [navigate]);
+    // Implementamos una verificación periódica pero muy poco frecuente
+    const sessionInterval = setInterval(checkSession, 30 * 60 * 1000); // 30 minutos
+    
+    return () => clearInterval(sessionInterval);
+  }, []);
 
   // Cargar administradores
   useEffect(() => {
@@ -70,13 +107,20 @@ const Dashboard: React.FC = () => {
       }
 
       try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          throw new Error('No hay token de autenticación disponible');
+        }
+        
+        // Asegurar formato correcto del token
+        const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
         
         // Asegurarse de que el token se envía correctamente
         const response = await fetch('http://localhost:8080/api/administradores', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${user.token}`,
+            'Authorization': authToken,
             'Content-Type': 'application/json'
           }
         });
@@ -109,12 +153,14 @@ const Dashboard: React.FC = () => {
     
     if (window.confirm('¿Está seguro que desea eliminar este administrador?')) {
       try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const authToken = getAuthToken();
+        if (!authToken) throw new Error('No hay token de autenticación disponible');
         
         const response = await fetch(`http://localhost:8080/api/administradores/${adminId}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${user.token}`
+            'Authorization': authToken,
+            'Content-Type': 'application/json'
           }
         });
         
@@ -123,9 +169,10 @@ const Dashboard: React.FC = () => {
         }
         
         // Actualizar la lista después de eliminar
-        setAdministradores(prevAdmins => prevAdmins.filter(admin => 
-          admin.id !== adminId && admin.idAdministrador !== adminId
-        ));
+        setAdministradores(prevAdmins => prevAdmins.filter(admin => {
+          const adminIdKey = admin.idAdmin || admin.id_admin || admin.id || admin.idAdministrador;
+          return adminIdKey !== adminId;
+        }));
         
         alert('Administrador eliminado correctamente');
       } catch (err) {
@@ -134,9 +181,10 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Manejo de cierre de sesión
+  // Manejo de cierre de sesión - sin timeouts
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     navigate('/login');
   };
 
@@ -186,7 +234,8 @@ const Dashboard: React.FC = () => {
     setSubmitError(null);
 
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const authToken = getAuthToken();
+      if (!authToken) throw new Error('No hay token de autenticación disponible');
       
       // Usar siempre el rol 2 (Administrador)
       const adminData = {
@@ -203,7 +252,7 @@ const Dashboard: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
+          'Authorization': authToken
         },
         body: JSON.stringify(adminData)
       });
@@ -225,7 +274,7 @@ const Dashboard: React.FC = () => {
         const updatedResponse = await fetch('http://localhost:8080/api/administradores', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${user.token}`,
+            'Authorization': authToken,
             'Content-Type': 'application/json'
           }
         });
@@ -316,7 +365,8 @@ const Dashboard: React.FC = () => {
     setIsEditing(true);
     
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const authToken = getAuthToken();
+      if (!authToken) throw new Error('No hay token de autenticación disponible');
       
       // Actualizar la estructura de datos - ya no incluye el rol
       const updateData: any = {
@@ -335,7 +385,7 @@ const Dashboard: React.FC = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
+          'Authorization': authToken
         },
         body: JSON.stringify(updateData)
       });
@@ -350,7 +400,7 @@ const Dashboard: React.FC = () => {
       const updatedResponse = await fetch('http://localhost:8080/api/administradores', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': authToken,
           'Content-Type': 'application/json'
         }
       });
@@ -385,14 +435,15 @@ const Dashboard: React.FC = () => {
     
     try {
       setIsDeleting(true);
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const authToken = getAuthToken();
+      if (!authToken) throw new Error('No hay token de autenticación disponible');
       
       console.log("Eliminando administrador con ID:", adminToDelete);
       
       const response = await fetch(`http://localhost:8080/api/administradores/${adminToDelete}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': authToken,
           'Content-Type': 'application/json'
         }
       });
@@ -414,7 +465,7 @@ const Dashboard: React.FC = () => {
       const updatedResponse = await fetch('http://localhost:8080/api/administradores', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': authToken,
           'Content-Type': 'application/json'
         }
       });
@@ -432,36 +483,6 @@ const Dashboard: React.FC = () => {
       setIsDeleting(false);
     }
   };
-
-  // Verificar permisos específicos para editar administradores
-  useEffect(() => {
-    const checkEditPermissions = async () => {
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        
-        // Intentar obtener opciones/permisos
-        const response = await fetch('http://localhost:8080/api/administradores/permisos', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${user.token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (response.ok) {
-          console.log("Permisos verificados correctamente");
-        } else {
-          console.error("No se tienen los permisos necesarios:", response.status);
-        }
-      } catch (error) {
-        console.error("Error verificando permisos:", error);
-      }
-    };
-    
-    if (userRole === 'ROLE_MASTER') {
-      checkEditPermissions();
-    }
-  }, [userRole]);
 
   // Renderiza la sección correspondiente según activeSection
   const renderContent = () => {
@@ -628,6 +649,28 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Renderizar banner de sesión expirada si hay error
+  const renderSessionErrorBanner = () => {
+    if (error && (error.includes('sesión') || error.includes('token'))) {
+      return (
+        <div className="alert alert-warning d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            {error}
+          </div>
+          <Button 
+            variant="outline-dark" 
+            size="sm" 
+            onClick={() => navigate('/login')}
+          >
+            Iniciar sesión nuevamente
+          </Button>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="dashboard-main-container">
 {/* Barra de Navegación */}
@@ -765,6 +808,7 @@ const Dashboard: React.FC = () => {
         
         {/* Contenido principal existente */}
         <div className="dashboard-content">
+          {renderSessionErrorBanner()}
           {/* Código existente del contenido... */}
           <div className="dashboard-header">
             <h2>
