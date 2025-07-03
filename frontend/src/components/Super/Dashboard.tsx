@@ -225,8 +225,8 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    if (newAdmin.contrasena.length < 6) {
-      setSubmitError("La contraseña debe tener al menos 6 caracteres.");
+    if (newAdmin.contrasena.length < 8) {
+      setSubmitError("La contraseña debe tener al menos 8 caracteres.");
       return;
     }
 
@@ -874,7 +874,7 @@ const Dashboard: React.FC = () => {
                 />
               </div>
               <Form.Text className="text-muted">
-                La contraseña debe tener al menos 6 caracteres.
+                La contraseña debe tener al menos 8 caracteres.
               </Form.Text>
             </Form.Group>
 
