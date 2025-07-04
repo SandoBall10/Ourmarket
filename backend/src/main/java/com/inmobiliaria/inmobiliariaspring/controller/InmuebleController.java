@@ -174,7 +174,7 @@ public class InmuebleController implements WebMvcConfigurer {
     public ResponseEntity<InmuebleDTO> marcarComoVendido(@PathVariable Integer id, Authentication authentication) {
         boolean esAdmin = authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
-            .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_MASTER"));
+            .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_CLIENTE"));
         if (!esAdmin) {
             return ResponseEntity.status(403).body(null);
         }
