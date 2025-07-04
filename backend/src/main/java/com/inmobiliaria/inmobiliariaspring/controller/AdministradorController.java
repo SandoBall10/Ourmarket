@@ -30,11 +30,19 @@ public class AdministradorController {
         @ApiResponse(responseCode = "403", description = "No tienes permiso para acceder a este recurso")
     })
     public ResponseEntity<?> create(@RequestBody Administrador administrador) {
-        if (administrador.getUsername() == null || administrador.getContrasena() == null) {
-            return ResponseEntity.badRequest().body("Username y contraseña son obligatorios");
+        try {
+            if (administrador.getUsername() == null || administrador.getContrasena() == null) {
+                return ResponseEntity.badRequest().body("Username y contraseña son obligatorios");
+            }
+            Administrador nuevoAdmin = administradorService.registrarAdministrador(administrador);
+            return ResponseEntity.ok(nuevoAdmin);
+        } catch (IllegalArgumentException e) {
+            // Captura el mensaje de error de validación de contraseña
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            // Captura otros errores como rol no encontrado
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        Administrador nuevoAdmin = administradorService.registrarAdministrador(administrador);
-        return ResponseEntity.ok(nuevoAdmin);
     }
 
     // Listar administradores

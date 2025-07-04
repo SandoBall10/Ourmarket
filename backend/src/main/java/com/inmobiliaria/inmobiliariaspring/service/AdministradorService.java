@@ -28,6 +28,7 @@ public class AdministradorService {
     }
 
     public Administrador registrarAdministrador(Administrador admin) {
+        validarFuerzaContrasena(admin.getContrasena());
         // Asigna el rol 2 (admin) por defecto
         Rol rolAdmin = rolRepository.findById(2)
             .orElseThrow(() -> new RuntimeException("Rol admin no encontrado"));
@@ -66,5 +67,13 @@ public class AdministradorService {
 
     public void deleteById(Integer id) {
         administradorRepository.deleteById(id);
+    }
+
+    // Validar fuerza de contraseña
+    private void validarFuerzaContrasena(String contrasena) {
+        // Al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo
+        if (contrasena == null || !contrasena.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")) {
+            throw new RuntimeException("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.");
+        }
     }
 }
