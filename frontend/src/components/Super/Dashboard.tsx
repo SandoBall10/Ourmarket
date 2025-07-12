@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Navbar, Container, Nav, NavDropdown, Button, Modal, Form, Dropdown } from 'react-bootstrap';
+import { Navbar, Container, Nav, NavDropdown, Button, Modal, Form, Dropdown, Table, Alert } from 'react-bootstrap';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
@@ -38,6 +38,9 @@ const Dashboard: React.FC = () => {
   const [adminToDelete, setAdminToDelete] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false); // Nuevo estado para eliminar
+  const [pendientes, setPendientes] = useState<any[]>([]);
+  const [loadingPendientes, setLoadingPendientes] = useState(false);
+  const [errorPendientes, setErrorPendientes] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Utilidad global para obtener el token correctamente formateado
@@ -146,6 +149,36 @@ const Dashboard: React.FC = () => {
       fetchAdministradores();
     }
   }, [userRole, activeSection]);
+
+  // Cargar publicaciones pendientes cuando la sección activa es 'pendientes'
+  useEffect(() => {
+    const fetchPendientes = async () => {
+      if (activeSection !== 'pendientes') return;
+      setLoadingPendientes(true);
+      setErrorPendientes(null);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No hay token de autenticación disponible');
+        const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        const response = await fetch('http://localhost:8080/api/publicaciones/pendientes', {
+          headers: {
+            'Authorization': authToken,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Error al cargar publicaciones pendientes');
+        }
+        const data = await response.json();
+        setPendientes(data);
+      } catch (err) {
+        setErrorPendientes(err instanceof Error ? err.message : 'Error al cargar publicaciones pendientes');
+      } finally {
+        setLoadingPendientes(false);
+      }
+    };
+    fetchPendientes();
+  }, [activeSection]);
 
   // Eliminar administrador (solo MASTER)
   const handleDeleteAdmin = async (adminId: number) => {
@@ -588,6 +621,62 @@ const Dashboard: React.FC = () => {
           </div>
         );
         
+      case 'pendientes':
+        return (
+          <div className="card shadow">
+            <div className="card-header bg-white d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">
+                <i className="bi bi-hourglass-split me-2"></i>
+                Publicaciones Pendientes de Aprobación
+              </h5>
+            </div>
+            <div className="card-body">
+              {errorPendientes && <Alert variant="danger">{errorPendientes}</Alert>}
+              {loadingPendientes ? (
+                <div className="text-center py-4">
+                  <div className="spinner-border text-success" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                  </div>
+                </div>
+              ) : (
+                <Table striped bordered hover>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Título</th>
+                      <th>Descripción</th>
+                      <th>Cliente</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pendientes.length > 0 ? pendientes.map(pub => (
+                      <tr key={pub.idPublicacion || pub.id}>
+                        <td>{pub.idPublicacion || pub.id}</td>
+                        <td>{pub.titulo}</td>
+                        <td>{pub.descripcion}</td>
+                        <td>{pub.cliente?.email || 'N/A'}</td>
+                        <td>
+                          <span className="badge bg-warning text-dark">{pub.estado}</span>
+                        </td>
+                        <td>
+                          {/* Aquí podrías agregar botón para aprobar */}
+                          {/* <Button size="sm" variant="success">Aprobar</Button> */}
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={6} className="text-center">No hay publicaciones pendientes</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              )}
+            </div>
+          </div>
+        );
+        
       case 'dashboard':
       default:
         return (
@@ -795,6 +884,12 @@ const Dashboard: React.FC = () => {
               <a href="#" onClick={() => setActiveSection('administradores')}>
                 <i className="bi bi-people-fill"></i>
                 <span>Administradores</span>
+              </a>
+            </li>
+            <li className={activeSection === 'pendientes' ? 'active' : ''}>
+              <a href="#" onClick={() => setActiveSection('pendientes')}>
+                <i className="bi bi-hourglass-split"></i>
+                <span>Pendientes de aprobación</span>
               </a>
             </li>
             <li>
