@@ -7,7 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.inmobiliaria.inmobiliariaspring.dto.PublicacionDTO;
 import com.inmobiliaria.inmobiliariaspring.mappers.InmuebleMapper;
@@ -83,6 +91,22 @@ public class PublicacionController {
             .map(PublicacionMapper::toDTO)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Listar publicaciones por estado (solo para admins)
+    @GetMapping("/pendientes")
+    @Operation(summary = "Listar publicaciones pendientes de aprobación", description = "Obtiene todas las publicaciones en estado 'Pendiente de aprobación'. Solo accesible para ADMIN/MASTER.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
+    public ResponseEntity<List<PublicacionDTO>> listarPublicacionesPendientes() {
+        List<PublicacionDTO> dtos = publicacionService.listarPublicaciones()
+            .stream()
+            .filter(pub -> pub.getAutorizado() != null && !pub.getAutorizado()) // Solo las NO autorizadas
+            .map(PublicacionMapper::toDTO)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     // Autorizar publicación (por un admin)
