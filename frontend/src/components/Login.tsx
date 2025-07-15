@@ -34,6 +34,7 @@ const Login: React.FC = () => {
         name: username,
         isLoggedIn: true,
         rol: data.rol,
+        prueba: "ddddddddd"
       }));
 
       // Guardar el token por separado

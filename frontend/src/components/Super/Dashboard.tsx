@@ -1,10 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Navbar, Container, Nav, NavDropdown, Button, Modal, Form, Dropdown, Table, Alert } from 'react-bootstrap';
+import { Navbar, Container, Nav, NavDropdown, Button, Modal, Form, Table, Alert, Carousel } from 'react-bootstrap';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
-  const [administradores, setAdministradores] = useState<any[]>([]);
+  interface Administrador {
+    idAdmin?: number;
+    id_admin?: number;
+    id?: number;
+    idAdministrador?: number;
+    username?: string;
+    nombreCompleto?: string;
+    fechaCreacion?: string;
+    fecha_creacion?: string;
+    fechaActualizacion?: string;
+    fecha_actualizacion?: string;
+    rol?: {
+      idRol?: number;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  }
+  const [administradores, setAdministradores] = useState<Administrador[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string>('');
@@ -17,8 +34,17 @@ const Dashboard: React.FC = () => {
     identificador: ''
   });
   const [activeSection, setActiveSection] = useState('perfil');
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Siempre true en el dashboard
-  const [user, setUser] = useState<any>(null);
+  const [isLoggedIn] = useState(true); // Siempre true en el dashboard
+  interface User {
+    name?: string;
+    email?: string;
+    telefono?: string;
+    documento?: string;
+    identificador?: string;
+    rol?: string;
+    isLoggedIn?: boolean;
+  }
+  const [user, setUser] = useState<User | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [newAdmin, setNewAdmin] = useState({
     username: '',
@@ -38,9 +64,28 @@ const Dashboard: React.FC = () => {
   const [adminToDelete, setAdminToDelete] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false); // Nuevo estado para eliminar
-  const [pendientes, setPendientes] = useState<any[]>([]);
+  interface Pendiente {
+    idPublicacion?: number;
+    id?: number;
+    titulo?: string;
+    descripcion?: string;
+    cliente?: {
+      email?: string;
+      [key: string]: unknown;
+    };
+    estado?: string;
+    imagenes?: string[]; // Nueva propiedad para las imágenes
+    inmueble?: {
+      imagenes?: string;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  }
+  const [pendientes, setPendientes] = useState<Pendiente[]>([]);
   const [loadingPendientes, setLoadingPendientes] = useState(false);
   const [errorPendientes, setErrorPendientes] = useState<string | null>(null);
+  const [showImagenesModal, setShowImagenesModal] = useState(false);
+  const [imagenesSeleccionadas, setImagenesSeleccionadas] = useState<string[]>([]);
   const navigate = useNavigate();
 
   // Utilidad global para obtener el token correctamente formateado
@@ -180,39 +225,7 @@ const Dashboard: React.FC = () => {
     fetchPendientes();
   }, [activeSection]);
 
-  // Eliminar administrador (solo MASTER)
-  const handleDeleteAdmin = async (adminId: number) => {
-    if (userRole !== 'ROLE_MASTER') return;
-    
-    if (window.confirm('¿Está seguro que desea eliminar este administrador?')) {
-      try {
-        const authToken = getAuthToken();
-        if (!authToken) throw new Error('No hay token de autenticación disponible');
-        
-        const response = await fetch(`http://localhost:8080/api/administradores/${adminId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': authToken,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Error al eliminar el administrador');
-        }
-        
-        // Actualizar la lista después de eliminar
-        setAdministradores(prevAdmins => prevAdmins.filter(admin => {
-          const adminIdKey = admin.idAdmin || admin.id_admin || admin.id || admin.idAdministrador;
-          return adminIdKey !== adminId;
-        }));
-        
-        alert('Administrador eliminado correctamente');
-      } catch (err) {
-        alert(err instanceof Error ? err.message : 'Error al eliminar el administrador');
-      }
-    }
-  };
+  // (Eliminada función handleDeleteAdmin porque no se usa)
 
   // Manejo de cierre de sesión - sin timeouts
   const handleLogout = () => {
@@ -241,12 +254,6 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  const handleRolChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setNewAdmin({
-      ...newAdmin,
-      rolId: parseInt(e.target.value)
-    });
-  };
 
   // Modifica la función handleSubmit para usar siempre rol 2
   const handleSubmit = async (e: React.FormEvent) => {
@@ -327,7 +334,7 @@ const Dashboard: React.FC = () => {
   };
 
   // Abrir el modal de edición con los datos del administrador seleccionado
-  const handleShowEditModal = (admin: any) => {
+  const handleShowEditModal = (admin: Administrador) => {
     console.log("Datos completos del admin:", admin); // Para depuración
     
     // Extrae correctamente el ID observando todas las propiedades
@@ -402,7 +409,11 @@ const Dashboard: React.FC = () => {
       if (!authToken) throw new Error('No hay token de autenticación disponible');
       
       // Actualizar la estructura de datos - ya no incluye el rol
-      const updateData: any = {
+      interface UpdateAdminData {
+        username: string;
+        contrasena?: string;
+      }
+      const updateData: UpdateAdminData = {
         username: editAdmin.username
       };
       
@@ -517,6 +528,76 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Estados para modal de rechazo (mueve aquí para evitar error de hooks en switch)
+  const [showRechazarModal, setShowRechazarModal] = useState(false);
+  const [rechazoMsg, setRechazoMsg] = useState('');
+  const [publicacionARechazar, setPublicacionARechazar] = useState<Pendiente | null>(null);
+
+  // Función para aprobar publicación
+  const aprobarPublicacion = async (pubId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : {};
+      const idAdmin = user.idAdmin || user.id || user.id_admin || user.idAdministrador;
+      if (!idAdmin) {
+        alert('No se pudo identificar el ID del administrador.');
+        return;
+      }
+      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      const response = await fetch(`http://localhost:8080/api/publicaciones/${pubId}/autorizar?idAdmin=${idAdmin}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('No se pudo aprobar la publicación');
+      setPendientes(prev => prev.filter(p => (p.idPublicacion || p.id) !== pubId));
+    } catch {
+      alert('Error al aprobar la publicación');
+    }
+  };
+
+  // Función para abrir modal de rechazo
+  const handleAbrirRechazar = (pub: Pendiente) => {
+    setPublicacionARechazar(pub);
+    setRechazoMsg('');
+    setShowRechazarModal(true);
+  };
+
+  // Función para rechazar publicación
+  const rechazarPublicacion = async () => {
+    const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : {};
+      const idAdmin = user.idAdmin || user.id || user.id_admin || user.idAdministrador;
+      if (!idAdmin) {
+        alert('No se pudo identificar el ID del administrador.');
+        return;
+      }
+    if (!publicacionARechazar) return;
+    try {
+      const pubId = publicacionARechazar.idPublicacion || publicacionARechazar.id;
+      const token = localStorage.getItem('token');
+      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      const response = await fetch(`http://localhost:8080/api/publicaciones/${pubId}/rechazar?idAdmin=${idAdmin}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: JSON.stringify({ autorizado: false, motivoRechazo: rechazoMsg }),
+      });
+      if (!response.ok) throw new Error('No se pudo rechazar la publicación');
+      setPendientes(prev => prev.filter(p => (p.idPublicacion || p.id) !== pubId));
+      setShowRechazarModal(false);
+      setPublicacionARechazar(null);
+      setRechazoMsg('');
+    } catch {
+      alert('Error al rechazar la publicación');
+    }
+  };
+
   // Renderiza la sección correspondiente según activeSection
   const renderContent = () => {
     switch (activeSection) {
@@ -569,7 +650,7 @@ const Dashboard: React.FC = () => {
                               <td>{admin.username || admin.nombreCompleto}</td>
                               <td className="date-column">
                                 {admin.fechaCreacion || admin.fecha_creacion 
-                                  ? new Date(admin.fechaCreacion || admin.fecha_creacion).toLocaleDateString('es-ES', {
+                                  ? new Date(admin.fechaCreacion || admin.fecha_creacion || '').toLocaleDateString('es-ES', {
                                       day: '2-digit',
                                       month: '2-digit',
                                       year: 'numeric',
@@ -580,7 +661,7 @@ const Dashboard: React.FC = () => {
                               </td>
                               <td className="date-column">
                                 {admin.fechaActualizacion || admin.fecha_actualizacion 
-                                  ? new Date(admin.fechaActualizacion || admin.fecha_actualizacion).toLocaleDateString('es-ES', {
+                                  ? new Date(admin.fechaActualizacion || admin.fecha_actualizacion || '').toLocaleDateString('es-ES', {
                                       day: '2-digit',
                                       month: '2-digit',
                                       year: 'numeric',
@@ -599,7 +680,14 @@ const Dashboard: React.FC = () => {
                                 {userRole === 'ROLE_MASTER' && (
                                   <button 
                                     className="btn btn-sm btn-outline-danger"
-                                    onClick={() => handleShowDeleteModal(admin.idAdmin || admin.id || admin.idAdministrador)}
+                                    onClick={() => {
+                                      const id = admin.idAdmin ?? admin.id ?? admin.idAdministrador ?? admin.id_admin;
+                                      if (typeof id === 'number') {
+                                        handleShowDeleteModal(id);
+                                      } else {
+                                        alert('No se pudo identificar el ID del administrador para eliminar.');
+                                      }
+                                    }}
                                   >
                                     <i className="bi bi-trash"></i>
                                   </button>
@@ -646,6 +734,8 @@ const Dashboard: React.FC = () => {
                       <th>Título</th>
                       <th>Descripción</th>
                       <th>Cliente</th>
+                      {/* Nueva columna para ver imágenes */}
+                      <th>Ver Imágenes</th>
                       <th>Estado</th>
                       <th>Acciones</th>
                     </tr>
@@ -658,11 +748,52 @@ const Dashboard: React.FC = () => {
                         <td>{pub.descripcion}</td>
                         <td>{pub.cliente?.email || 'N/A'}</td>
                         <td>
-                          <span className="badge bg-warning text-dark">{pub.estado}</span>
+                          <Button
+                            size="sm"
+                            variant="info"
+                            onClick={() => {
+                              // Obtener imágenes del inmueble asociado a la publicación
+                              let imagenes: string[] = [];
+                              const inm = pub.inmueble || {};
+                              if (inm.imagenes) {
+                                imagenes = inm.imagenes
+                                  .split(';')
+                                  .filter((img: string) => img.trim() !== '')
+                                  .map((img: string) => `http://localhost:8080/assets/inmuebles/${img}`);
+                              }
+                              setShowImagenesModal(true);
+                              setImagenesSeleccionadas(imagenes);
+                            }}
+                          >
+                            Ver Imágenes
+                          </Button>
                         </td>
                         <td>
-                          {/* Aquí podrías agregar botón para aprobar */}
-                          {/* <Button size="sm" variant="success">Aprobar</Button> */}
+                          <span className="badge bg-warning text-dark">{pub.estado || 'Pendiente'}</span>
+                        </td>
+                        <td>
+                          <Button
+                            size="sm"
+                            variant="success"
+                            className="me-2"
+                            onClick={() => {
+                              const pubId = pub.idPublicacion ?? pub.id;
+                              if (typeof pubId === 'number') {
+                                aprobarPublicacion(pubId);
+                              } else {
+                                alert('No se pudo identificar el ID de la publicación para aprobar.');
+                              }
+                            }}
+                          >
+                            Aceptar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="danger"
+                            onClick={() => handleAbrirRechazar(pub)}
+                          >
+                            Rechazar
+                          </Button>
                         </td>
                       </tr>
                     )) : (
@@ -674,6 +805,37 @@ const Dashboard: React.FC = () => {
                 </Table>
               )}
             </div>
+            {/* Modal para motivo de rechazo */}
+            <Modal show={showRechazarModal} onHide={() => setShowRechazarModal(false)} centered>
+              <Modal.Header closeButton>
+                <Modal.Title>Motivo de rechazo</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <Form.Group>
+                  <Form.Label>Por favor, indica el motivo del rechazo:</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={rechazoMsg}
+                    onChange={e => setRechazoMsg(e.target.value)}
+                    placeholder="Ej: La información es incorrecta o incompleta."
+                    required
+                  />
+                </Form.Group>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowRechazarModal(false)}>
+                  Cancelar
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={rechazarPublicacion}
+                  disabled={!rechazoMsg.trim()}
+                >
+                  Rechazar publicación
+                </Button>
+              </Modal.Footer>
+            </Modal>
           </div>
         );
         
@@ -1122,6 +1284,30 @@ const Dashboard: React.FC = () => {
             )}
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* Modal para ver imágenes de publicación */}
+      <Modal show={showImagenesModal} onHide={() => setShowImagenesModal(false)} centered size="xl">
+        <Modal.Header closeButton>
+          <Modal.Title>Imágenes del Inmueble</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ minHeight: 450 }}>
+          {imagenesSeleccionadas.length > 0 ? (
+            <Carousel>
+              {imagenesSeleccionadas.map((img, idx) => (
+                <Carousel.Item key={idx}>
+                  <img
+                    src={img}
+                    alt={`Imagen ${idx + 1}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </Carousel.Item>
+              ))}
+            </Carousel>
+          ) : (
+            <div className="text-center text-muted">No hay imágenes disponibles</div>
+          )}
+        </Modal.Body>
       </Modal>
     </div>
   );

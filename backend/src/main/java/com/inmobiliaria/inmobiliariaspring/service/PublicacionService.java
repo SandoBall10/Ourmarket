@@ -69,12 +69,26 @@ public class PublicacionService {
             .orElseThrow(() -> new RuntimeException("Administrador no encontrado"));
 
         // Marca como autorizada
-        publicacion.setAutorizado(true);
+        publicacion.setAutorizado(2);
         // Asigna el admin que autorizó
         publicacion.setAdministrador(admin);
         // Guarda un log con el nombre del admin y la fecha
         publicacion.setLogAutorizado("Autorizado por: " + admin.getUsername() + " el " + LocalDateTime.now());
         // Guarda y retorna la publicación actualizada
+        return publicacionRepository.save(publicacion);
+    }
+
+    // Rechazar publicación (por un admin)
+    public Publicacion rechazarPublicacion(Integer idPublicacion, Integer idAdmin, String motivoRechazo) {
+        Publicacion publicacion = publicacionRepository.findById(idPublicacion)
+            .orElseThrow(() -> new RuntimeException("Publicación no encontrada"));
+        Administrador admin = administradorRepository.findById(idAdmin)
+            .orElseThrow(() -> new RuntimeException("Administrador no encontrado"));
+
+        publicacion.setAutorizado(3);
+        publicacion.setAdministrador(admin);
+        publicacion.setMotivoRechazo(motivoRechazo);
+        publicacion.setLogAutorizado("Rechazado por: " + admin.getUsername() + " el " + java.time.LocalDateTime.now() + ". Motivo: " + motivoRechazo);
         return publicacionRepository.save(publicacion);
     }
 

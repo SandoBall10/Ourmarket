@@ -25,7 +25,7 @@ public class Publicacion {
     private String descripcion;
 
     @Column(name = "autorizado", nullable = false)
-    private Boolean autorizado = false; //falso por defecto
+    private Integer autorizado = 1; //1 pendiente // 2 autorizado // 3 rechazado
 
     @ManyToOne
     @JoinColumn(name = "id_cliente")
@@ -38,6 +38,9 @@ public class Publicacion {
     @Column(name = "log_autorizado", columnDefinition = "TEXT")
     private String logAutorizado;
 
+    @Column(name = "motivo_rechazo", columnDefinition = "TEXT")
+    private String motivoRechazo;
+
     public Publicacion() {}
 
     public Publicacion(Inmueble inmueble, LocalDateTime fechaPublicacion, String titulo,
@@ -46,10 +49,10 @@ public class Publicacion {
         this.fechaPublicacion = fechaPublicacion;
         this.titulo = titulo;
         this.descripcion = descripcion;
-        this.autorizado = false;
+        this.autorizado = 1;
         this.cliente = cliente;
         this.administrador = null;
-        this.logAutorizado = null; 
+        this.logAutorizado = null;
     }
     //Getters y Setters
     public Integer getIdPublicacion() {
@@ -92,11 +95,11 @@ public class Publicacion {
         this.descripcion = descripcion;
     }
 
-    public Boolean getAutorizado() {
+    public Integer getAutorizado() {
         return autorizado;
     }
 
-    public void setAutorizado(Boolean autorizado) {
+    public void setAutorizado(Integer autorizado) {
         this.autorizado = autorizado;
     }
 
@@ -123,5 +126,11 @@ public class Publicacion {
     public void setLogAutorizado(String logAutorizado) {
         this.logAutorizado = logAutorizado;
     }
+    public String getMotivoRechazo() {
+        return motivoRechazo;
+    }
 
+    public void setMotivoRechazo(String motivoRechazo) {
+        this.motivoRechazo = motivoRechazo;
+    }
 }

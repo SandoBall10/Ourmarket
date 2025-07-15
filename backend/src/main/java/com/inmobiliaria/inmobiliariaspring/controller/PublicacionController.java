@@ -1,6 +1,7 @@
 package com.inmobiliaria.inmobiliariaspring.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,10 +104,23 @@ public class PublicacionController {
     public ResponseEntity<List<PublicacionDTO>> listarPublicacionesPendientes() {
         List<PublicacionDTO> dtos = publicacionService.listarPublicaciones()
             .stream()
-            .filter(pub -> pub.getAutorizado() != null && !pub.getAutorizado()) // Solo las NO autorizadas
-            .map(PublicacionMapper::toDTO)
+            .filter(pub -> pub.getAutorizado() == 1) // Solo las pendientes
+            .map(pub -> {
+            PublicacionDTO dto = PublicacionMapper.toDTO(pub);
+            // Aquí obtienes el inmueble y lo asignas al DTO
+            if (pub.getInmueble() != null && pub.getInmueble().getIdInmueble() != null) {
+                inmuebleRepository.findById(pub.getInmueble().getIdInmueble()).ifPresent(
+                    inmueble -> dto.setInmueble(InmuebleMapper.toDTO(inmueble))
+                );
+            }
+            return dto;
+        })
             .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
+
+        
+
+
     }
 
     // Autorizar publicación (por un admin)
@@ -121,6 +135,26 @@ public class PublicacionController {
         try {
             Publicacion autorizada = publicacionService.autorizarPublicacion(idPublicacion, idAdmin);
             return ResponseEntity.ok(PublicacionMapper.toDTO(autorizada));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    // Rechazar publicación (por un admin)
+    @PutMapping("/{idPublicacion}/rechazar")
+    @Operation(summary = "Rechazar publicación", description = "Rechaza una publicación específica. Solo un administrador puede realizar esta acción.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Publicación rechazada exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Error al rechazar publicación")
+    })
+    public ResponseEntity<PublicacionDTO> rechazarPublicacion(
+            @PathVariable Integer idPublicacion,
+            @RequestParam Integer idAdmin,
+            @RequestBody Map<String, String> body) {
+        try {
+            String motivoRechazo = body.get("motivoRechazo");
+            Publicacion rechazada = publicacionService.rechazarPublicacion(idPublicacion, idAdmin, motivoRechazo);
+            return ResponseEntity.ok(PublicacionMapper.toDTO(rechazada));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);
         }

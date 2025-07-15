@@ -2,6 +2,7 @@ package com.inmobiliaria.inmobiliariaspring.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,15 +19,25 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.inmobiliaria.inmobiliariaspring.dto.AuthRequest;
 import com.inmobiliaria.inmobiliariaspring.util.JwtUtil;
+import com.inmobiliaria.inmobiliariaspring.model.Administrador;
+import com.inmobiliaria.inmobiliariaspring.model.Cliente;
+import com.inmobiliaria.inmobiliariaspring.repository.AdministradorRepository;
+import com.inmobiliaria.inmobiliariaspring.repository.ClienteRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-
 @RestController
 public class AuthController {
+
+
+    @Autowired
+    private ClienteRepository clienteRepository;
+
+    @Autowired
+    private AdministradorRepository administradorRepository;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -59,11 +70,27 @@ public class AuthController {
                     .loadUserByUsername(authRequest.usernameOrEmail);
 
             String rol = userDetails.getAuthorities().iterator().next().getAuthority();
-
             final String jwt = jwtUtil.generateToken(
                     userDetails.getUsername(),
                     rol
             );
+
+            // NUEVO: Obtener el id según el rol
+            Long id = null;
+            if (rol.equals("ROLE_ADMIN") || rol.equals("ROLE_MASTER")) {
+                // Busca el admin por username
+                Optional<Administrador> adminOpt = administradorRepository.findByUsername(authRequest.usernameOrEmail);
+                if (adminOpt.isPresent()) {
+                    id = adminOpt.get().getIdAdmin() != null ? adminOpt.get().getIdAdmin().longValue() : null;
+                }
+            } else if (rol.equals("ROLE_CLIENTE")) {
+                // Busca el cliente por email
+                Optional<Cliente> clienteOpt = clienteRepository.findByEmail(authRequest.usernameOrEmail);
+                if (clienteOpt.isPresent()) {
+                    id = clienteOpt.get().getIdCliente() != null ? clienteOpt.get().getIdCliente().longValue() : null;
+                }
+            }
+
             // Configurar la cookie si rememberMe es true (se usa jwt)
             if(rememberMe){
                 Cookie cookie = new Cookie("jwt", jwt);
@@ -75,9 +102,10 @@ public class AuthController {
                 resp.addCookie(cookie);
             }
 
-            Map<String, String> response = new HashMap<>();
+            Map<String, Object> response = new HashMap<>();
             response.put("token", jwt);
             response.put("rol", rol);
+            response.put("id", id); // <-- Agrega el id aquí
 
             return ResponseEntity.ok(response);
 
