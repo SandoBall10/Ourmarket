@@ -136,18 +136,17 @@ const Buscar: React.FC = () => {
       once: false
     });
 
-    // Cargar datos de usuario
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      setIsLoggedIn(true);
-      // Cargar favoritos del usuario
-      cargarFavoritos(parsedUser.id);
-    }
+    // Función para cargar todo
+    const cargarDatos = async () => {
+      // Cargar datos de usuario
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        setIsLoggedIn(true);
+      }
 
-    // Cargar publicaciones desde el backend
-    const cargarPublicaciones = async () => {
+      // Cargar publicaciones desde el backend
       setIsLoading(true);
       try {
         const token = localStorage.getItem('token');
@@ -196,16 +195,24 @@ const Buscar: React.FC = () => {
               idInmueble: inm.id,
             };
           });
-        setPublicaciones(publicacionesAutorizadas);
-      } catch (error) {
-        console.error('Error al cargar publicaciones:', error);
-      } finally {
-        setIsLoading(false);
+      
+      setPublicaciones(publicacionesAutorizadas);
+      
+      // AHORA cargar favoritos DESPUÉS de que las publicaciones estén cargadas
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        await cargarFavoritos(parsedUser.id, publicacionesAutorizadas);
       }
-    };
+      
+    } catch (error) {
+      console.error('Error al cargar publicaciones:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    cargarPublicaciones();
-  }, []);
+  cargarDatos();
+}, []);
 
   // Función para cerrar sesión
   const handleLogout = () => {
@@ -235,7 +242,7 @@ const Buscar: React.FC = () => {
     });
   };
 
-  // Función para alternar favorito
+  // Función para alternar favorito - VERSIÓN MEJORADA
   const toggleFavorito = async (publicacionId: number) => {
     if (!user) {
       alert('Debes iniciar sesión para guardar favoritos');
@@ -245,11 +252,20 @@ const Buscar: React.FC = () => {
 
     // Buscar la publicación completa para obtener el idInmueble
     const publicacion = publicaciones.find(pub => pub.id === publicacionId);
-    if (!publicacion || !publicacion.idInmueble) {
-      console.error('No se encontró el inmueble para esta publicación:', publicacionId);
-      alert('Error: No se pudo identificar el inmueble');
+    if (!publicacion) {
+      console.error('No se encontró la publicación:', publicacionId);
+      alert('Error: No se pudo encontrar la publicación');
       return;
     }
+
+    // Si no tiene idInmueble, usar el ID de la publicación como fallback
+    const inmuebleId = publicacion.idInmueble || publicacionId;
+    
+    console.log('Datos de la publicación:', {
+      publicacionId,
+      inmuebleId,
+      publicacion
+    });
 
     // Agregar a loading
     setLoadingFavoritos(prev => new Set(prev).add(publicacionId));
@@ -262,7 +278,7 @@ const Buscar: React.FC = () => {
       
       console.log('Usuario ID:', user.id);
       console.log('Publicación ID:', publicacionId);
-      console.log('Inmueble ID:', publicacion.idInmueble);
+      console.log('Inmueble ID (usando):', inmuebleId);
       console.log('Es favorito actual:', esFavorito);
       
       if (esFavorito) {
@@ -274,7 +290,7 @@ const Buscar: React.FC = () => {
           },
           data: {
             id_cliente: user.id,
-            id_inmueble: publicacion.idInmueble  // Usar el ID real del inmueble
+            id_inmueble: inmuebleId
           }
         });
         
@@ -289,17 +305,19 @@ const Buscar: React.FC = () => {
         // Agregar a favoritos
         const favoritoData = {
           id_cliente: user.id,
-          id_inmueble: publicacion.idInmueble  // Usar el ID real del inmueble
+          id_inmueble: inmuebleId
         };
         
         console.log('Enviando datos de favorito:', favoritoData);
         
-        await axios.post('http://localhost:8080/api/favoritos/crear', favoritoData, {
+        const response = await axios.post('http://localhost:8080/api/favoritos/crear', favoritoData, {
           headers: {
             'Authorization': authToken,
             'Content-Type': 'application/json'
           }
         });
+        
+        console.log('Respuesta del servidor:', response.data);
         
         // Actualizar estado local
         setFavoritos(prev => new Set(prev).add(publicacionId));
@@ -311,8 +329,18 @@ const Buscar: React.FC = () => {
         console.error('Response data:', error.response?.data);
         console.error('Response status:', error.response?.status);
         console.error('Response headers:', error.response?.headers);
+        
+        // Mostrar mensaje de error más específico
+        if (error.response?.status === 403) {
+          alert('No tienes permisos para realizar esta acción. Verifica que hayas iniciado sesión correctamente.');
+        } else if (error.response?.status === 400) {
+          alert('Datos inválidos. Por favor, inténtalo de nuevo.');
+        } else {
+          alert('Error al actualizar favoritos. Inténtalo de nuevo.');
+        }
+      } else {
+        alert('Error de conexión. Verifica tu conexión a internet.');
       }
-      alert('Error al actualizar favoritos. Inténtalo de nuevo.');
     } finally {
       // Remover de loading
       setLoadingFavoritos(prev => {
@@ -323,11 +351,13 @@ const Buscar: React.FC = () => {
     }
   };
 
-  // Función para cargar favoritos del usuario
-  const cargarFavoritos = async (userId: number) => {
+  // Función para cargar favoritos del usuario - MEJORADA
+  const cargarFavoritos = async (userId: number, publicacionesData?: Publicacion[]) => {
     try {
       const token = localStorage.getItem('token');
       const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      
+      console.log('Cargando favoritos para usuario:', userId);
       
       const response = await axios.get(`http://localhost:8080/api/favoritos/usuario/${userId}`, {
         headers: {
@@ -335,7 +365,11 @@ const Buscar: React.FC = () => {
         }
       });
       
-      console.log('Favoritos cargados:', response.data);
+      console.log('Favoritos cargados desde backend:', response.data);
+      
+      // Usar las publicaciones pasadas como parámetro o las del estado
+      const publicacionesParaBuscar = publicacionesData || publicaciones;
+      console.log('Publicaciones disponibles para buscar:', publicacionesParaBuscar.length);
       
       // Crear Set con los IDs de publicaciones que corresponden a los inmuebles favoritos
       const favoritosIds: Set<number> = new Set<number>();
@@ -343,15 +377,30 @@ const Buscar: React.FC = () => {
       interface FavoritoBackend {
         id_inmueble?: number;
         inmuebleId?: number;
-        // Puedes agregar otras propiedades si es necesario
       }
 
       response.data.forEach((fav: FavoritoBackend) => {
         const inmuebleId = fav.id_inmueble || fav.inmuebleId;
+        console.log('Procesando favorito con inmueble ID:', inmuebleId);
+        
         // Buscar la publicación que corresponde a este inmueble
-        const publicacionCorrespondiente = publicaciones.find(pub => pub.idInmueble === inmuebleId);
+        const publicacionCorrespondiente = publicacionesParaBuscar.find(pub => {
+          const match = pub.idInmueble === inmuebleId || pub.id === inmuebleId;
+          console.log(`Comparando publicación ${pub.id}: idInmueble=${pub.idInmueble}, id=${pub.id} con inmuebleId=${inmuebleId}, match=${match}`);
+          return match;
+        });
+        
         if (publicacionCorrespondiente) {
+          console.log('✓ Publicación encontrada:', publicacionCorrespondiente.id, publicacionCorrespondiente.titulo);
           favoritosIds.add(publicacionCorrespondiente.id);
+        } else {
+          console.log('✗ No se encontró publicación para inmueble:', inmuebleId);
+          // Como fallback, intentar agregar el ID directamente si es una publicación válida
+          const publicacionDirecta = publicacionesParaBuscar.find(pub => pub.id === inmuebleId);
+          if (publicacionDirecta) {
+            console.log('✓ Encontrada publicación por ID directo:', publicacionDirecta.id);
+            favoritosIds.add(publicacionDirecta.id);
+          }
         }
       });
       
@@ -359,6 +408,10 @@ const Buscar: React.FC = () => {
       console.log('Favoritos IDs de publicaciones cargados:', Array.from(favoritosIds));
     } catch (error) {
       console.error('Error al cargar favoritos:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+      }
     }
   };
 

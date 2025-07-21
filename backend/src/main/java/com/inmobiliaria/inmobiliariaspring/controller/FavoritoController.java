@@ -14,70 +14,103 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequestMapping("/api/favoritos")
+@CrossOrigin(origins = "*")
 public class FavoritoController {
 
     @Autowired
     private FavoritoService favoritoService;
 
-    @PostMapping("/agregar")
-    @Operation(summary = "Agregar un favorito", description = "Agrega un inmueble a la lista de favoritos de un cliente.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Favorito agregado exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-        @ApiResponse(responseCode = "403", description = "Acceso denegado: Solo el cliente autenticado puede agregar un favorito")
-    })
-    public ResponseEntity<FavoritoDTO> agregarFavorito(@RequestBody FavoritoDTO favoritoDTO) {
-        Favorito favorito = new Favorito();
-        favorito.setIdCliente(favoritoDTO.getIdCliente());
-        favorito.setIdInmueble(favoritoDTO.getIdInmueble());
-        Favorito favoritoCreado = favoritoService.agregarFavorito(favorito);
+    @PostMapping("/crear")
+    @Operation(summary = "Crear un favorito")
+    public ResponseEntity<?> crearFavorito(@RequestBody FavoritoDTO favoritoDTO) {
+        try {
+            System.out.println("=== CREAR FAVORITO ===");
+            System.out.println("ID Cliente: " + favoritoDTO.getId_cliente());
+            System.out.println("ID Inmueble: " + favoritoDTO.getId_inmueble());
+            
+            if (favoritoDTO.getId_cliente() == null || favoritoDTO.getId_inmueble() == null) {
+                System.out.println("ERROR: ID cliente o inmueble es null");
+                return ResponseEntity.badRequest().body("ID cliente e inmueble son requeridos");
+            }
+            
+            Favorito favorito = new Favorito();
+            favorito.setIdCliente(favoritoDTO.getId_cliente());
+            favorito.setIdInmueble(favoritoDTO.getId_inmueble());
+            
+            Favorito favoritoCreado = favoritoService.agregarFavorito(favorito);
 
-        // Construir DTO de respuesta (puedes agregar más campos si tienes acceso a inmueble)
-        FavoritoDTO respuesta = new FavoritoDTO();
-        respuesta.setIdCliente(favoritoCreado.getIdCliente());
-        respuesta.setIdInmueble(favoritoCreado.getIdInmueble());
-        // Si tienes acceso a inmueble, puedes setear dirección, precio, imágenes, etc.
+            FavoritoDTO respuesta = new FavoritoDTO();
+            respuesta.setId_cliente(favoritoCreado.getIdCliente());
+            respuesta.setId_inmueble(favoritoCreado.getIdInmueble());
 
-        return ResponseEntity.ok(respuesta);
+            System.out.println("Favorito creado exitosamente");
+            return ResponseEntity.ok(respuesta);
+        } catch (Exception e) {
+            System.out.println("ERROR al crear favorito: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Error interno del servidor: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/usuario/{userId}")
+    @Operation(summary = "Obtener favoritos de un usuario")
+    public ResponseEntity<?> obtenerFavoritosPorUsuario(@PathVariable Integer userId) {
+        try {
+            System.out.println("=== OBTENER FAVORITOS ===");
+            System.out.println("Usuario ID: " + userId);
+            
+            List<FavoritoDTO> favoritos = favoritoService.obtenerFavoritosPorCliente(userId);
+            System.out.println("Favoritos encontrados: " + favoritos.size());
+            
+            for (FavoritoDTO fav : favoritos) {
+                System.out.println("- Cliente: " + fav.getId_cliente() + ", Inmueble: " + fav.getId_inmueble());
+            }
+            
+            return ResponseEntity.ok(favoritos);
+        } catch (Exception e) {
+            System.out.println("ERROR al obtener favoritos: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Error interno del servidor: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/eliminar")
+    @Operation(summary = "Eliminar un favorito")
+    public ResponseEntity<?> eliminarFavorito(@RequestBody FavoritoDTO favoritoDTO) {
+        try {
+            System.out.println("=== ELIMINAR FAVORITO ===");
+            System.out.println("ID Cliente: " + favoritoDTO.getId_cliente());
+            System.out.println("ID Inmueble: " + favoritoDTO.getId_inmueble());
+            
+            if (favoritoDTO.getId_cliente() == null || favoritoDTO.getId_inmueble() == null) {
+                return ResponseEntity.badRequest().body("ID cliente e inmueble son requeridos");
+            }
+            
+            favoritoService.eliminarFavorito(favoritoDTO.getId_cliente(), favoritoDTO.getId_inmueble());
+            System.out.println("Favorito eliminado exitosamente");
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            System.out.println("ERROR al eliminar favorito: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Error interno del servidor: " + e.getMessage());
+        }
     }
 
     @GetMapping
-    @Operation(summary = "Listar todos los favoritos", description = "Obtiene una lista de todos los favoritos registrados.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Lista de favoritos obtenida exitosamente")
-    })
     public List<FavoritoDTO> listarFavoritos() {
         return favoritoService.listarFavoritos();
     }
 
     @GetMapping("/{clienteId}/{inmuebleId}")
-    @Operation(summary = "Obtener un favorito", description = "Obtiene un favorito específico por cliente ID e inmueble ID.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Favorito encontrado"),
-        @ApiResponse(responseCode = "404", description = "Favorito no encontrado")
-    })
     public ResponseEntity<FavoritoDTO> obtenerFavorito(@PathVariable Integer clienteId, 
                                                        @PathVariable Integer inmuebleId) {
         return favoritoService.obtenerFavorito(clienteId, inmuebleId)
             .map(favorito -> {
                 FavoritoDTO dto = new FavoritoDTO();
-                dto.setIdCliente(favorito.getIdCliente());
-                dto.setIdInmueble(favorito.getIdInmueble());
-                // Si tienes acceso a inmueble, puedes setear dirección, precio, imágenes, etc.
+                dto.setId_cliente(favorito.getIdCliente());
+                dto.setId_inmueble(favorito.getIdInmueble());
                 return ResponseEntity.ok(dto);
             })
             .orElse(ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/eliminar/{clienteId}/{inmuebleId}")
-    @Operation(summary = "Eliminar un favorito", description = "Elimina un favorito específico por cliente ID e inmueble ID.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Favorito eliminado exitosamente"),
-        @ApiResponse(responseCode = "404", description = "Favorito no encontrado"),
-        @ApiResponse(responseCode = "403", description = "Acceso denegado: Solo el cliente que agregó el favorito puede eliminarlo")
-    })
-    public ResponseEntity<Void> eliminarFavorito(@PathVariable Integer clienteId, @PathVariable Integer inmuebleId) {
-        favoritoService.eliminarFavorito(clienteId, inmuebleId);
-        return ResponseEntity.noContent().build();
     }
 }

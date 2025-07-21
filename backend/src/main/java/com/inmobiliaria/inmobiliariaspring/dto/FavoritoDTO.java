@@ -1,30 +1,47 @@
 package com.inmobiliaria.inmobiliariaspring.dto;
 
 public class FavoritoDTO {
-    private Integer idCliente;
-    private Integer idInmueble;
-    private String direccion;   // opcional
-    private String precio;      // opcional
-    private String imagenes;    // opcional
+    private Integer id_cliente;  // Cambiado para coincidir con el frontend
+    private Integer id_inmueble; // Cambiado para coincidir con el frontend
+    private String direccion;    // opcional
+    private String precio;       // opcional
+    private String imagenes;     // opcional
 
     public FavoritoDTO() {
     }
 
-    // Getters y Setters
+    // Getters y Setters actualizados
+    public Integer getId_cliente() {
+        return id_cliente;
+    }
+
+    public void setId_cliente(Integer id_cliente) {
+        this.id_cliente = id_cliente;
+    }
+
+    public Integer getId_inmueble() {
+        return id_inmueble;
+    }
+
+    public void setId_inmueble(Integer id_inmueble) {
+        this.id_inmueble = id_inmueble;
+    }
+
+    // Métodos de compatibilidad
     public Integer getIdCliente() {
-        return idCliente;
+        return id_cliente;
     }
 
     public void setIdCliente(Integer idCliente) {
-        this.idCliente = idCliente;
+        this.id_cliente = idCliente;
     }
 
     public Integer getIdInmueble() {
-        return idInmueble;
+        return id_inmueble;
     }
 
     public void setIdInmueble(Integer idInmueble) {
-        this.idInmueble = idInmueble;
+        this.id_inmueble = idInmueble;
     }
 
     public String getDireccion() {
