@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Form, Button, Navbar, Nav, NavDropdown } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import axios from 'axios';
 import './Chats.css';
 
 interface Message {
-  id: string;
-  senderId: string;
-  text: string;
-  timestamp: Date;
-  isRead: boolean;
+  id_mensaje: number;
+  contenido: string;
+  fecha_envio: string;
+  tipo_mensaje: string;
+  id_cliente: number;
+  id_inmueble: number;
+  isFromCurrentUser?: boolean;
 }
 
 interface Contact {
@@ -20,10 +23,19 @@ interface Contact {
   unreadCount: number;
   isOnline: boolean;
   avatar?: string;
+  publicacionId?: number;
+  publicacionTitulo?: string;
+  propietarioId?: number;
+}
+
+interface User {
+  id: number;
+  name: string;
 }
 
 const Chats: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -31,51 +43,247 @@ const Chats: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Simulación de autenticación
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
-  const [user, setUser] = useState<{ name: string }>({ name: 'Usuario' });
+  // Estados para autenticación
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  // Interface for publicación
+  interface Publicacion {
+    id: number;
+    titulo: string;
+    idInmueble?: number;
+    // Add other relevant fields if needed
+  }
+
+  // Estados para la publicación actual
+  const [currentPublicacion, setCurrentPublicacion] = useState<Publicacion | null>(null);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
-    setContacts([
-      {
-        id: '1',
-        name: 'Juan Pérez',
-        lastMessage: '¿Está disponible la casa?',
-        unreadCount: 2,
-        isOnline: true,
-      },
-    ]);
-  }, []);
+    
+    // Cargar datos de usuario
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      setIsLoggedIn(true);
+    }
+
+    // Verificar si se viene desde una publicación
+    if (location.state?.publicacion) {
+      setCurrentPublicacion(location.state.publicacion);
+      crearContactoPublicacion();
+    } else {
+      cargarContactos();
+    }
+  }, [location.state]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    // Cargar mensajes cuando se selecciona un contacto
+    if (selectedContact && location.state?.inmuebleId) {
+      cargarMensajesPublicacion(location.state.inmuebleId);
+    }
+  }, [selectedContact, location.state?.inmuebleId]);
+
+  useEffect(() => {
+    // Check if coming from a publication contact
+    if (location.state) {
+      const { publicacionId, inmuebleId, propietarioId, publicacionTitulo } = location.state;
+      createInitialChat(publicacionId, inmuebleId, propietarioId, publicacionTitulo);
+    }
+  }, [location.state]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const crearContactoPublicacion = () => {
+    if (location.state?.publicacion && location.state?.propietarioId) {
+      const pub = location.state.publicacion;
+      const nuevoContacto: Contact = {
+        id: `propietario_${location.state.propietarioId}`,
+        name: `Propietario de ${pub.titulo}`,
+        lastMessage: location.state.mensajeCreado ? 
+          `Hola, estoy interesado en tu propiedad "${pub.titulo}". ¿Podrías darme más información?` :
+          'Sin mensajes',
+        unreadCount: 0,
+        isOnline: false,
+        publicacionId: pub.id,
+        publicacionTitulo: pub.titulo,
+        propietarioId: location.state.propietarioId
+      };
+      
+      setContacts([nuevoContacto]);
+      setSelectedContact(nuevoContacto);
+      
+      // Cargar mensajes usando el ID del inmueble
+      if (location.state.inmuebleId) {
+        cargarMensajesPublicacion(location.state.inmuebleId);
+      }
+    }
+  };
+
+  const cargarContactos = async () => {
+    try {
+      // Por ahora mantenemos contactos simulados para conversaciones existentes
+      // En el futuro podrías cargar conversaciones reales desde el backend
+      const contactosSimulados: Contact[] = [
+        {
+          id: '1',
+          name: 'Juan Pérez',
+          lastMessage: '¿Está disponible la casa?',
+          unreadCount: 2,
+          isOnline: true,
+        },
+      ];
+      
+      setContacts(contactosSimulados);
+    } catch (error) {
+      console.error('Error al cargar contactos:', error);
+    }
+  };
+
+  const cargarMensajesPublicacion = async (inmuebleId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      
+      console.log('Cargando mensajes para inmueble:', inmuebleId);
+      
+      const response = await axios.get(`http://localhost:8080/api/mensajes/inmueble/${inmuebleId}`, {
+        headers: {
+          'Authorization': authToken
+        }
+      });
+
+      console.log('Mensajes recibidos:', response.data);
+
+      const mensajesConUsuario = response.data.map((msg: Message) => ({
+        ...msg,
+        isFromCurrentUser: user ? msg.id_cliente === user.id : false
+      }));
+
+      setMessages(mensajesConUsuario);
+    } catch (error) {
+      console.error('Error al cargar mensajes:', error);
+      setMessages([]);
+    }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedContact) return;
+    if (!newMessage.trim() || !selectedContact || !user) return;
 
-    const newMsg: Message = {
-      id: Date.now().toString(),
-      senderId: 'currentUser',
-      text: newMessage,
-      timestamp: new Date(),
-      isRead: false,
-    };
+    try {
+      const token = localStorage.getItem('token');
+      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      
+      const mensajeData = {
+        contenido: newMessage,
+        tipo_mensaje: 'texto',
+        id_cliente: user.id, // El usuario actual envía el mensaje
+        id_inmueble: location.state?.inmuebleId || currentPublicacion?.idInmueble || currentPublicacion?.id
+      };
 
-    setMessages((prevMessages) => [...prevMessages, newMsg]);
-    setNewMessage('');
+      console.log('Enviando nuevo mensaje:', mensajeData);
+
+      const response = await axios.post('http://localhost:8080/api/mensajes/crear', mensajeData, {
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Mensaje enviado exitosamente:', response.data);
+
+      // Agregar el mensaje a la lista local
+      const nuevoMensaje: Message = {
+        id_mensaje: response.data.id_mensaje || Date.now(),
+        contenido: newMessage,
+        fecha_envio: new Date().toISOString(),
+        tipo_mensaje: 'texto',
+        id_cliente: user.id,
+        id_inmueble: mensajeData.id_inmueble || 0,
+        isFromCurrentUser: true
+      };
+
+      setMessages(prevMessages => [...prevMessages, nuevoMensaje]);
+      setNewMessage('');
+      
+      // Actualizar el último mensaje del contacto
+      setContacts(prevContacts => 
+        prevContacts.map(contact => 
+          contact.id === selectedContact.id 
+            ? { ...contact, lastMessage: newMessage }
+            : contact
+        )
+      );
+    } catch (error) {
+      console.error('Error al enviar mensaje:', error);
+    }
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
     setIsLoggedIn(false);
-    setUser({ name: '' });
+    setUser(null);
     navigate('/login');
+  };
+
+  const formatMessageTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('es-ES', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const createInitialChat = async (publicacionId: number, inmuebleId: number, propietarioId: number, titulo: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Create initial message
+      const initialMessage = `Hola, estoy interesado en tu publicación: ${titulo}`;
+      
+      await axios.post('http://localhost:8080/api/mensajes/crear', {
+        contenido: initialMessage,
+        tipo_mensaje: 'texto',
+        id_cliente: user.id,
+        id_inmueble: inmuebleId
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Create contact and load messages
+      const newContact: Contact = {
+        id: propietarioId.toString(),
+        name: `Propietario - ${titulo}`,
+        lastMessage: initialMessage,
+        unreadCount: 0,
+        isOnline: false,
+        publicacionId,
+        publicacionTitulo: titulo,
+        propietarioId
+      };
+      
+      setSelectedContact(newContact);
+      cargarMensajesPublicacion(inmuebleId);
+      
+      // Clear navigation state
+      window.history.replaceState({}, document.title);
+      
+    } catch (error) {
+      console.error('Error creating initial chat:', error);
+    }
   };
 
   return (
@@ -95,61 +303,20 @@ const Chats: React.FC = () => {
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">
             <Nav className="me-auto">
-              {/* Menú Mis Publicaciones */}
-              <div className="nav-item mega-dropdown">
-                <Nav.Link
-                  as={Link}
-                  to="/publicaciones"
-                  className="nav-link-text"
-                  id="comprar-dropdown"
-                >
-                  Mis Publicaciones <i className="fas fa-chevron-down fa-xs"></i>
-                </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
-              </div>
-
-              {/* Menú Favoritos */}
-              <div className="nav-item mega-dropdown">
-                <Nav.Link
-                  as={Link}
-                  to="/mis-favoritos"
-                  className="nav-link-text active"
-                  id="favoritos-dropdown"
-                >
-                  Favoritos <i className="fas fa-chevron-down fa-xs"></i>
-                </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
-              </div>
-
-              {/* Menú Mis Chats */}
-              <div className="nav-item mega-dropdown">
-                <Nav.Link
-                  as={Link}
-                  to="/chats"
-                  className="nav-link-text"
-                  id="chats-dropdown"
-                >
-                  Mis Chats <i className="fas fa-chevron-down fa-xs"></i>
-                </Nav.Link>
-                <div className="mega-menu-wrapper">
-                </div>
-              </div>
-
-              {/* Menú Historial*/}
-              <div className="nav-item mega-dropdown">
-
-                <div className="mega-menu-wrapper">
-                </div>
-              </div>
+              <Nav.Link as={Link} to="/publicaciones" className="nav-link-text">
+                Mis Publicaciones
+              </Nav.Link>
+              <Nav.Link as={Link} to="/mis-favoritos" className="nav-link-text">
+                Favoritos
+              </Nav.Link>
+              <Nav.Link as={Link} to="/chats" className="nav-link-text active">
+                Mis Chats
+              </Nav.Link>
             </Nav>
             <Nav className="ms-auto">
-              {/* Notificaciones */}
               <Nav.Link href="#" className="me-2">
                 <span className="nav-link-text">Notificaciones <i className="far fa-bell"></i></span>
               </Nav.Link>
-              {/* Ingresar o Avatar de Usuario */}
               {isLoggedIn && user ? (
                 <NavDropdown
                   title={
@@ -173,7 +340,7 @@ const Chats: React.FC = () => {
                     <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
                     <span>Mis publicaciones</span>
                   </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
+                  <NavDropdown.Item as={Link} to="/mis-favoritos" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-heart"></i></div>
                     <span>Favoritos</span>
                   </NavDropdown.Item>
@@ -185,21 +352,6 @@ const Chats: React.FC = () => {
                   <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-user"></i></div>
                     <span>Mi cuenta</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Item
-                    onClick={() => {
-                      document.body.click();
-                      navigate('/perfil', { state: { activeSection: 'notificaciones' } });
-                    }}
-                    className="dropdown-item-custom"
-                  >
-                    <div className="icon-wrapper"><i className="fas fa-cog"></i></div>
-                    <span>Ajustes de notificaciones</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Item as={Link} to="/compradores" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-question-circle"></i></div>
-                    <span>Ayuda</span>
                   </NavDropdown.Item>
                   <NavDropdown.Item onClick={handleLogout} className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="fas fa-sign-out-alt"></i></div>
@@ -254,6 +406,9 @@ const Chats: React.FC = () => {
                     <div className="contact-info">
                       <h6 className="contact-name">{contact.name}</h6>
                       <p className="last-message">{contact.lastMessage}</p>
+                      {contact.publicacionTitulo && (
+                        <small className="text-muted">📍 {contact.publicacionTitulo}</small>
+                      )}
                     </div>
                     {contact.unreadCount > 0 && (
                       <span className="unread-badge">{contact.unreadCount}</span>
@@ -273,6 +428,12 @@ const Chats: React.FC = () => {
                     </div>
                     <div className="contact-info">
                       <h5>{selectedContact.name}</h5>
+                      {selectedContact.publicacionTitulo && (
+                        <small className="text-info">
+                          Conversación sobre: {selectedContact.publicacionTitulo}
+                        </small>
+                      )}
+                      <br />
                       <small
                         className={selectedContact.isOnline ? 'text-success' : 'text-muted'}
                       >
@@ -285,14 +446,14 @@ const Chats: React.FC = () => {
                 <div className="messages-container">
                   {messages.map((message) => (
                     <div
-                      key={message.id}
-                      className={`message ${message.senderId === 'currentUser' ? 'sent' : 'received'}`}
+                      key={message.id_mensaje}
+                      className={`message ${message.isFromCurrentUser ? 'sent' : 'received'}`}
                       data-aos="fade-up"
                     >
                       <div className="message-content">
-                        <p>{message.text}</p>
+                        <p>{message.contenido}</p>
                         <small className="message-time">
-                          {message.timestamp.toLocaleTimeString()}
+                          {formatMessageTime(message.fecha_envio)}
                         </small>
                       </div>
                     </div>

@@ -12,6 +12,7 @@ public class PublicacionDTO {
     private String nombreCliente;
     private InmuebleDTO inmueble; // <-- agrega esto
     private ClienteDTO cliente; // <-- Añade esta línea
+    private Integer autorizado; // <-- Agrega esto
 
     public PublicacionDTO() {
     }
@@ -79,6 +80,14 @@ public class PublicacionDTO {
 
     public void setInmueble(InmuebleDTO inmueble) {
         this.inmueble = inmueble;
+    }
+
+    public Integer getAutorizado() {
+        return autorizado;
+    }
+
+    public void setAutorizado(Integer autorizado) {
+        this.autorizado = autorizado;
     }
 
 }

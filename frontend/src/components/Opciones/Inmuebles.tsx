@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navbar, Nav, Container, Row, Col, Button, Card, Badge, NavDropdown, Modal } from 'react-bootstrap';
+import { Navbar, Nav, Container, Row, Col, Button, Card, Badge, NavDropdown, Modal, Carousel } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import './Inmuebles.css';
@@ -343,55 +343,40 @@ const Inmuebles: React.FC = () => {
             inmuebles.map(inm => (
               <Card key={inm.idInmueble} className="publicacion-card" data-aos="fade-up">
                 <Card.Body style={{ padding: 0 }}>
-                  <div
-                    className="imagen-container"
-                    style={{
-                      height: 180,
-                      width: '100%',
-                      overflow: 'hidden',
-                      borderTopLeftRadius: 12,
-                      borderTopRightRadius: 12,
-                      position: 'relative',
-                      background: '#eee'
-                    }}
-                  >
-                    {inm.imagenes ? (
-                      <img
-                        src={
-                          inm.imagenes.split(';')[0]
-                            ? `http://localhost:8080/assets/inmuebles/${inm.imagenes.split(';')[0]}`
-                            : 'http://localhost:8080/assets/inmuebles/img_default.jpg'
-                        }
-                        alt="Imagen inmueble"
-                        style={{
-                          width: '100%',
-                          height: 180,
-                          objectFit: 'cover',
-                          borderTopLeftRadius: 12,
-                          borderTopRightRadius: 12
-                        }}
-                        onError={e => {
-                          (e.target as HTMLImageElement).src = 'http://localhost:8080/assets/inmuebles/img_default.jpg';
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: '100%',
-                          height: 180,
-                          background: '#eee',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#aaa',
-                          borderTopLeftRadius: 12,
-                          borderTopRightRadius: 12
-                        }}
-                      >
-                        Sin imágenes
-                      </div>
-                    )}
-                  </div>
+                  {inm.imagenes ? (
+  <Carousel interval={null}>
+    {inm.imagenes.split(";").map((img, index) => (
+      <Carousel.Item key={index}>
+        <img
+          className="d-block w-100"
+          src={`http://localhost:8080/assets/inmuebles/${img}`}
+          alt={`Imagen ${index + 1}`}
+          style={{
+            height: 180,
+            objectFit: "cover",
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12
+          }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "http://localhost:8080/assets/inmuebles/img_default.jpg";
+          }}
+        />
+      </Carousel.Item>
+    ))}
+  </Carousel>
+) : (
+  <div style={{
+    height: 180,
+    backgroundColor: "#f0f0f0",
+    textAlign: "center",
+    paddingTop: 70,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12
+  }}>
+    Sin imágenes
+  </div>
+)}
+
                   <div style={{ padding: 16 }}>
                     <Card.Title>{inm.tipo.charAt(0).toUpperCase() + inm.tipo.slice(1)}</Card.Title>
                     <Badge bg="info" className="mb-2">{inm.estado || 'Disponible'}</Badge>
@@ -406,9 +391,6 @@ const Inmuebles: React.FC = () => {
                         </span>
                         <span>
                           <i className="bi bi-house-door"></i> {inm.numHabitaciones} hab.
-                        </span>
-                        <span>
-                          <i className="bi bi-water"></i> {inm.numBanos} baños
                         </span>
                       </div>
                     </div>

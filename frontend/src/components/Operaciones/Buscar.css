@@ -599,6 +599,22 @@ button.more-filters-btn[aria-expanded="true"] {
   justify-content: center;
 }
 
+.modal-titulo {
+  font-size: 1.3rem;
+  font-weight: 600;
+  word-break: break-word;
+  max-height: 3.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+.modal-descripcion {
+  max-height: 180px;
+  overflow-y: auto;
+  word-break: break-word;
+}
+
 /* Estilos responsivos */
 @media (max-width: 992px) {
   .search-controls {

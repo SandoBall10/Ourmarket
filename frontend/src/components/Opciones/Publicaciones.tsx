@@ -21,6 +21,7 @@ interface Publicacion {
   estado: 'activa' | 'vendida' | 'reservada';
   descripcion?: string;
   autorizado?: boolean; // <-- agrega esto
+  propietarioEmail?: string; // <-- agrega esto para evitar el error
 }
 
 const Publicaciones: React.FC = () => {
@@ -101,29 +102,31 @@ const Publicaciones: React.FC = () => {
 
         let publicacionesMapeadas: Publicacion[] = response.data.map(
           (pub: ApiPublicacion) => {
-          const inm = pub.inmueble || {};
-          let imagenes: string[] = [];
-          if (inm.imagenes) {
-            imagenes = inm.imagenes
-              .split(';')
-              .filter((img: string) => img.trim() !== '')
-              .map((img: string) => `http://localhost:8080/assets/inmuebles/${img}`);
+            const inm = pub.inmueble || {};
+            let imagenes: string[] = [];
+            if (inm.imagenes) {
+              imagenes = inm.imagenes
+                .split(';')
+                .filter((img: string) => img.trim() !== '')
+                .map((img: string) => `http://localhost:8080/assets/inmuebles/${img}`);
+            }
+            return {
+              id: pub.idPublicacion ?? pub.id ?? pub.id_publicacion,
+              tipo: inm.tipo || 'casa',
+              titulo: pub.titulo,
+              precio: inm.precio ?? 0,
+              ubicacion: `${inm.direccion || ''}${inm.distrito ? ', ' + inm.distrito : ''}`,
+              metros: inm.area ?? 0,
+              habitaciones: inm.num_habitaciones ?? inm.numero_habitaciones,
+              banos: inm.num_banos ?? inm.numero_banos,
+              imagenes,
+              estado: pub.estado || 'activa',
+              descripcion: pub.descripcion || '',
+              autorizado: pub.autorizado ?? false,
+              propietarioEmail: inm.cliente?.email ?? '', // <-- ASIGNA EL EMAIL DEL DUEÑO AQUÍ
+            };
           }
-          return {
-            id: pub.idPublicacion ?? pub.id ?? pub.id_publicacion,
-            tipo: inm.tipo || 'casa',
-            titulo: pub.titulo,
-            precio: inm.precio ?? 0,
-            ubicacion: `${inm.direccion || ''}${inm.distrito ? ', ' + inm.distrito : ''}`,
-            metros: inm.area ?? 0,
-            habitaciones: inm.num_habitaciones ?? inm.numero_habitaciones,
-            banos: inm.num_banos ?? inm.numero_banos,
-            imagenes,
-            estado: pub.estado || 'activa',
-            descripcion: pub.descripcion || '', // <-- AGREGA ESTA LÍNEA
-            autorizado: pub.autorizado ?? false, // <-- agrega esto
-          };
-        });
+        );
         // Filtrar si es cliente
     if (user?.rol === 'ROLE_CLIENTE') {
       // Filtra publicaciones del cliente autenticado usando el email
@@ -166,13 +169,21 @@ const Publicaciones: React.FC = () => {
   const handleGuardarEdicion = async () => {
     if (!publicacionEdit) return;
     setSaving(true);
+
+    // Verifica usuario dueño
+    if (user?.name !== publicacionEdit?.propietarioEmail) {
+      alert('Solo el dueño puede editar esta publicación.');
+      setSaving(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
       const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      // Solo envía los campos requeridos
       await axios.put(
         `http://localhost:8080/api/publicaciones/${publicacionEdit.id}`,
         {
-          ...publicacionEdit,
           titulo: editTitulo,
           descripcion: editDescripcion
         },
@@ -183,7 +194,6 @@ const Publicaciones: React.FC = () => {
           }
         }
       );
-      // Actualiza el estado local
       setPublicaciones(prev =>
         prev.map(p =>
           p.id === publicacionEdit.id

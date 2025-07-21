@@ -15,6 +15,7 @@ public class PublicacionMapper {
         //dto.setIdCliente(publicacion.getCliente() != null ? publicacion.getCliente().getIdCliente() : null);
         dto.setCliente(publicacion.getCliente() != null ? ClienteMapper.toDTO(publicacion.getCliente()) : null); // opcional
         dto.setNombreCliente(publicacion.getCliente() != null ? publicacion.getCliente().getNombreCompleto() : null);
+        dto.setAutorizado(publicacion.getAutorizado()); // <-- Agrega esta línea
         return dto;
     }
 }

@@ -4,11 +4,43 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Buscar.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import axios from 'axios';
+import Modal from 'react-bootstrap/Modal';
+import Carousel from 'react-bootstrap/Carousel';
 
 // Mover la interfaz User fuera del componente
 interface User {
+  id?: number;
   name?: string;
   // Otras propiedades del usuario
+}
+
+// Interfaz para la respuesta del backend
+interface PublicacionBackend {
+  id?: number;
+  idPublicacion?: number;
+  id_publicacion?: number;
+  titulo: string;
+  estado?: string;
+  autorizado?: boolean | number;
+  idCliente?: number;
+  id_cliente?: number;
+  inmueble?: {
+      id?: number;
+      tipo?: string;
+      precio?: number;
+      direccion?: string;
+      distrito?: string;
+      provincia?: string;
+      area?: number;
+      numhabitaciones?: number;
+      numero_habitaciones?: number;
+      numero_banos?: number;
+      imagenes?: string;
+      descripcion?: string;
+      servicios?: string;
+      region?: string;
+  };
 }
 
 interface Publicacion {
@@ -21,14 +53,18 @@ interface Publicacion {
   habitaciones?: number;
   banos?: number;
   imagen: string;
+  imagenes?: string[];
   estado: 'activa' | 'vendida' | 'reservada';
+  autorizado?: boolean | number;
+  descripcion?: string;
+  servicios?: string;
+  idCliente?: number;
+  idInmueble?: number;
 }
 
 const Buscar: React.FC = () => {
   const navigate = useNavigate();
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
-  const [filtroTipo, setFiltroTipo] = useState<string>('todos');
-  const [filtroEstado, setFiltroEstado] = useState<string>('todos');
   const [busqueda, setBusqueda] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
@@ -53,7 +89,7 @@ const Buscar: React.FC = () => {
   // Ref para cerrar el dropdown al hacer clic fuera
   const dormitoriosDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Agrega estos estados para el menú desplegable de precio
+  // Estados para el menú desplegable de precio
   const [showPrecioDropdown, setShowPrecioDropdown] = useState<boolean>(false);
   const [moneda, setMoneda] = useState<string>('soles');
   const [precioDesde, setPrecioDesde] = useState<string>('');
@@ -62,7 +98,7 @@ const Buscar: React.FC = () => {
   // Ref para cerrar el dropdown al hacer clic fuera
   const precioDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Agrega estos estados para el menú desplegable de más filtros
+  // Estados para el menú desplegable de más filtros
   const [showMasFilters, setShowMasFilters] = useState<boolean>(false);
   const [caracteristicas, setCaracteristicas] = useState<string>('');
 
@@ -80,14 +116,15 @@ const Buscar: React.FC = () => {
   // Estados para tipo de anunciante
   const [tipoAnunciante, setTipoAnunciante] = useState<string>('todos');
 
-  // Estados para antigüedad
-  const [antiguedad, setAntigüedad] = useState<string[]>([]);
-
   // Estados para fecha de publicación
   const [fechaPublicacion, setFechaPublicacion] = useState<string>('');
 
   // Ref para cerrar el dropdown al hacer clic fuera
   const masFiltersDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Estado para el modal de detalles
+  const [showModal, setShowModal] = useState(false);
+  const [publicacionDetalle, setPublicacionDetalle] = useState<Publicacion | null>(null);
   
   useEffect(() => {
     AOS.init({
@@ -103,29 +140,60 @@ const Buscar: React.FC = () => {
       setIsLoggedIn(true);
     }
 
-    // Simulación de carga de datos
+    // Cargar publicaciones desde el backend
     const cargarPublicaciones = async () => {
+      setIsLoading(true);
       try {
-        setTimeout(() => {
-          setPublicaciones([
-            {
-              id: 1,
-              tipo: 'casa',
-              titulo: 'Casa moderna en zona residencial',
-              precio: 250000,
-              ubicacion: 'San Borja, Lima',
-              metros: 150,
-              habitaciones: 3,
-              banos: 2,
-              imagen: '/path-to-image.jpg',
-              estado: 'activa'
-            },
-            // Aquí puedes agregar más publicaciones de ejemplo
-          ]);
-          setIsLoading(false);
-        }, 1000);
+        const token = localStorage.getItem('token');
+        const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        const response = await axios.get('http://localhost:8080/api/publicaciones', {
+          headers: {
+            'Authorization': authToken
+          }
+        });
+        console.log('Publicaciones recibidas:', response.data);
+        
+        // Filtra solo las autorizadas
+        const publicacionesAutorizadas = response.data
+          .filter((pub: PublicacionBackend) => pub.autorizado === 2)
+          .map((pub: PublicacionBackend) => {
+            const inm = pub.inmueble || {};
+            const ubicacion = [
+              inm.direccion,
+              inm.distrito,
+              inm.provincia,
+              inm.region
+            ].filter(Boolean).join(', ');
+            
+            // Procesar las imágenes como array
+            const imagenesArray = inm.imagenes
+              ? inm.imagenes.split(';').filter(img => img.trim() !== '').map(img => `http://localhost:8080/assets/inmuebles/${img}`)
+              : [];
+            
+            return {
+              id: pub.idPublicacion ?? pub.id ?? pub.id_publicacion,
+              tipo: inm.tipo || 'casa',
+              titulo: pub.titulo,
+              precio: inm.precio ?? 0,
+              ubicacion,
+              metros: inm.area ?? 0,
+              habitaciones: inm.numhabitaciones ?? '',
+              imagen: imagenesArray[0] || '/img_default.jpg',
+              imagenes: imagenesArray,
+              estado: pub.estado || 'activa',
+              autorizado: pub.autorizado,
+              descripcion: inm.descripcion && inm.descripcion.trim() !== '' 
+                ? inm.descripcion 
+                : pub.descripcion ?? '',
+              servicios: inm.servicios ?? '',
+              idCliente: pub.idCliente ?? pub.id_cliente,
+              idInmueble: inm.id,
+            };
+          });
+        setPublicaciones(publicacionesAutorizadas);
       } catch (error) {
         console.error('Error al cargar publicaciones:', error);
+      } finally {
         setIsLoading(false);
       }
     };
@@ -142,12 +210,29 @@ const Buscar: React.FC = () => {
     navigate('/login');
   };
 
+  // Función para manejar el contacto con el propietario
+  const handleContactar = (publicacion: Publicacion) => {
+    if (!user) {
+      alert('Debes iniciar sesión para contactar al vendedor');
+      navigate('/login');
+      return;
+    }
+    
+    // Navigate to chat with publication data
+    navigate('/chats', { 
+      state: { 
+        publicacionId: publicacion.id,
+        inmuebleId: publicacion.idInmueble,
+        propietarioId: publicacion.idCliente,
+        publicacionTitulo: publicacion.titulo
+      } 
+    });
+  };
+
   const publicacionesFiltradas = publicaciones.filter(pub => {
-    const cumpleTipo = filtroTipo === 'todos' || pub.tipo === filtroTipo;
-    const cumpleEstado = filtroEstado === 'todos' || pub.estado === filtroEstado;
     const cumpleBusqueda = pub.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
       pub.ubicacion.toLowerCase().includes(busqueda.toLowerCase());
-    return cumpleTipo && cumpleEstado && cumpleBusqueda;
+    return cumpleBusqueda;
   });
 
   // Efecto para cerrar el dropdown al hacer clic fuera
@@ -224,7 +309,6 @@ const Buscar: React.FC = () => {
   
   // Función para aplicar filtros
   const handleVerResultados = () => {
-    // Aquí se aplicarían los filtros seleccionados
     console.log("Filtros aplicados:", selectedTipos);
     setShowTipoDropdown(false);
   };
@@ -261,7 +345,6 @@ const Buscar: React.FC = () => {
     setBanos('');
     setEstacionamientos('');
     setTipoAnunciante('todos');
-    setAntigüedad([]);
     setFechaPublicacion('');
   };
 
@@ -273,10 +356,15 @@ const Buscar: React.FC = () => {
       banos,
       estacionamientos,
       tipoAnunciante,
-      antiguedad,
       fechaPublicacion
     });
     setShowMasFilters(false);
+  };
+
+  // Función para ver detalles de una publicación
+  const handleVerDetalle = (pub: Publicacion) => {
+    setPublicacionDetalle(pub);
+    setShowModal(true);
   };
 
   return (
@@ -460,7 +548,6 @@ const Buscar: React.FC = () => {
                   align="end"
                   className="custom-dropdown"
                 >
-                  {/* Botón de Inicio */}
                   <NavDropdown.Item as={Link} to="/" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="fas fa-home"></i></div>
                     <span>Inicio</span>
@@ -489,9 +576,7 @@ const Buscar: React.FC = () => {
                   </NavDropdown.Item>
                   <NavDropdown.Item
                     onClick={() => {
-                      // Cerrar el dropdown
                       document.body.click();
-                      // Cambiar a la sección de notificaciones en Perfil
                       navigate('/perfil', { state: { activeSection: 'notificaciones' } });
                     }}
                     className="dropdown-item-custom"
@@ -747,8 +832,7 @@ const Buscar: React.FC = () => {
                 <i className="bi bi-currency-dollar me-2"></i>
                 <span>Precio{(precioDesde || precioHasta) ? 
       ` (${moneda === 'soles' ? 'S/ ' : '$'}${precioDesde || '0'} - ${precioHasta || '∞'})` : 
-      ''}
-    </span>
+      ''}</span>
                 <i className="bi bi-chevron-down ms-auto"></i>
               </Button>
               
@@ -764,53 +848,53 @@ const Buscar: React.FC = () => {
                     </div>
                     
                     <div className="moneda-options d-flex gap-4 mb-3">
-          <div className="form-check">
-            <input
-              type="radio"
-              className="form-check-input"
-              id="moneda-soles"
-              name="moneda"
-              checked={moneda === 'soles'}
-              onChange={() => setMoneda('soles')}
-            />
-            <label className="form-check-label" htmlFor="moneda-soles">Soles</label>
-          </div>
-          
-          <div className="form-check">
-            <input
-              type="radio"
-              className="form-check-input"
-              id="moneda-usd"
-              name="moneda"
-              checked={moneda === 'usd'}
-              onChange={() => setMoneda('usd')}
-            />
-            <label className="form-check-label" htmlFor="moneda-usd">USD</label>
-          </div>
-        </div>
-        
-        <div className="precio-range-container d-flex gap-2 my-3">
-          <div className="position-relative flex-grow-1">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Desde"
-              value={precioDesde}
-              onChange={(e) => setPrecioDesde(e.target.value.replace(/[^0-9]/g, ''))}
-            />
-          </div>
-          
-          <div className="position-relative flex-grow-1">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Hasta"
-              value={precioHasta}
-              onChange={(e) => setPrecioHasta(e.target.value.replace(/[^0-9]/g, ''))}
-            />
-          </div>
-        </div>
-        
+                      <div className="form-check">
+                        <input
+                          type="radio"
+                          className="form-check-input"
+                          id="moneda-soles"
+                          name="moneda"
+                          checked={moneda === 'soles'}
+                          onChange={() => setMoneda('soles')}
+                        />
+                        <label className="form-check-label" htmlFor="moneda-soles">Soles</label>
+                      </div>
+                      
+                      <div className="form-check">
+                        <input
+                          type="radio"
+                          className="form-check-input"
+                          id="moneda-usd"
+                          name="moneda"
+                          checked={moneda === 'usd'}
+                          onChange={() => setMoneda('usd')}
+                        />
+                        <label className="form-check-label" htmlFor="moneda-usd">USD</label>
+                      </div>
+                    </div>
+                    
+                    <div className="precio-range-container d-flex gap-2 my-3">
+                      <div className="position-relative flex-grow-1">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Desde"
+                          value={precioDesde}
+                          onChange={(e) => setPrecioDesde(e.target.value.replace(/[^0-9]/g, ''))}
+                        />
+                      </div>
+                      
+                      <div className="position-relative flex-grow-1">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Hasta"
+                          value={precioHasta}
+                          onChange={(e) => setPrecioHasta(e.target.value.replace(/[^0-9]/g, ''))}
+                        />
+                      </div>
+                    </div>
+                    
                     <div className="dropdown-buttons">
                       <Button 
                         variant="link" 
@@ -900,13 +984,7 @@ const Buscar: React.FC = () => {
                           </div>
                           
                           <div className="d-flex gap-2 mb-3">
-                            <div className="input-group" style={{ width: "90px" }}>
-                              <select className="form-select">
-                                <option>m²</option>
-                              </select>
-                            </div>
-                            
-                            <div className="flex-grow-1">
+                            <div className="position-relative flex-grow-1">
                               <input
                                 type="text"
                                 className="form-control"
@@ -916,7 +994,7 @@ const Buscar: React.FC = () => {
                               />
                             </div>
                             
-                            <div className="flex-grow-1">
+                            <div className="position-relative flex-grow-1">
                               <input
                                 type="text"
                                 className="form-control"
@@ -967,63 +1045,6 @@ const Buscar: React.FC = () => {
                             >
                               5+
                             </Button>
-                          </div>
-                        </div>
-                        
-                        {/* Antigüedad */}
-                        <div className="filter-section">
-                          <h6 className="mb-2 fw-bold">Antigüedad</h6>
-                          <div className="d-flex flex-column mb-2">
-                            <div className="mb-2 form-check">
-                              <input
-                                type="checkbox"
-                                className="form-check-input"
-                                id="antiguedad-construccion"
-                                checked={antiguedad.includes('construccion')}
-                                onChange={() => {
-                                  if (antiguedad.includes('construccion')) {
-                                    setAntigüedad(antiguedad.filter(a => a !== 'construccion'));
-                                  } else {
-                                    setAntigüedad([...antiguedad, 'construccion']);
-                                  }
-                                }}
-                              />
-                              <label className="form-check-label" htmlFor="antiguedad-construccion">En construcción</label>
-                            </div>
-                            
-                            <div className="mb-2 form-check">
-                              <input
-                                type="checkbox"
-                                className="form-check-input"
-                                id="antiguedad-estrenar"
-                                checked={antiguedad.includes('estrenar')}
-                                onChange={() => {
-                                  if (antiguedad.includes('estrenar')) {
-                                    setAntigüedad(antiguedad.filter(a => a !== 'estrenar'));
-                                  } else {
-                                    setAntigüedad([...antiguedad, 'estrenar']);
-                                  }
-                                }}
-                              />
-                              <label className="form-check-label" htmlFor="antiguedad-estrenar">A estrenar</label>
-                            </div>
-                            
-                            <div className="mb-2 form-check">
-                              <input
-                                type="checkbox"
-                                className="form-check-input"
-                                id="antiguedad-5anos"
-                                checked={antiguedad.includes('5anos')}
-                                onChange={() => {
-                                  if (antiguedad.includes('5anos')) {
-                                    setAntigüedad(antiguedad.filter(a => a !== '5anos'));
-                                  } else {
-                                    setAntigüedad([...antiguedad, '5anos']);
-                                  }
-                                }}
-                              />
-                              <label className="form-check-label" htmlFor="antiguedad-5anos">Hasta 5 años</label>
-                            </div>
                           </div>
                         </div>
                         
@@ -1168,7 +1189,7 @@ const Buscar: React.FC = () => {
                     <Button 
                       variant="success" 
                       className="w-100 d-flex align-items-center justify-content-center"
-                      onClick={() => navigate(`/chats`, { state: { publicacionId: pub.id, publicacion: pub } })}
+                      onClick={() => handleContactar(pub)}
                     >
                       <i className="bi bi-chat-text-fill me-2"></i>
                       <span>Contactar</span>
@@ -1177,12 +1198,65 @@ const Buscar: React.FC = () => {
                       <i className="bi bi-telephone-fill"></i>
                     </Button>
                   </div>
+                  <Button 
+                    variant="outline-info"
+                    className="w-100 mt-2"
+                    onClick={() => handleVerDetalle(pub)}
+                  >
+                    Ver detalles
+                  </Button>
                 </Card.Body>
               </Card>
             ))
           )}
         </div>
       </div>
+
+      {/* Modal de detalles */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Detalles de la publicación</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {publicacionDetalle && (
+            <>
+              {/* Carrusel de imágenes */}
+              <Carousel>
+                {(publicacionDetalle.imagenes && publicacionDetalle.imagenes.length > 0
+                  ? publicacionDetalle.imagenes
+                  : [publicacionDetalle.imagen]
+                ).map((img, idx) => (
+                  <Carousel.Item key={idx}>
+                    <img
+                      className="d-block w-100"
+                      src={img}
+                      alt={`Imagen ${idx + 1}`}
+                      style={{ maxHeight: '350px', objectFit: 'cover' }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/img_default.jpg';
+                      }}
+                    />
+                  </Carousel.Item>
+                ))}
+              </Carousel>
+              <h4 className="mt-3 modal-titulo">{publicacionDetalle.titulo}</h4>
+              <p><strong>Tipo de inmueble:</strong> {publicacionDetalle.tipo ?? 'No especificado'}</p>
+              <p><strong>Precio:</strong> $ {publicacionDetalle.precio}</p>
+              <p><strong>Ubicación:</strong> {publicacionDetalle.ubicacion}</p>
+              <p><strong>Metros:</strong> {publicacionDetalle.metros} m²</p>
+              <p><strong>Habitaciones:</strong> {publicacionDetalle.habitaciones != null ? publicacionDetalle.habitaciones : 'No especificado'}</p>
+              <p><strong>Estado:</strong> {publicacionDetalle.estado}</p>
+              <p><strong>Servicios:</strong> {publicacionDetalle.servicios ?? 'No especificados'}</p>
+              <p><strong>Descripción:</strong></p>
+              <div className="modal-descripcion">
+                {publicacionDetalle.descripcion && publicacionDetalle.descripcion.trim() !== '' 
+                  ? publicacionDetalle.descripcion 
+                  : 'No especificada'}
+              </div>
+            </>
+          )}
+        </Modal.Body>
+      </Modal>
 
       <footer className="bg-dark text-light py-4 mt-auto">
         <Container fluid>
