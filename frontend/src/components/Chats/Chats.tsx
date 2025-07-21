@@ -306,7 +306,7 @@ const Chats: React.FC = () => {
               <Nav.Link as={Link} to="/publicaciones" className="nav-link-text">
                 Mis Publicaciones
               </Nav.Link>
-              <Nav.Link as={Link} to="/mis-favoritos" className="nav-link-text">
+              <Nav.Link as={Link} to="/favoritos" className="nav-link-text">
                 Favoritos
               </Nav.Link>
               <Nav.Link as={Link} to="/chats" className="nav-link-text active">
@@ -340,7 +340,11 @@ const Chats: React.FC = () => {
                     <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
                     <span>Mis publicaciones</span>
                   </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/mis-favoritos" className="dropdown-item-custom">
+                  <NavDropdown.Item as={Link} to="/inmuebles" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="bi-house-door-fill"></i></div>
+                    <span>Mis inmuebles</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-heart"></i></div>
                     <span>Favoritos</span>
                   </NavDropdown.Item>

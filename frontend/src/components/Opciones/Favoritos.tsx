@@ -157,6 +157,10 @@ const Favoritos: React.FC = () => {
                     <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
                     <span>Mis publicaciones</span>
                   </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/inmuebles" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="bi-house-door-fill"></i></div>
+                    <span>Mis inmuebles</span>
+                  </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-heart"></i></div>
                     <span>Favoritos</span>
@@ -307,6 +311,11 @@ const Favoritos: React.FC = () => {
           </Row>
         )}
       </Container>
+      <footer className="bg-dark text-light py-4 mt-auto">
+        <Container fluid>
+          <p className="text-center mb-0">© 2023 InmoMarket. Todos los derechos reservados.</p>
+        </Container>
+      </footer>
     </div>
   );
 };

@@ -312,6 +312,10 @@ const Publicaciones: React.FC = () => {
                     <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
                     <span>Mis publicaciones</span>
                   </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/inmuebles" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="bi-house-door-fill"></i></div>
+                    <span>Mis inmuebles</span>
+                  </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-heart"></i></div>
                     <span>Favoritos</span>

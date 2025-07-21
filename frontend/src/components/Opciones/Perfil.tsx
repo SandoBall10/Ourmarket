@@ -604,14 +604,15 @@ const Perfil: React.FC = () => {
       {/* Barra de Navegación */}
       <Navbar bg="white" expand="lg" className="w-100 border-bottom">
         <Container fluid className="px-4">
-          <Navbar.Brand href="#">
-            <img
-              src="imagen"
-              alt="InmoMarket"
-              height="30"
-              className="d-inline-block align-top"
-            />
-          </Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">
+                                <img
+                                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm6ETphfVq-SfJmeaX42jYRIUxikXCNQvu56BxSPdkWxgHO2KAov9MXLWJRZWjbBgwOR4&usqp=CAU"
+                                  alt="InmoMarket"
+                                  height="30"
+                                  className="d-inline-block align-top"
+                                />
+                                <span className="fw-bold"> InmoMarket</span>
+                              </Navbar.Brand>
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">
             <Nav className="me-auto">
@@ -633,7 +634,7 @@ const Perfil: React.FC = () => {
               <div className="nav-item mega-dropdown">
                 <Nav.Link
                   as={Link}
-                  to="/mis-favoritos"
+                  to="/favoritos"
                   className="nav-link-text"
                   id="favoritos-dropdown"
                 >
@@ -694,6 +695,10 @@ const Perfil: React.FC = () => {
                   <NavDropdown.Item as={Link} to="/publicaciones" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
                     <span>Mis publicaciones</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/inmuebles" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="bi-house-door-fill"></i></div>
+                    <span>Mis inmuebles</span>
                   </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-heart"></i></div>

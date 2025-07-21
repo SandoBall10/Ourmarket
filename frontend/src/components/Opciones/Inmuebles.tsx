@@ -544,6 +544,11 @@ const Inmuebles: React.FC = () => {
         </Button>
       </Modal.Footer>
     </Modal>
+    <footer className="bg-dark text-light py-4 mt-auto">
+      <Container fluid>
+        <p className="text-center mb-0">© 2023 InmoMarket. Todos los derechos reservados.</p>
+      </Container>
+    </footer>
     </div>
   );
 };

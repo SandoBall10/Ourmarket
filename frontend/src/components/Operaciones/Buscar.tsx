@@ -442,7 +442,7 @@ const Buscar: React.FC = () => {
               <div className="nav-item mega-dropdown">
                 <Nav.Link
                   as={Link}
-                  to="/publicar"
+                  to="/vender"
                   className="nav-link-text"
                   id="vender-dropdown"
                 >
