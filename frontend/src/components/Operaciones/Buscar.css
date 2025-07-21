@@ -63,18 +63,19 @@
   border: none;
   border-radius: 10px;
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .publicacion-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .imagen-container {
   position: relative;
-  padding-top: 66.67%; /* Aspect ratio 3:2 */
+  overflow: hidden;
 }
 
 .imagen-container img {
@@ -86,14 +87,35 @@
   object-fit: cover;
 }
 
+.favorito-btn {
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.favorito-btn:hover {
+  transform: scale(1.1);
+  background-Color: rgba(255, 255, 255, 1) !important;
+}
+
+.favorito-btn.favorito-activo {
+  background-color: rgba(255, 255, 255, 1) !important;
+}
+
+.favorito-btn:disabled {
+  opacity: 0.7;
+}
+
 .estado-badge {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  top: 10px;
+  right: 10px;  /* Movido de nuevo a la derecha para no interferir con el corazón */
+  z-index: 5;
+  font-size: 0.75rem;  /* Tamaño de fuente más pequeño */
+  padding: 0.25rem 0.5rem;  /* Padding más pequeño */
+  border-radius: 4px;  /* Bordes redondeados pequeños */
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .estado-activa {
@@ -108,7 +130,7 @@
 
 .estado-reservada {
   background-color: #ffc107;
-  color: black;
+  color: #000;
 }
 
 .detalles {
@@ -593,7 +615,8 @@ button.more-filters-btn[aria-expanded="true"] {
 
 /* Estilo para el botón de teléfono */
 .contact-phone-btn {
-  width: 48px;
+  width: 50px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;

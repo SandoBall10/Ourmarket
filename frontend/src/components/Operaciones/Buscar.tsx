@@ -72,6 +72,10 @@ const Buscar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
 
+  // Estado para favoritos
+  const [favoritos, setFavoritos] = useState<Set<number>>(new Set());
+  const [loadingFavoritos, setLoadingFavoritos] = useState<Set<number>>(new Set());
+
   // Estados para el menú desplegable de tipo de propiedad
   const [showTipoDropdown, setShowTipoDropdown] = useState<boolean>(false);
   const [selectedTipos, setSelectedTipos] = useState<{[key: string]: boolean}>({
@@ -138,6 +142,8 @@ const Buscar: React.FC = () => {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
       setIsLoggedIn(true);
+      // Cargar favoritos del usuario
+      cargarFavoritos(parsedUser.id);
     }
 
     // Cargar publicaciones desde el backend
@@ -227,6 +233,133 @@ const Buscar: React.FC = () => {
         publicacionTitulo: publicacion.titulo
       } 
     });
+  };
+
+  // Función para alternar favorito
+  const toggleFavorito = async (publicacionId: number) => {
+    if (!user) {
+      alert('Debes iniciar sesión para guardar favoritos');
+      navigate('/login');
+      return;
+    }
+
+    // Buscar la publicación completa para obtener el idInmueble
+    const publicacion = publicaciones.find(pub => pub.id === publicacionId);
+    if (!publicacion || !publicacion.idInmueble) {
+      console.error('No se encontró el inmueble para esta publicación:', publicacionId);
+      alert('Error: No se pudo identificar el inmueble');
+      return;
+    }
+
+    // Agregar a loading
+    setLoadingFavoritos(prev => new Set(prev).add(publicacionId));
+
+    try {
+      const token = localStorage.getItem('token');
+      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      
+      const esFavorito = favoritos.has(publicacionId);
+      
+      console.log('Usuario ID:', user.id);
+      console.log('Publicación ID:', publicacionId);
+      console.log('Inmueble ID:', publicacion.idInmueble);
+      console.log('Es favorito actual:', esFavorito);
+      
+      if (esFavorito) {
+        // Eliminar de favoritos
+        await axios.delete(`http://localhost:8080/api/favoritos/eliminar`, {
+          headers: {
+            'Authorization': authToken,
+            'Content-Type': 'application/json'
+          },
+          data: {
+            id_cliente: user.id,
+            id_inmueble: publicacion.idInmueble  // Usar el ID real del inmueble
+          }
+        });
+        
+        // Actualizar estado local
+        setFavoritos(prev => {
+          const newFavoritos = new Set(prev);
+          newFavoritos.delete(publicacionId);
+          return newFavoritos;
+        });
+        console.log('Favorito eliminado exitosamente');
+      } else {
+        // Agregar a favoritos
+        const favoritoData = {
+          id_cliente: user.id,
+          id_inmueble: publicacion.idInmueble  // Usar el ID real del inmueble
+        };
+        
+        console.log('Enviando datos de favorito:', favoritoData);
+        
+        await axios.post('http://localhost:8080/api/favoritos/crear', favoritoData, {
+          headers: {
+            'Authorization': authToken,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        // Actualizar estado local
+        setFavoritos(prev => new Set(prev).add(publicacionId));
+        console.log('Favorito agregado exitosamente');
+      }
+    } catch (error) {
+      console.error('Error al manejar favorito:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Response data:', error.response?.data);
+        console.error('Response status:', error.response?.status);
+        console.error('Response headers:', error.response?.headers);
+      }
+      alert('Error al actualizar favoritos. Inténtalo de nuevo.');
+    } finally {
+      // Remover de loading
+      setLoadingFavoritos(prev => {
+        const newLoading = new Set(prev);
+        newLoading.delete(publicacionId);
+        return newLoading;
+      });
+    }
+  };
+
+  // Función para cargar favoritos del usuario
+  const cargarFavoritos = async (userId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      
+      const response = await axios.get(`http://localhost:8080/api/favoritos/usuario/${userId}`, {
+        headers: {
+          'Authorization': authToken
+        }
+      });
+      
+      console.log('Favoritos cargados:', response.data);
+      
+      // Crear Set con los IDs de publicaciones que corresponden a los inmuebles favoritos
+      const favoritosIds: Set<number> = new Set<number>();
+      
+      interface FavoritoBackend {
+        id_inmueble?: number;
+        inmuebleId?: number;
+        // Puedes agregar otras propiedades si es necesario
+      }
+
+      response.data.forEach((fav: FavoritoBackend) => {
+        const inmuebleId = fav.id_inmueble || fav.inmuebleId;
+        // Buscar la publicación que corresponde a este inmueble
+        const publicacionCorrespondiente = publicaciones.find(pub => pub.idInmueble === inmuebleId);
+        if (publicacionCorrespondiente) {
+          favoritosIds.add(publicacionCorrespondiente.id);
+        }
+      });
+      
+      setFavoritos(favoritosIds);
+      console.log('Favoritos IDs de publicaciones cargados:', Array.from(favoritosIds));
+    } catch (error) {
+      console.error('Error al cargar favoritos:', error);
+    }
   };
 
   const publicacionesFiltradas = publicaciones.filter(pub => {
@@ -1160,12 +1293,49 @@ const Buscar: React.FC = () => {
           ) : (
             publicacionesFiltradas.map(pub => (
               <Card key={pub.id} className="publicacion-card" data-aos="fade-up">
-                <div className="imagen-container">
+                <div className="imagen-container position-relative">
                   <Card.Img variant="top" src={pub.imagen} />
                   <Badge className={`estado-badge estado-${pub.estado}`}>
                     {pub.estado.toUpperCase()}
                   </Badge>
+                  
+                  {/* Botón de favorito - MOVIDO AL LADO IZQUIERDO */}
+                  <Button
+                    variant="light"
+                    className={`favorito-btn position-absolute ${favoritos.has(pub.id) ? 'favorito-activo' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorito(pub.id);
+                    }}
+                    disabled={loadingFavoritos.has(pub.id)}
+                    style={{
+                      top: '10px',
+                      left: '10px',  // CAMBIADO DE 'right' A 'left'
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      border: 'none',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      zIndex: 10
+                    }}
+                  >
+                    {loadingFavoritos.has(pub.id) ? (
+                      <div className="spinner-border spinner-border-sm" role="status">
+                        <span className="visually-hidden">Cargando...</span>
+                      </div>
+                    ) : (
+                      <i 
+                        className={`${favoritos.has(pub.id) ? 'fas fa-heart text-danger' : 'far fa-heart text-muted'}`}
+                        style={{ fontSize: '18px' }}
+                      />
+                    )}
+                  </Button>
                 </div>
+                
                 <Card.Body>
                   <Card.Title>{pub.titulo}</Card.Title>
                   <div className="detalles">
