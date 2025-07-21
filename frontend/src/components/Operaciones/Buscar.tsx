@@ -557,17 +557,17 @@ const Buscar: React.FC = () => {
                     <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
                     <span>Mis publicaciones</span>
                   </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/mis-favoritos" className="dropdown-item-custom">
+                  <NavDropdown.Item as={Link} to="/inmuebles" className="dropdown-item-custom">
+                    <div className="icon-wrapper"><i className="bi-house-door-fill"></i></div>
+                    <span>Mis inmuebles</span>
+                  </NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-heart"></i></div>
                     <span>Favoritos</span>
                   </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to="/chats" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-comments"></i></div>
                     <span>Mis chats</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/historial" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-eye"></i></div>
-                    <span>Historial</span>
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">

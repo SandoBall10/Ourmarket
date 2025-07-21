@@ -24,7 +24,7 @@ const Favoritos: React.FC = () => {
   const [favoritos, setFavoritos] = useState<FavoritoItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true); // Asumimos que el usuario está logueado
-  const [user, setUser] = useState<{name?: string}>({name: 'Usuario'}); // Información del usuario
+  const [user] = useState<{name?: string}>({name: 'Usuario'}); // Información del usuario
   const navigate = useNavigate();
   
   // Simulando carga de datos
@@ -65,15 +65,15 @@ const Favoritos: React.FC = () => {
       {/* Barra de Navegación */}
       <Navbar bg="white" expand="lg" className="w-100 border-bottom">
         <Container fluid className="px-4">
-          <Navbar.Brand href="#">
-            <img
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm6ETphfVq-SfJmeaX42jYRIUxikXCNQvu56BxSPdkWxgHO2KAov9MXLWJRZWjbBgwOR4&usqp=CAU"
-              alt="InmoMarket"
-              height="30"
-              className="d-inline-block align-top"
-            />
-            <span className="fw-bold"> InmoMarket</span>
-          </Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">
+                                <img
+                                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm6ETphfVq-SfJmeaX42jYRIUxikXCNQvu56BxSPdkWxgHO2KAov9MXLWJRZWjbBgwOR4&usqp=CAU"
+                                  alt="InmoMarket"
+                                  height="30"
+                                  className="d-inline-block align-top"
+                                />
+                                <span className="fw-bold"> InmoMarket</span>
+                              </Navbar.Brand>
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav">
             <Nav className="me-auto">
@@ -248,7 +248,11 @@ const Favoritos: React.FC = () => {
             <p className="text-muted mb-4">
               Guarda propiedades como favoritas para verlas aquí y compararlas fácilmente.
             </p>
-            <Button variant="primary" as={Link as any} to="/buscar">
+            <Button
+              variant="primary"
+              as="a"
+              href="/buscar"
+            >
               <i className="fas fa-search me-2"></i>Explorar propiedades
             </Button>
           </div>
