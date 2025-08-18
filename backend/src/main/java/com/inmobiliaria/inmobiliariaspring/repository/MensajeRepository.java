@@ -10,4 +10,6 @@ public interface MensajeRepository extends JpaRepository<Mensaje, Integer> {
     List<Mensaje> findByInmueble(Inmueble inmueble);
     List<Mensaje> findByInmuebleAndCliente(Inmueble inmueble, Cliente cliente);
     List<Mensaje> findByInmueble_IdInmueble(Integer idInmueble);
+    List<Mensaje> findByCliente_IdCliente(Integer idCliente);
+    List<Mensaje> findByInmueble_Cliente_IdCliente(Integer idCliente);
 }

@@ -27,6 +27,8 @@ interface PublicacionBackend {
   id_cliente?: number;
   inmueble?: {
       id?: number;
+      idInmueble?: number; // AGREGAR: posible campo alternativo
+      id_inmueble?: number; // AGREGAR: posible campo alternativo
       tipo?: string;
       precio?: number;
       direccion?: string;
@@ -175,6 +177,15 @@ const Buscar: React.FC = () => {
               ? inm.imagenes.split(';').filter(img => img.trim() !== '').map(img => `http://localhost:8080/assets/inmuebles/${img}`)
               : [];
             
+            // AGREGAR LOGS PARA DEBUGGEAR
+            console.log('=== DEBUGGEANDO INMUEBLE ===');
+            console.log('Publicación ID:', pub.idPublicacion ?? pub.id ?? pub.id_publicacion);
+            console.log('Inmueble completo:', inm);
+            console.log('Inmueble ID:', inm.id);
+            console.log('Inmueble idInmueble:', inm.idInmueble);
+            console.log('Inmueble id_inmueble:', (inm as any).id_inmueble);
+            console.log('================================');
+            
             return {
               id: pub.idPublicacion ?? pub.id ?? pub.id_publicacion,
               tipo: inm.tipo || 'casa',
@@ -192,7 +203,8 @@ const Buscar: React.FC = () => {
                 : pub.descripcion ?? '',
               servicios: inm.servicios ?? '',
               idCliente: pub.idCliente ?? pub.id_cliente,
-              idInmueble: inm.id,
+              // PROBAR DIFERENTES OPCIONES PARA EL ID DEL INMUEBLE
+              idInmueble: inm.id || inm.idInmueble || (inm as any).id_inmueble || (inm as any).idInmueble,
             };
           });
       
@@ -225,20 +237,26 @@ const Buscar: React.FC = () => {
 
   // Función para manejar el contacto con el propietario
   const handleContactar = (publicacion: Publicacion) => {
-    if (!user) {
-      alert('Debes iniciar sesión para contactar al vendedor');
-      navigate('/login');
+    console.log('=== DATOS DE PUBLICACIÓN COMPLETA ===');
+    console.log('Publicación completa:', publicacion);
+    console.log('ID Publicación:', publicacion.id);
+    console.log('ID Inmueble:', publicacion.idInmueble);
+    console.log('ID Cliente:', publicacion.idCliente);
+    console.log('Título:', publicacion.titulo);
+    
+    if (!publicacion.idInmueble) {
+      console.error('❌ PROBLEMA: idInmueble es undefined o null');
+      alert('Error: No se pudo obtener el ID del inmueble');
       return;
     }
     
-    // Navigate to chat with publication data
-    navigate('/chats', { 
-      state: { 
+    navigate('/chats', {
+      state: {
         publicacionId: publicacion.id,
         inmuebleId: publicacion.idInmueble,
         propietarioId: publicacion.idCliente,
         publicacionTitulo: publicacion.titulo
-      } 
+      }
     });
   };
 

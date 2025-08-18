@@ -1,18 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Form, Button, Navbar, Nav, NavDropdown } from 'react-bootstrap';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Container, Row, Col, Form, Button, Navbar, Nav, NavDropdown, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import axios from 'axios';
 import './Chats.css';
 
+// Interfaces
+interface User {
+  id: number;
+  name: string;
+  email?: string;
+}
+
 interface Message {
-  id_mensaje: number;
+  idMensaje: number;
   contenido: string;
-  fecha_envio: string;
-  tipo_mensaje: string;
-  id_cliente: number;
-  id_inmueble: number;
+  fechaEnvio: string;
+  tipoMensaje: string;
+  idCliente: number;
+  nombreCliente?: string;
+  idInmueble: number;
   isFromCurrentUser?: boolean;
 }
 
@@ -20,17 +28,25 @@ interface Contact {
   id: string;
   name: string;
   lastMessage: string;
+  timestamp: string;
+  avatar: string;
   unreadCount: number;
   isOnline: boolean;
-  avatar?: string;
-  publicacionId?: number;
-  publicacionTitulo?: string;
-  propietarioId?: number;
+  publicacion?: {
+    id: number;
+    titulo: string;
+    idInmueble: number;
+  };
 }
 
-interface User {
-  id: number;
-  name: string;
+interface Conversacion {
+  idInmueble: number;
+  tituloPublicacion: string;
+  propietarioNombre: string;
+  clienteNombre: string;
+  ultimoMensaje?: Message;
+  totalMensajes: number;
+  fechaUltimoMensaje: string;
 }
 
 const Chats: React.FC = () => {
@@ -41,118 +57,268 @@ const Chats: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Estados para autenticación
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
 
-  // Interface for publicación
-  interface Publicacion {
-    id: number;
-    titulo: string;
-    idInmueble?: number;
-    // Add other relevant fields if needed
-  }
-
-  // Estados para la publicación actual
-  const [currentPublicacion, setCurrentPublicacion] = useState<Publicacion | null>(null);
-
+  // Inicialización
   useEffect(() => {
     AOS.init({ duration: 800, once: false });
     
     // Cargar datos de usuario
     const userData = localStorage.getItem('user');
     if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      setIsLoggedIn(true);
-    }
-
-    // Verificar si se viene desde una publicación
-    if (location.state?.publicacion) {
-      setCurrentPublicacion(location.state.publicacion);
-      crearContactoPublicacion();
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        setIsLoggedIn(true);
+        console.log('Usuario cargado:', parsedUser);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        navigate('/login');
+      }
     } else {
-      cargarContactos();
+      navigate('/login');
     }
-  }, [location.state]);
+  }, [navigate]);
 
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  // Handle navigation from publication contact
   useEffect(() => {
-    // Cargar mensajes cuando se selecciona un contacto
-    if (selectedContact && location.state?.inmuebleId) {
-      cargarMensajesPublicacion(location.state.inmuebleId);
-    }
-  }, [selectedContact, location.state?.inmuebleId]);
-
-  useEffect(() => {
-    // Check if coming from a publication contact
-    if (location.state) {
+    if (location.state && user) {
       const { publicacionId, inmuebleId, propietarioId, publicacionTitulo } = location.state;
-      createInitialChat(publicacionId, inmuebleId, propietarioId, publicacionTitulo);
+      
+      console.log('Estado de navegación recibido:', location.state);
+      
+      if (publicacionId && inmuebleId && publicacionTitulo) {
+        console.log('🚀 Iniciando creación de chat desde publicación');
+        createInitialChat(publicacionId, inmuebleId, propietarioId || 1, publicacionTitulo);
+      } else {
+        console.log('❌ Faltan datos en el state:', { publicacionId, inmuebleId, publicacionTitulo });
+        setError('Error: Faltan datos para crear el chat');
+      }
+    } else if (user && !location.state) {
+      console.log('🔄 Cargando conversaciones existentes');
+      cargarConversacionesExistentes();
     }
-  }, [location.state]);
+  }, [location.state, user]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const crearContactoPublicacion = () => {
-    if (location.state?.publicacion && location.state?.propietarioId) {
-      const pub = location.state.publicacion;
-      const nuevoContacto: Contact = {
-        id: `propietario_${location.state.propietarioId}`,
-        name: `Propietario de ${pub.titulo}`,
-        lastMessage: location.state.mensajeCreado ? 
-          `Hola, estoy interesado en tu propiedad "${pub.titulo}". ¿Podrías darme más información?` :
-          'Sin mensajes',
-        unreadCount: 0,
-        isOnline: false,
-        publicacionId: pub.id,
-        publicacionTitulo: pub.titulo,
-        propietarioId: location.state.propietarioId
-      };
-      
-      setContacts([nuevoContacto]);
-      setSelectedContact(nuevoContacto);
-      
-      // Cargar mensajes usando el ID del inmueble
-      if (location.state.inmuebleId) {
-        cargarMensajesPublicacion(location.state.inmuebleId);
-      }
-    }
-  };
-
-  const cargarContactos = async () => {
-    try {
-      // Por ahora mantenemos contactos simulados para conversaciones existentes
-      // En el futuro podrías cargar conversaciones reales desde el backend
-      const contactosSimulados: Contact[] = [
-        {
-          id: '1',
-          name: 'Juan Pérez',
-          lastMessage: '¿Está disponible la casa?',
-          unreadCount: 2,
-          isOnline: true,
-        },
-      ];
-      
-      setContacts(contactosSimulados);
-    } catch (error) {
-      console.error('Error al cargar contactos:', error);
-    }
-  };
-
-  const cargarMensajesPublicacion = async (inmuebleId: number) => {
+  // 🔥 FUNCIÓN: Crear chat inicial desde publicación
+  const createInitialChat = useCallback(async (publicacionId: number, inmuebleId: number, propietarioId: number, titulo: string) => {
+    console.log('=== CREANDO CHAT INICIAL ===');
+    console.log('Parámetros recibidos:', { publicacionId, inmuebleId, propietarioId, titulo });
+    
+    setLoading(true);
+    setError(null);
+    
     try {
       const token = localStorage.getItem('token');
-      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      if (!token || !user) {
+        console.error('❌ No hay token o usuario disponible');
+        setError('Error: No se pudo autenticar al usuario');
+        navigate('/login');
+        return;
+      }
+
+      // Validar inmuebleId
+      if (!inmuebleId || inmuebleId === undefined || inmuebleId === null) {
+        console.error('❌ inmuebleId es inválido:', inmuebleId);
+        setError('Error: No se pudo obtener el ID del inmueble');
+        return;
+      }
       
-      console.log('Cargando mensajes para inmueble:', inmuebleId);
+      // Limitar título
+      const tituloCorto = titulo.length > 50 ? titulo.substring(0, 50) + '...' : titulo;
+      
+      // Crear mensaje inicial
+      const initialMessage = `Hola, estoy interesado en tu publicación: ${tituloCorto}`;
+      
+      console.log('📤 Enviando mensaje inicial:', {
+        contenido: initialMessage,
+        tipoMensaje: 'pregunta',
+        inmuebleId: Number(inmuebleId)
+      });
+      
+      const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      
+      const response = await axios.post('http://localhost:8080/api/mensajes/crear', {
+        contenido: initialMessage,
+        tipoMensaje: 'pregunta',
+        inmuebleId: Number(inmuebleId)
+      }, {
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('✅ Mensaje inicial creado exitosamente:', response.data);
+      setSuccess('Chat creado exitosamente');
+      
+      // Crear contacto
+      const newContact: Contact = {
+        id: inmuebleId.toString(),
+        name: `Conversación - ${tituloCorto}`,
+        lastMessage: initialMessage,
+        timestamp: new Date().toISOString(),
+        avatar: tituloCorto.charAt(0).toUpperCase(),
+        unreadCount: 0,
+        isOnline: false,
+        publicacion: {
+          id: publicacionId,
+          titulo: tituloCorto,
+          idInmueble: inmuebleId
+        }
+      };
+      
+      console.log('📋 Contacto creado:', newContact);
+      
+      setSelectedContact(newContact);
+      setContacts([newContact]);
+      
+      // Cargar mensajes después de un breve delay
+      setTimeout(() => {
+        console.log('🔄 Cargando mensajes del inmueble:', inmuebleId);
+        cargarMensajes(Number(inmuebleId));
+      }, 1000);
+      
+      // Limpiar state de navegación
+      window.history.replaceState({}, document.title);
+      
+    } catch (error) {
+      console.error('❌ Error creating initial chat:', error);
+      
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+        
+        if (error.response?.status === 403) {
+          setError('Error: No tienes permisos para crear mensajes');
+        } else if (error.response?.status === 400) {
+          setError('Error: Datos inválidos para crear el mensaje');
+        } else {
+          setError('Error al crear el chat inicial');
+        }
+      } else {
+        setError('Error de conexión al crear el chat');
+      }
+      
+      // Crear contacto de fallback sin mensaje inicial
+      const tituloCorto = titulo.length > 50 ? titulo.substring(0, 50) + '...' : titulo;
+      const fallbackContact: Contact = {
+        id: inmuebleId?.toString() || 'unknown',
+        name: `Conversación - ${tituloCorto}`,
+        lastMessage: 'Chat iniciado',
+        timestamp: new Date().toISOString(),
+        avatar: tituloCorto.charAt(0).toUpperCase(),
+        unreadCount: 0,
+        isOnline: false,
+        publicacion: {
+          id: publicacionId,
+          titulo: tituloCorto,
+          idInmueble: inmuebleId
+        }
+      };
+      
+      setSelectedContact(fallbackContact);
+      setContacts([fallbackContact]);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, navigate]);
+
+  // 🔥 FUNCIÓN: Cargar conversaciones existentes
+  const cargarConversacionesExistentes = useCallback(async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const token = localStorage.getItem('token');
+      const authToken = token?.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      
+      console.log('🔄 Cargando conversaciones existentes para usuario:', user.id);
+      
+      const response = await axios.get('http://localhost:8080/api/mensajes/conversaciones', {
+        headers: {
+          'Authorization': authToken
+        }
+      });
+      
+      console.log('📥 Conversaciones recibidas:', response.data);
+      
+      if (!response.data || response.data.length === 0) {
+        console.log('ℹ️ No hay conversaciones existentes');
+        setContacts([]);
+        return;
+      }
+      
+      // Convertir conversaciones a contacts
+      const contactsFromConversaciones: Contact[] = response.data.map((conv: Conversacion) => {
+        const tituloCorto = conv.tituloPublicacion.length > 50 
+          ? conv.tituloPublicacion.substring(0, 50) + '...'
+          : conv.tituloPublicacion;
+        
+        return {
+          id: conv.idInmueble.toString(),
+          name: `Conversación - ${tituloCorto}`,
+          lastMessage: conv.ultimoMensaje?.contenido || 'Sin mensajes',
+          timestamp: conv.fechaUltimoMensaje,
+          avatar: tituloCorto.charAt(0).toUpperCase(),
+          unreadCount: 0,
+          isOnline: false,
+          publicacion: {
+            id: 0,
+            titulo: tituloCorto,
+            idInmueble: conv.idInmueble
+          }
+        };
+      });
+      
+      console.log('📋 Contacts creados:', contactsFromConversaciones);
+      setContacts(contactsFromConversaciones);
+      
+      // Seleccionar el primer contacto automáticamente
+      if (contactsFromConversaciones.length > 0 && !selectedContact) {
+        const primerContacto = contactsFromConversaciones[0];
+        setSelectedContact(primerContacto);
+        cargarMensajes(primerContacto.publicacion!.idInmueble);
+      }
+      
+    } catch (error) {
+      console.error('❌ Error al cargar conversaciones:', error);
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        console.log('ℹ️ Usuario sin conversaciones - esto es normal');
+        setContacts([]);
+      } else {
+        setError('Error al cargar conversaciones');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [user, selectedContact]);
+
+  // 🔥 FUNCIÓN: Cargar mensajes de un inmueble
+  const cargarMensajes = async (inmuebleId: number) => {
+    console.log('🔄 Cargando mensajes para inmueble:', inmuebleId);
+    
+    try {
+      const token = localStorage.getItem('token');
+      const authToken = token?.startsWith('Bearer ') ? token : `Bearer ${token}`;
       
       const response = await axios.get(`http://localhost:8080/api/mensajes/inmueble/${inmuebleId}`, {
         headers: {
@@ -160,36 +326,51 @@ const Chats: React.FC = () => {
         }
       });
 
-      console.log('Mensajes recibidos:', response.data);
+      console.log('📥 Mensajes recibidos:', response.data);
 
-      const mensajesConUsuario = response.data.map((msg: Message) => ({
-        ...msg,
-        isFromCurrentUser: user ? msg.id_cliente === user.id : false
+      // Mapear mensajes con información de usuario
+      const mensajesConUsuario = response.data.map((msg: any) => ({
+        idMensaje: msg.idMensaje,
+        contenido: msg.contenido,
+        fechaEnvio: msg.fechaEnvio,
+        tipoMensaje: msg.tipoMensaje,
+        idCliente: msg.idCliente,
+        nombreCliente: msg.nombreCliente,
+        idInmueble: msg.idInmueble,
+        isFromCurrentUser: user ? msg.idCliente === user.id : false
       }));
 
       setMessages(mensajesConUsuario);
+      console.log('✅ Mensajes cargados correctamente');
     } catch (error) {
-      console.error('Error al cargar mensajes:', error);
+      console.error('❌ Error al cargar mensajes:', error);
       setMessages([]);
+      setError('Error al cargar mensajes');
     }
   };
 
+  // 🔥 FUNCIÓN: Enviar mensaje
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedContact || !user) return;
 
+    const inmuebleId = selectedContact.publicacion?.idInmueble;
+    if (!inmuebleId) {
+      setError('No se pudo identificar el inmueble');
+      return;
+    }
+
+    console.log('📤 Enviando mensaje:', newMessage);
+
     try {
       const token = localStorage.getItem('token');
-      const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      const authToken = token?.startsWith('Bearer ') ? token : `Bearer ${token}`;
       
       const mensajeData = {
         contenido: newMessage,
-        tipo_mensaje: 'texto',
-        id_cliente: user.id, // El usuario actual envía el mensaje
-        id_inmueble: location.state?.inmuebleId || currentPublicacion?.idInmueble || currentPublicacion?.id
+        tipoMensaje: 'respuesta',
+        inmuebleId: Number(inmuebleId)
       };
-
-      console.log('Enviando nuevo mensaje:', mensajeData);
 
       const response = await axios.post('http://localhost:8080/api/mensajes/crear', mensajeData, {
         headers: {
@@ -198,33 +379,55 @@ const Chats: React.FC = () => {
         }
       });
 
-      console.log('Mensaje enviado exitosamente:', response.data);
+      console.log('✅ Mensaje enviado exitosamente:', response.data);
 
-      // Agregar el mensaje a la lista local
+      // Crear mensaje local
       const nuevoMensaje: Message = {
-        id_mensaje: response.data.id_mensaje || Date.now(),
+        idMensaje: response.data.idMensaje || Date.now(),
         contenido: newMessage,
-        fecha_envio: new Date().toISOString(),
-        tipo_mensaje: 'texto',
-        id_cliente: user.id,
-        id_inmueble: mensajeData.id_inmueble || 0,
+        fechaEnvio: new Date().toISOString(),
+        tipoMensaje: 'respuesta',
+        idCliente: user.id,
+        nombreCliente: user.name,
+        idInmueble: inmuebleId,
         isFromCurrentUser: true
       };
 
       setMessages(prevMessages => [...prevMessages, nuevoMensaje]);
       setNewMessage('');
       
-      // Actualizar el último mensaje del contacto
+      // Actualizar último mensaje del contacto
       setContacts(prevContacts => 
         prevContacts.map(contact => 
           contact.id === selectedContact.id 
-            ? { ...contact, lastMessage: newMessage }
+            ? { 
+                ...contact, 
+                lastMessage: newMessage,
+                timestamp: new Date().toISOString()
+              }
             : contact
         )
       );
+      
+      setError(null);
+      setSuccess('Mensaje enviado correctamente');
+      
+      // Limpiar success message después de 3 segundos
+      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error('Error al enviar mensaje:', error);
+      console.error('❌ Error al enviar mensaje:', error);
+      setError('Error al enviar el mensaje');
     }
+  };
+
+  // 🔥 FUNCIÓN: Manejar selección de contacto
+  const handleContactSelect = (contact: Contact) => {
+    console.log('📋 Contacto seleccionado:', contact);
+    setSelectedContact(contact);
+    if (contact.publicacion?.idInmueble) {
+      cargarMensajes(contact.publicacion.idInmueble);
+    }
+    setError(null);
   };
 
   const handleLogout = () => {
@@ -243,48 +446,11 @@ const Chats: React.FC = () => {
     });
   };
 
-  const createInitialChat = async (publicacionId: number, inmuebleId: number, propietarioId: number, titulo: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      
-      // Create initial message
-      const initialMessage = `Hola, estoy interesado en tu publicación: ${titulo}`;
-      
-      await axios.post('http://localhost:8080/api/mensajes/crear', {
-        contenido: initialMessage,
-        tipo_mensaje: 'texto',
-        id_cliente: user.id,
-        id_inmueble: inmuebleId
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      // Create contact and load messages
-      const newContact: Contact = {
-        id: propietarioId.toString(),
-        name: `Propietario - ${titulo}`,
-        lastMessage: initialMessage,
-        unreadCount: 0,
-        isOnline: false,
-        publicacionId,
-        publicacionTitulo: titulo,
-        propietarioId
-      };
-      
-      setSelectedContact(newContact);
-      cargarMensajesPublicacion(inmuebleId);
-      
-      // Clear navigation state
-      window.history.replaceState({}, document.title);
-      
-    } catch (error) {
-      console.error('Error creating initial chat:', error);
-    }
-  };
+  // Filtrar contactos por búsqueda
+  const filteredContacts = contacts.filter((contact) =>
+    contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    contact.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="chat-page">
@@ -340,10 +506,6 @@ const Chats: React.FC = () => {
                     <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
                     <span>Mis publicaciones</span>
                   </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/inmuebles" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="bi-house-door-fill"></i></div>
-                    <span>Mis inmuebles</span>
-                  </NavDropdown.Item>
                   <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="far fa-heart"></i></div>
                     <span>Favoritos</span>
@@ -353,10 +515,6 @@ const Chats: React.FC = () => {
                     <span>Mis chats</span>
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-user"></i></div>
-                    <span>Mi cuenta</span>
-                  </NavDropdown.Item>
                   <NavDropdown.Item onClick={handleLogout} className="dropdown-item-custom">
                     <div className="icon-wrapper"><i className="fas fa-sign-out-alt"></i></div>
                     <span>Cerrar sesión</span>
@@ -378,9 +536,10 @@ const Chats: React.FC = () => {
         </Container>
       </Navbar>
 
-      {/* CHAT */}
+      {/* CHAT CONTAINER */}
       <Container fluid className="chat-wrapper">
         <Row className="h-100">
+          {/* SIDEBAR DE CONTACTOS */}
           <Col md={4} lg={3} className="chat-sidebar" data-aos="fade-right">
             <div className="search-container">
               <Form.Control
@@ -391,80 +550,121 @@ const Chats: React.FC = () => {
                 className="search-input"
               />
             </div>
+            
+            {/* MOSTRAR LOADING */}
+            {loading && (
+              <div className="text-center p-3">
+                <Spinner animation="border" size="sm" />
+                <p className="mt-2 mb-0">Cargando conversaciones...</p>
+              </div>
+            )}
+            
+            {/* LISTA DE CONTACTOS */}
             <div className="contacts-list">
-              {contacts
-                .filter((contact) =>
-                  contact.name.toLowerCase().includes(searchQuery.toLowerCase())
-                )
-                .map((contact) => (
+              {filteredContacts.length === 0 && !loading ? (
+                <div className="no-conversations p-3 text-center text-muted">
+                  <i className="bi bi-chat-dots fs-1 mb-2"></i>
+                  <p>No hay conversaciones aún</p>
+                  <small>Contacta a un propietario desde una publicación para empezar a chatear</small>
+                </div>
+              ) : (
+                filteredContacts.map((contact) => (
                   <div
                     key={contact.id}
                     className={`contact-item ${selectedContact?.id === contact.id ? 'active' : ''}`}
-                    onClick={() => setSelectedContact(contact)}
+                    onClick={() => handleContactSelect(contact)}
                     data-aos="fade-up"
                   >
                     <div className="contact-avatar">
                       {contact.isOnline && <span className="online-indicator"></span>}
-                      <div className="avatar-text">{contact.name[0]}</div>
+                      <div className="avatar-text">{contact.avatar}</div>
                     </div>
                     <div className="contact-info">
                       <h6 className="contact-name">{contact.name}</h6>
-                      <p className="last-message">{contact.lastMessage}</p>
-                      {contact.publicacionTitulo && (
-                        <small className="text-muted">📍 {contact.publicacionTitulo}</small>
+                      <p className="contact-last-message">{contact.lastMessage}</p>
+                      {contact.publicacion?.titulo && (
+                        <small className="text-muted">📍 {contact.publicacion.titulo}</small>
                       )}
                     </div>
                     {contact.unreadCount > 0 && (
                       <span className="unread-badge">{contact.unreadCount}</span>
                     )}
                   </div>
-                ))}
+                ))
+              )}
             </div>
           </Col>
 
+          {/* ÁREA PRINCIPAL DEL CHAT */}
           <Col md={8} lg={9} className="chat-main" data-aos="fade-left">
             {selectedContact ? (
               <>
+                {/* HEADER DEL CHAT */}
                 <div className="chat-header">
                   <div className="selected-contact">
                     <div className="contact-avatar">
-                      <div className="avatar-text">{selectedContact.name[0]}</div>
+                      <div className="avatar-text">{selectedContact.avatar}</div>
                     </div>
                     <div className="contact-info">
-                      <h5>{selectedContact.name}</h5>
-                      {selectedContact.publicacionTitulo && (
+                      <h6>{selectedContact.name}</h6>
+                      {selectedContact.publicacion?.titulo && (
                         <small className="text-info">
-                          Conversación sobre: {selectedContact.publicacionTitulo}
+                          Conversación sobre: {selectedContact.publicacion.titulo}
                         </small>
                       )}
                       <br />
-                      <small
-                        className={selectedContact.isOnline ? 'text-success' : 'text-muted'}
-                      >
+                      <small className={selectedContact.isOnline ? 'text-success' : 'text-muted'}>
                         {selectedContact.isOnline ? 'En línea' : 'Desconectado'}
                       </small>
                     </div>
                   </div>
                 </div>
 
+                {/* MOSTRAR ALERTAS */}
+                {error && (
+                  <Alert variant="danger" className="mx-3" dismissible onClose={() => setError(null)}>
+                    {error}
+                  </Alert>
+                )}
+                {success && (
+                  <Alert variant="success" className="mx-3" dismissible onClose={() => setSuccess(null)}>
+                    {success}
+                  </Alert>
+                )}
+
+                {/* CONTENEDOR DE MENSAJES */}
                 <div className="messages-container">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id_mensaje}
-                      className={`message ${message.isFromCurrentUser ? 'sent' : 'received'}`}
-                      data-aos="fade-up"
-                    >
-                      <div className="message-content">
-                        <p>{message.contenido}</p>
-                        <small className="message-time">
-                          {formatMessageTime(message.fecha_envio)}
-                        </small>
-                      </div>
+                  {messages.length === 0 ? (
+                    <div className="no-messages text-center text-muted p-4">
+                      <i className="bi bi-chat-text fs-1 mb-2"></i>
+                      <p>No hay mensajes en esta conversación</p>
+                      <small>Envía el primer mensaje para comenzar</small>
                     </div>
-                  ))}
+                  ) : (
+                    messages.map((message) => (
+                      <div
+                        key={message.idMensaje}
+                        className={`message ${message.isFromCurrentUser ? 'sent' : 'received'}`}
+                        data-aos="fade-up"
+                      >
+                        <div className="message-content">
+                          <p>{message.contenido}</p>
+                          <small className="message-time">
+                            {formatMessageTime(message.fechaEnvio)}
+                          </small>
+                          {!message.isFromCurrentUser && message.nombreCliente && (
+                            <small className="message-sender d-block text-muted">
+                              {message.nombreCliente}
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
 
+                {/* FORMULARIO DE ENVÍO DE MENSAJES */}
                 <Form onSubmit={handleSendMessage} className="message-form">
                   <Form.Group className="message-input d-flex">
                     <Form.Control
@@ -472,8 +672,13 @@ const Chats: React.FC = () => {
                       placeholder="Escribe un mensaje..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
+                      disabled={!selectedContact}
                     />
-                    <Button type="submit" className="send-button">
+                    <Button 
+                      type="submit" 
+                      className="send-button"
+                      disabled={!newMessage.trim() || !selectedContact}
+                    >
                       <i className="bi bi-send-fill"></i>
                     </Button>
                   </Form.Group>
