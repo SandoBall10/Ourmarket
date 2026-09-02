@@ -5,6 +5,10 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Perfil.css';
 import axios from 'axios'; // Asegúrate que axios está importado
 
+interface User {
+  name: string;
+}
+
 const Perfil: React.FC = () => {
   const location = useLocation();
   // Estado para los datos del perfil y navegación
@@ -44,7 +48,7 @@ const Perfil: React.FC = () => {
   
   // Estado para el usuario logueado
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   // Efecto de entrada para animaciones
   const pageVariants = {
@@ -230,7 +234,7 @@ const Perfil: React.FC = () => {
       setMessage({type: 'info', text: 'Actualizando perfil...'});
       
       // Obtener el token actual
-      let token = localStorage.getItem('token');
+      const token = localStorage.getItem('token');
       
       if (!token) {
         console.error('No hay token de autenticación');
@@ -371,7 +375,7 @@ const Perfil: React.FC = () => {
       };
 
       const baseURL = 'http://localhost:8080';
-      const response = await axios.put(`${baseURL}/api/clientes/me`, body, config);
+      await axios.put(`${baseURL}/api/clientes/me`, body, config);
 
       setMessage({
         type: 'success',

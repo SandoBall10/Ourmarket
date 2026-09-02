@@ -26,6 +26,42 @@ interface FavoritoItem {
   direccion?: string;
 }
 
+interface FavoritoBackend {
+  id_inmueble?: number;
+  inmuebleId?: number;
+}
+
+interface InmuebleBackend {
+  id: number;
+  idCliente?: number;
+  tipo?: string;
+  precio?: number;
+  direccion?: string;
+  distrito?: string;
+  provincia?: string;
+  region?: string;
+  area?: number;
+  numhabitaciones?: number;
+  habitaciones?: number;
+  numHabitaciones?: number;
+  imagenes?: string;
+  descripcion?: string;
+  servicios?: string;
+}
+
+interface PublicacionBackend {
+  id?: number;
+  idPublicacion?: number;
+  idInmueble?: number;
+  id_inmueble?: number;
+  titulo?: string;
+  descripcion?: string;
+  estado?: string;
+  idCliente?: number;
+  autorizado?: number;
+  inmueble?: InmuebleBackend;
+}
+
 interface User {
   id: number;
   nombre: string;
@@ -66,7 +102,7 @@ const Favoritos: React.FC = () => {
       console.log('Cargando favoritos para usuario:', userId);
       
       // 1. Obtener los favoritos del usuario
-      const favoritosResponse = await axios.get(`http://localhost:8080/api/favoritos/usuario/${userId}`, {
+      const favoritosResponse = await axios.get<FavoritoBackend[]>(`http://localhost:8080/api/favoritos/usuario/${userId}`, {
         headers: {
           'Authorization': authToken
         }
@@ -81,13 +117,14 @@ const Favoritos: React.FC = () => {
       }
       
       // 2. Obtener todas las publicaciones CON sus inmuebles
-      let publicacionesResponse;
+      let publicaciones: PublicacionBackend[];
       try {
-        publicacionesResponse = await axios.get('http://localhost:8080/api/publicaciones', {
+        const response = await axios.get<PublicacionBackend[]>('http://localhost:8080/api/publicaciones', {
           headers: {
             'Authorization': authToken
           }
         });
+        publicaciones = response.data;
       } catch (error) {
         console.error('Error al obtener publicaciones:', error);
         setFavoritos([]);
@@ -95,20 +132,20 @@ const Favoritos: React.FC = () => {
         return;
       }
       
-      console.log('Publicaciones disponibles:', publicacionesResponse.data.length);
+      console.log('Publicaciones disponibles:', publicaciones.length);
       
       // 3. Obtener todos los inmuebles por separado como backup
-      let inmueblesResponse;
+      let inmuebles: InmuebleBackend[] = [];
       try {
-        inmueblesResponse = await axios.get('http://localhost:8080/api/inmuebles', {
+        const response = await axios.get<InmuebleBackend[]>('http://localhost:8080/api/inmuebles', {
           headers: {
             'Authorization': authToken
           }
         });
-        console.log('Inmuebles disponibles:', inmueblesResponse.data.length);
+        inmuebles = response.data;
+        console.log('Inmuebles disponibles:', inmuebles.length);
       } catch (error) {
         console.log('No se pudieron obtener los inmuebles:', error);
-        inmueblesResponse = { data: [] };
       }
       
       // 4. Procesar favoritos
@@ -116,16 +153,20 @@ const Favoritos: React.FC = () => {
       
       for (const favorito of favoritosResponse.data) {
         const inmuebleId = favorito.id_inmueble || favorito.inmuebleId;
+        if (inmuebleId === undefined) {
+          console.warn('Favorito ignorado porque no contiene un ID de inmueble:', favorito);
+          continue;
+        }
         console.log('Procesando favorito con inmueble ID:', inmuebleId);
         
         // Primero buscar la publicación
-        let publicacion = publicacionesResponse.data.find((pub: any) => {
+        let publicacion = publicaciones.find((pub) => {
           return pub.inmueble && pub.inmueble.id === inmuebleId;
         });
         
         // Si no se encuentra por inmueble, buscar por otros campos
         if (!publicacion) {
-          publicacion = publicacionesResponse.data.find((pub: any) => {
+          publicacion = publicaciones.find((pub) => {
             return pub.idInmueble === inmuebleId || pub.id_inmueble === inmuebleId;
           });
         }
@@ -135,12 +176,12 @@ const Favoritos: React.FC = () => {
         if (publicacion && publicacion.inmueble) {
           inmuebleData = publicacion.inmueble;
         } else {
-          inmuebleData = inmueblesResponse.data.find((inm: any) => inm.id === inmuebleId);
+          inmuebleData = inmuebles.find((inm) => inm.id === inmuebleId);
         }
         
         // Si encontramos el inmueble pero no la publicación, buscar la publicación por el inmueble
         if (inmuebleData && !publicacion) {
-          publicacion = publicacionesResponse.data.find((pub: any) => {
+          publicacion = publicaciones.find((pub) => {
             return pub.idInmueble === inmuebleId || 
                    (pub.inmueble && pub.inmueble.id === inmuebleId);
           });
@@ -240,7 +281,7 @@ const Favoritos: React.FC = () => {
   };
 
   // Función para eliminar de favoritos - IGUAL QUE EN BUSCAR
-  const removeFavorito = async (publicacionId: number, inmuebleId: number) => {
+  const removeFavorito = async (inmuebleId: number) => {
     if (!user) return;
     
     try {
@@ -278,11 +319,11 @@ const Favoritos: React.FC = () => {
       // Mostrar mensaje de éxito
       alert('Favorito eliminado correctamente');
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al eliminar favorito:', error);
       
       // Manejo de errores igual que en Buscar
-      if (error.response) {
+      if (axios.isAxiosError(error) && error.response) {
         console.error('Response data:', error.response.data);
         console.error('Response status:', error.response.status);
         
@@ -293,11 +334,11 @@ const Favoritos: React.FC = () => {
         } else {
           alert(`Error al eliminar de favoritos: ${error.response.data.message || error.response.statusText}`);
         }
-      } else if (error.request) {
+      } else if (axios.isAxiosError(error) && error.request) {
         console.error('No se recibió respuesta del servidor:', error.request);
         alert('Error de conexión. Verifica que el servidor esté funcionando.');
       } else {
-        console.error('Error:', error.message);
+        console.error('Error:', error instanceof Error ? error.message : error);
         alert('Error inesperado. Inténtalo de nuevo.');
       }
     }
@@ -518,7 +559,7 @@ const Favoritos: React.FC = () => {
                             
                             // Asegurar que tenemos un inmuebleId válido
                             const inmuebleIdFinal = item.idInmueble || item.id;
-                            removeFavorito(item.id, inmuebleIdFinal);
+                            removeFavorito(inmuebleIdFinal);
                           }}
                         >
                           <i className="fas fa-heart text-danger"></i>
@@ -761,7 +802,7 @@ const Favoritos: React.FC = () => {
                   
                   // Asegurar que tenemos un inmuebleId válido
                   const inmuebleIdFinal = selectedFavorito.idInmueble || selectedFavorito.id;
-                  removeFavorito(selectedFavorito.id, inmuebleIdFinal);
+                  removeFavorito(inmuebleIdFinal);
                 }
               }}
             >

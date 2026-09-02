@@ -145,7 +145,7 @@ const Registro: React.FC = () => {
         return 'Fecha de nacimiento incorrecta: debes ser mayor de edad (18 años o más)';
       }
       return '';
-    } catch (e) {
+    } catch {
       return 'La fecha de nacimiento no es válida';
     }
   };
@@ -288,8 +288,11 @@ const Registro: React.FC = () => {
       setShowSuccessNotification(true);
       
       // La redirección se manejará automáticamente después de 5 segundos
-    } catch (error: any) {
-      alert(error.message || 'Error en el registro. Por favor, intenta nuevamente.');
+    } catch (error: unknown) {
+      const message = error instanceof Error
+        ? error.message
+        : 'Error en el registro. Por favor, intenta nuevamente.';
+      alert(message);
     } finally {
       setIsLoading(false);
     }

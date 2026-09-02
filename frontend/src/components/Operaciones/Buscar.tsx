@@ -25,6 +25,7 @@ interface PublicacionBackend {
   autorizado?: boolean | number;
   idCliente?: number;
   id_cliente?: number;
+  descripcion?: string;
   inmueble?: {
       id?: number;
       idInmueble?: number; // AGREGAR: posible campo alternativo
@@ -183,7 +184,7 @@ const Buscar: React.FC = () => {
             console.log('Inmueble completo:', inm);
             console.log('Inmueble ID:', inm.id);
             console.log('Inmueble idInmueble:', inm.idInmueble);
-            console.log('Inmueble id_inmueble:', (inm as any).id_inmueble);
+            console.log('Inmueble id_inmueble:', inm.id_inmueble);
             console.log('================================');
             
             return {
@@ -204,7 +205,7 @@ const Buscar: React.FC = () => {
               servicios: inm.servicios ?? '',
               idCliente: pub.idCliente ?? pub.id_cliente,
               // PROBAR DIFERENTES OPCIONES PARA EL ID DEL INMUEBLE
-              idInmueble: inm.id || inm.idInmueble || (inm as any).id_inmueble || (inm as any).idInmueble,
+              idInmueble: inm.id || inm.idInmueble || inm.id_inmueble,
             };
           });
       

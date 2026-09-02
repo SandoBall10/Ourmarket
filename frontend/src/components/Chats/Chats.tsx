@@ -320,7 +320,7 @@ const Chats: React.FC = () => {
       const token = localStorage.getItem('token');
       const authToken = token?.startsWith('Bearer ') ? token : `Bearer ${token}`;
       
-      const response = await axios.get(`http://localhost:8080/api/mensajes/inmueble/${inmuebleId}`, {
+      const response = await axios.get<Message[]>(`http://localhost:8080/api/mensajes/inmueble/${inmuebleId}`, {
         headers: {
           'Authorization': authToken
         }
@@ -329,7 +329,7 @@ const Chats: React.FC = () => {
       console.log('📥 Mensajes recibidos:', response.data);
 
       // Mapear mensajes con información de usuario
-      const mensajesConUsuario = response.data.map((msg: any) => ({
+      const mensajesConUsuario = response.data.map((msg) => ({
         idMensaje: msg.idMensaje,
         contenido: msg.contenido,
         fechaEnvio: msg.fechaEnvio,

@@ -70,7 +70,6 @@ const Inmuebles: React.FC = () => {
       setIsLoading(false);
     };
     if (userData) fetchInmuebles();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.rol, user?.name]);
 
   // Navbar exacto proporcionado por el usuario
