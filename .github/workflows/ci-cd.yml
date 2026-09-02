@@ -1,0 +1,214 @@
+name: CI/CD - Inmomarket
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend | calidad y compilacion
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v6
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias reproducibles
+        run: npm ci
+
+      - name: Ejecutar validacion estatica
+        run: npm run lint
+
+      - name: Compilar frontend
+        run: npm run build
+
+      - name: Publicar artefacto frontend
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  backend:
+    name: Backend | pruebas y compilacion
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: marketplaceinmobiliario
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d marketplaceinmobiliario"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v6
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Ejecutar pruebas y compilar backend
+        working-directory: backend
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/marketplaceinmobiliario
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: ci_password
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+        run: bash ./mvnw --batch-mode --no-transfer-progress verify
+
+      - name: Publicar resultados de pruebas
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-test-results
+          path: backend/target/surefire-reports
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Publicar artefacto backend
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-jar
+          path: |
+            backend/target/*.jar
+            !backend/target/*.jar.original
+          if-no-files-found: error
+          retention-days: 7
+
+  docker-images:
+    name: Docker | construir imagenes
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v6
+
+      - name: Construir imagen del frontend
+        run: docker build --tag inmomarket-frontend:${{ github.sha }} frontend
+
+      - name: Construir imagen del backend
+        run: docker build --tag inmomarket-backend:${{ github.sha }} backend
+
+      - name: Empaquetar imagenes Docker
+        shell: bash
+        run: |
+          docker save \
+            inmomarket-frontend:${GITHUB_SHA} \
+            inmomarket-backend:${GITHUB_SHA} \
+            | gzip > inmomarket-images.tar.gz
+
+      - name: Publicar imagenes validadas
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-images
+          path: inmomarket-images.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy-staging:
+    name: CD | despliegue simulado con Docker Compose
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [docker-images]
+    runs-on: ubuntu-latest
+    environment: staging-simulado
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v6
+
+      - name: Recuperar imagenes validadas
+        uses: actions/download-artifact@v8
+        with:
+          name: docker-images
+          path: release
+
+      - name: Cargar imagenes Docker
+        shell: bash
+        run: gzip -dc release/inmomarket-images.tar.gz | docker load
+
+      - name: Desplegar ambiente temporal
+        run: docker compose up -d --no-build
+
+      - name: Ejecutar pruebas de humo
+        shell: bash
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent --location http://localhost:5173/ > /dev/null && \
+               curl --fail --silent --location http://localhost:8080/swagger-ui/index.html > /dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          docker compose logs --no-color
+          exit 1
+
+      - name: Guardar evidencia del despliegue
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p deployment-evidence
+          docker compose ps > deployment-evidence/containers.txt || true
+          docker compose logs --no-color > deployment-evidence/logs.txt 2>&1 || true
+          printf 'commit=%s\nrun=%s\nenvironment=staging-simulado\n' \
+            "${GITHUB_SHA}" "${GITHUB_RUN_ID}" > deployment-evidence/DEPLOYMENT.txt
+
+      - name: Publicar evidencia del despliegue
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: deployment-evidence-${{ github.sha }}
+          path: deployment-evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Eliminar ambiente temporal
+        if: always()
+        run: docker compose down --volumes
+
+      - name: Registrar despliegue
+        shell: bash
+        run: |
+          {
+            echo '## Despliegue simulado completado'
+            echo "- Entorno: staging-simulado"
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Imagen frontend: \`inmomarket-frontend:${GITHUB_SHA}\`"
+            echo "- Imagen backend: \`inmomarket-backend:${GITHUB_SHA}\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
