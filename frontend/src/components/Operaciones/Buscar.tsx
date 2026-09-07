@@ -27,7 +27,6 @@ interface PublicacionBackend {
   autorizado?: boolean | number;
   idCliente?: number;
   id_cliente?: number;
-  descripcion?: string;
   inmueble?: {
       id?: number;
       idInmueble?: number; // AGREGAR: posible campo alternativo
