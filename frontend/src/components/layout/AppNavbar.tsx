@@ -3,9 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { clearSession, getSessionUser, isAdminRole } from '../../auth/session';
 import '../Principal.css';
 
-type AppNavbarProps = {
-  active?: 'buscar' | 'vender' | 'guias';
-};
+type AppNavbarProps = { active?: 'buscar' | 'vender' | 'guias' };
 
 export default function AppNavbar({ active }: AppNavbarProps) {
   const navigate = useNavigate();
@@ -18,84 +16,54 @@ export default function AppNavbar({ active }: AppNavbarProps) {
     navigate('/');
   };
 
+  const accountMenu = loggedIn ? (
+    <NavDropdown
+      title={<span className="navbar-account"><i className="fa-regular fa-user" /><span>{displayName}</span></span>}
+      id="user-dropdown"
+      align="end"
+      className="account-dropdown"
+    >
+      <NavDropdown.Item as={Link} to="/publicaciones">Mis publicaciones</NavDropdown.Item>
+      <NavDropdown.Item as={Link} to="/inmuebles">Mis inmuebles</NavDropdown.Item>
+      <NavDropdown.Item as={Link} to="/favoritos">Favoritos</NavDropdown.Item>
+      <NavDropdown.Item as={Link} to="/chats">Mis chats</NavDropdown.Item>
+      {isAdminRole(user?.rol) && <NavDropdown.Item as={Link} to="/dashboard">Dashboard Admin</NavDropdown.Item>}
+      <NavDropdown.Divider />
+      <NavDropdown.Item as={Link} to="/perfil">Mi cuenta</NavDropdown.Item>
+      <NavDropdown.Item onClick={handleLogout}>Cerrar sesión</NavDropdown.Item>
+    </NavDropdown>
+  ) : (
+    <Nav.Link as={Link} to="/login" className="navbar-user" aria-label="Ir a iniciar sesión">
+      <i className="fa-regular fa-user" />
+    </Nav.Link>
+  );
+
   return (
-    <Navbar bg="white" expand="lg" className="w-100 border-bottom">
-      <Container fluid className="px-4">
-        <Navbar.Brand as={Link} to="/">
-          <img
-            src="/inmoicon.png"
-            alt="InmoMarket"
-            height="30"
-            className="d-inline-block align-top"
-          />
-          <span className="fw-bold"> InmoMarket</span>
+    <Navbar expand="lg" className="inmo-navbar" sticky="top">
+      <Container className="navbar-shell">
+        <Navbar.Brand as={Link} to="/" className="inmo-brand">
+          <img src="/inmoicon.png" alt="" />
+          <span>InmoMarket</span>
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="app-navbar" />
+
+        <Navbar.Toggle aria-controls="app-navbar" aria-label="Abrir navegación" />
         <Navbar.Collapse id="app-navbar">
-          <Nav className="me-auto">
-            <Nav.Link as={Link} to="/buscar" className={active === 'buscar' ? 'fw-bold' : ''}>
-              Comprar
-            </Nav.Link>
-            <Nav.Link as={Link} to="/vender" className={active === 'vender' ? 'fw-bold' : ''}>
-              Vender
-            </Nav.Link>
-            <NavDropdown title="Guías" id="guias-dropdown" className={active === 'guias' ? 'fw-bold' : ''}>
+          <Nav className="navbar-main-links">
+            <Nav.Link as={Link} to="/buscar" className={active === 'buscar' ? 'active' : ''}>Comprar</Nav.Link>
+            <Nav.Link as={Link} to="/vender" className={active === 'vender' ? 'active' : ''}>Vender</Nav.Link>
+            <NavDropdown title="Guías" id="guias-dropdown" className={active === 'guias' ? 'active' : ''}>
               <NavDropdown.Item as={Link} to="/vendedores">Para vendedores</NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/compradores">Para compradores</NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/conocenos">Conócenos</NavDropdown.Item>
             </NavDropdown>
           </Nav>
-          <Nav className="ms-auto">
-            {loggedIn ? (
-              <NavDropdown
-                title={
-                  <div className="avatar-container">
-                    <div className="user-avatar">
-                      {displayName.charAt(0).toUpperCase()}
-                    </div>
-                    <i className="fas fa-chevron-down avatar-arrow"></i>
-                  </div>
-                }
-                id="user-dropdown"
-                align="end"
-                className="custom-dropdown"
-              >
-                <NavDropdown.Item as={Link} to="/publicaciones" className="dropdown-item-custom">
-                  <span>Mis publicaciones</span>
-                </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/inmuebles" className="dropdown-item-custom">
-                  <span>Mis inmuebles</span>
-                </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
-                  <span>Favoritos</span>
-                </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/chats" className="dropdown-item-custom">
-                  <span>Mis chats</span>
-                </NavDropdown.Item>
-                {isAdminRole(user?.rol) && (
-                  <>
-                    <NavDropdown.Divider />
-                    <NavDropdown.Item as={Link} to="/dashboard" className="dropdown-item-custom">
-                      <span>Dashboard Admin</span>
-                    </NavDropdown.Item>
-                  </>
-                )}
-                <NavDropdown.Divider />
-                <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
-                  <span>Mi cuenta</span>
-                </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/compradores" className="dropdown-item-custom">
-                  <span>Ayuda</span>
-                </NavDropdown.Item>
-                <NavDropdown.Item onClick={handleLogout} className="dropdown-item-custom">
-                  <span>Cerrar sesión</span>
-                </NavDropdown.Item>
-              </NavDropdown>
-            ) : (
-              <Button variant="success" className="btn-ingresar" onClick={() => navigate('/login')}>
-                Ingresar
-              </Button>
-            )}
+
+          <Nav className="navbar-actions">
+            <Nav.Link as={Link} to={loggedIn ? '/favoritos' : '/login'} className="navbar-favorites">
+              <i className="fa-regular fa-heart" /> <span>Favoritos</span>
+            </Nav.Link>
+            {accountMenu}
+            {!loggedIn && <Button className="navbar-login" onClick={() => navigate('/login')}>Ingresar</Button>}
           </Nav>
         </Navbar.Collapse>
       </Container>
