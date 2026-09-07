@@ -15,9 +15,12 @@ public final class DatabaseBootstrap {
     private DatabaseBootstrap() {}
 
     public static void ensureDatabaseExists() {
-        String jdbcUrl = env("DB_URL", "jdbc:postgresql://localhost:5432/marketplaceinmobiliario");
-        String username = env("DB_USERNAME", "postgres");
-        String password = env("DB_PASSWORD", "12345");
+        String jdbcUrl = firstEnv(
+                "jdbc:postgresql://localhost:5432/marketplaceinmobiliario",
+                "DB_URL",
+                "SPRING_DATASOURCE_URL");
+        String username = firstEnv("postgres", "DB_USERNAME", "SPRING_DATASOURCE_USERNAME");
+        String password = firstEnv("12345", "DB_PASSWORD", "SPRING_DATASOURCE_PASSWORD");
         String dbName = extractDatabaseName(jdbcUrl);
         if (dbName == null || !dbName.matches("[a-zA-Z0-9_]+")) {
             throw new IllegalStateException("Nombre de base de datos inválido en DB_URL: " + jdbcUrl);
@@ -39,7 +42,8 @@ public final class DatabaseBootstrap {
             }
         } catch (Exception ex) {
             throw new IllegalStateException(
-                    "No se pudo crear o verificar PostgreSQL. ¿Está el servicio en marcha? " + ex.getMessage(),
+                    "No se pudo crear o verificar PostgreSQL en " + adminUrl
+                            + ". ¿Está el servicio en marcha? " + ex.getMessage(),
                     ex);
         }
     }
@@ -54,8 +58,13 @@ public final class DatabaseBootstrap {
         return query >= 0 ? tail.substring(0, query) : tail;
     }
 
-    private static String env(String key, String fallback) {
-        String value = System.getenv(key);
-        return (value == null || value.isBlank()) ? fallback : value;
+    private static String firstEnv(String fallback, String... keys) {
+        for (String key : keys) {
+            String value = System.getenv(key);
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return fallback;
     }
 }
