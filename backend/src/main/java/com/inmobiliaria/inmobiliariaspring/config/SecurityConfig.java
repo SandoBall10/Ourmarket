@@ -4,8 +4,10 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +24,7 @@ import com.inmobiliaria.inmobiliariaspring.service.CustomerUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -48,11 +51,13 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> {
                 auth.requestMatchers("/assets/inmuebles/**").permitAll();
                 auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
-                auth.requestMatchers("/api/clientes/registrar","/authenticate").permitAll()
-                    .requestMatchers("/api/clientes/me").hasAnyRole("CLIENTE", "MASTER") // Solo CLIENTE puede acceder a /me
+                auth.requestMatchers("/api/clientes/registrar", "/authenticate").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/publicaciones/catalogo").permitAll()
+                    .requestMatchers("/api/clientes/me").hasAnyRole("CLIENTE", "MASTER")
                     .requestMatchers("/api/roles/**", "/api/administradores/**").hasRole("MASTER")
                     .requestMatchers("/api/clientes/**").hasAnyRole("MASTER", "ADMIN")
-                    .requestMatchers("/api/publicaciones/*/autorizar").hasAnyRole("MASTER", "ADMIN")
+                    .requestMatchers("/api/publicaciones/pendientes").hasAnyRole("MASTER", "ADMIN")
+                    .requestMatchers("/api/publicaciones/*/autorizar", "/api/publicaciones/*/rechazar").hasAnyRole("MASTER", "ADMIN")
                     .requestMatchers("/api/inmuebles/**", "/api/publicaciones/**", "/api/mensajes/**", "/api/favoritos/**")
                         .hasAnyRole("MASTER", "ADMIN", "CLIENTE")
                     .anyRequest().authenticated();

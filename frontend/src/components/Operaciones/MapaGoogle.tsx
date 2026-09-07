@@ -63,8 +63,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address, setCoo
     }
   };
 
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
+    return (
+      <div className="p-3 border rounded bg-light text-muted">
+        Configura <code>VITE_GOOGLE_MAPS_API_KEY</code> en <code>frontend/.env</code> para ver el mapa.
+      </div>
+    );
+  }
+
   return (
-    <LoadScript googleMapsApiKey="AIzaSyBDaeWicvigtP9xPv919E-RNoxfvC-Hqik">
+    <LoadScript googleMapsApiKey={apiKey}>
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}

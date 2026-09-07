@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navbar, Container, Nav, NavDropdown, Button, Modal, Form, Table, Alert, Carousel } from 'react-bootstrap';
+import { API_BASE_URL } from '../../api/config';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
@@ -84,6 +85,9 @@ const Dashboard: React.FC = () => {
   const [pendientes, setPendientes] = useState<Pendiente[]>([]);
   const [loadingPendientes, setLoadingPendientes] = useState(false);
   const [errorPendientes, setErrorPendientes] = useState<string | null>(null);
+  const [clientes, setClientes] = useState<Array<Record<string, unknown>>>([]);
+  const [propiedades, setPropiedades] = useState<Array<Record<string, unknown>>>([]);
+  const [loadingGestion, setLoadingGestion] = useState(false);
   const [showImagenesModal, setShowImagenesModal] = useState(false);
   const [imagenesSeleccionadas, setImagenesSeleccionadas] = useState<string[]>([]);
   const navigate = useNavigate();
@@ -165,7 +169,7 @@ const Dashboard: React.FC = () => {
         const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
         
         // Asegurarse de que el token se envía correctamente
-        const response = await fetch('http://localhost:8080/api/administradores', {
+        const response = await fetch(API_BASE_URL + '/api/administradores', {
           method: 'GET',
           headers: {
             'Authorization': authToken,
@@ -205,7 +209,7 @@ const Dashboard: React.FC = () => {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('No hay token de autenticación disponible');
         const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-        const response = await fetch('http://localhost:8080/api/publicaciones/pendientes', {
+        const response = await fetch(API_BASE_URL + '/api/publicaciones/pendientes', {
           headers: {
             'Authorization': authToken,
             'Content-Type': 'application/json'
@@ -223,6 +227,38 @@ const Dashboard: React.FC = () => {
       }
     };
     fetchPendientes();
+  }, [activeSection]);
+
+  useEffect(() => {
+    const loadGestion = async () => {
+      const token = getAuthToken();
+      if (!token) return;
+      if (activeSection !== 'clientes' && activeSection !== 'propiedades' && activeSection !== 'dashboard') {
+        return;
+      }
+      setLoadingGestion(true);
+      try {
+        if (activeSection === 'clientes' || activeSection === 'dashboard') {
+          const res = await fetch(API_BASE_URL + '/api/clientes', {
+            headers: { Authorization: token },
+          });
+          if (res.ok) {
+            setClientes(await res.json());
+          }
+        }
+        if (activeSection === 'propiedades' || activeSection === 'dashboard') {
+          const res = await fetch(API_BASE_URL + '/api/inmuebles', {
+            headers: { Authorization: token },
+          });
+          if (res.ok) {
+            setPropiedades(await res.json());
+          }
+        }
+      } finally {
+        setLoadingGestion(false);
+      }
+    };
+    loadGestion();
   }, [activeSection]);
 
   // (Eliminada función handleDeleteAdmin porque no se usa)
@@ -288,7 +324,7 @@ const Dashboard: React.FC = () => {
 
       console.log("Datos completos a enviar:", JSON.stringify(adminData));
 
-      const response = await fetch('http://localhost:8080/api/administradores', {
+      const response = await fetch(API_BASE_URL + '/api/administradores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -311,7 +347,7 @@ const Dashboard: React.FC = () => {
       
       // Refrescar la lista de administradores
       if (activeSection === 'administradores') {
-        const updatedResponse = await fetch('http://localhost:8080/api/administradores', {
+        const updatedResponse = await fetch(API_BASE_URL + '/api/administradores', {
           method: 'GET',
           headers: {
             'Authorization': authToken,
@@ -422,10 +458,10 @@ const Dashboard: React.FC = () => {
         updateData.contrasena = editAdmin.contrasena;
       }
       
-      console.log(`Enviando petición a: http://localhost:8080/api/administradores/${editAdmin.id}`);
+      console.log(`Enviando petición a: ${API_BASE_URL}/api/administradores/${editAdmin.id}`);
       console.log("Datos a enviar:", JSON.stringify(updateData)); // Para depuración
       
-      const response = await fetch(`http://localhost:8080/api/administradores/${editAdmin.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/administradores/${editAdmin.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -441,7 +477,7 @@ const Dashboard: React.FC = () => {
       }
       
       // Actualizar la lista de administradores
-      const updatedResponse = await fetch('http://localhost:8080/api/administradores', {
+      const updatedResponse = await fetch(API_BASE_URL + '/api/administradores', {
         method: 'GET',
         headers: {
           'Authorization': authToken,
@@ -484,7 +520,7 @@ const Dashboard: React.FC = () => {
       
       console.log("Eliminando administrador con ID:", adminToDelete);
       
-      const response = await fetch(`http://localhost:8080/api/administradores/${adminToDelete}`, {
+      const response = await fetch(`${API_BASE_URL}/api/administradores/${adminToDelete}`, {
         method: 'DELETE',
         headers: {
           'Authorization': authToken,
@@ -506,7 +542,7 @@ const Dashboard: React.FC = () => {
       });
       
       // También recargar datos del backend para asegurar sincronización
-      const updatedResponse = await fetch('http://localhost:8080/api/administradores', {
+      const updatedResponse = await fetch(API_BASE_URL + '/api/administradores', {
         method: 'GET',
         headers: {
           'Authorization': authToken,
@@ -545,7 +581,7 @@ const Dashboard: React.FC = () => {
         return;
       }
       const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      const response = await fetch(`http://localhost:8080/api/publicaciones/${pubId}/autorizar?idAdmin=${idAdmin}`, {
+      const response = await fetch(`${API_BASE_URL}/api/publicaciones/${pubId}/autorizar?idAdmin=${idAdmin}`, {
         method: 'PUT',
         headers: {
           'Authorization': authToken,
@@ -580,7 +616,7 @@ const Dashboard: React.FC = () => {
       const pubId = publicacionARechazar.idPublicacion || publicacionARechazar.id;
       const token = localStorage.getItem('token');
       const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      const response = await fetch(`http://localhost:8080/api/publicaciones/${pubId}/rechazar?idAdmin=${idAdmin}`, {
+      const response = await fetch(`${API_BASE_URL}/api/publicaciones/${pubId}/rechazar?idAdmin=${idAdmin}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -759,7 +795,7 @@ const Dashboard: React.FC = () => {
                                 imagenes = inm.imagenes
                                   .split(';')
                                   .filter((img: string) => img.trim() !== '')
-                                  .map((img: string) => `http://localhost:8080/assets/inmuebles/${img}`);
+                                  .map((img: string) => `${API_BASE_URL}/assets/inmuebles/${img}`);
                               }
                               setShowImagenesModal(true);
                               setImagenesSeleccionadas(imagenes);
@@ -838,6 +874,86 @@ const Dashboard: React.FC = () => {
             </Modal>
           </div>
         );
+
+      case 'clientes':
+        return (
+          <div className="card shadow">
+            <div className="card-header bg-white">
+              <h5 className="mb-0">Clientes registrados</h5>
+            </div>
+            <div className="card-body">
+              {loadingGestion ? (
+                <div className="text-center py-4">
+                  <div className="spinner-border text-success" role="status" />
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {clientes.map((c) => (
+                        <tr key={String(c.idCliente ?? c.id)}>
+                          <td>{String(c.idCliente ?? c.id ?? '')}</td>
+                          <td>{String(c.nombreCompleto ?? '')}</td>
+                          <td>{String(c.email ?? '')}</td>
+                          <td>{String(c.telefono ?? '')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'propiedades':
+        return (
+          <div className="card shadow">
+            <div className="card-header bg-white">
+              <h5 className="mb-0">Inmuebles</h5>
+            </div>
+            <div className="card-body">
+              {loadingGestion ? (
+                <div className="text-center py-4">
+                  <div className="spinner-border text-success" role="status" />
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Dirección</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {propiedades.map((p) => (
+                        <tr key={String(p.idInmueble ?? p.id)}>
+                          <td>{String(p.idInmueble ?? p.id ?? '')}</td>
+                          <td>{String(p.tipo ?? '')}</td>
+                          <td>{String(p.direccion ?? '')}</td>
+                          <td>{String(p.precio ?? '')}</td>
+                          <td>{String(p.estado ?? '')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        );
         
       case 'dashboard':
       default:
@@ -851,7 +967,7 @@ const Dashboard: React.FC = () => {
                       <i className="bi bi-house-fill"></i>
                     </div>
                     <h5 className="stat-title">Propiedades</h5>
-                    <h3 className="stat-value">245</h3>
+                    <h3 className="stat-value">{propiedades.length}</h3>
                     <p className="stat-desc">Total de propiedades</p>
                   </div>
                 </div>
@@ -875,7 +991,7 @@ const Dashboard: React.FC = () => {
                       <i className="bi bi-people-fill"></i>
                     </div>
                     <h5 className="stat-title">Usuarios</h5>
-                    <h3 className="stat-value">1,250</h3>
+                    <h3 className="stat-value">{clientes.length}</h3>
                     <p className="stat-desc">Clientes registrados</p>
                   </div>
                 </div>
@@ -1040,6 +1156,18 @@ const Dashboard: React.FC = () => {
               <a href="#" onClick={() => setActiveSection('dashboard')}>
                 <i className="bi bi-speedometer2"></i>
                 <span>Dashboard</span>
+              </a>
+            </li>
+            <li className={activeSection === 'propiedades' ? 'active' : ''}>
+              <a href="#" onClick={() => setActiveSection('propiedades')}>
+                <i className="bi bi-house-door"></i>
+                <span>Propiedades</span>
+              </a>
+            </li>
+            <li className={activeSection === 'clientes' ? 'active' : ''}>
+              <a href="#" onClick={() => setActiveSection('clientes')}>
+                <i className="bi bi-person-lines-fill"></i>
+                <span>Clientes</span>
               </a>
             </li>
             <li className={activeSection === 'administradores' ? 'active' : ''}>

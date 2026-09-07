@@ -30,8 +30,8 @@ public class AdministradorService {
     public Administrador registrarAdministrador(Administrador admin) {
         validarFuerzaContrasena(admin.getContrasena());
         // Asigna el rol 2 (admin) por defecto
-        Rol rolAdmin = rolRepository.findById(2)
-            .orElseThrow(() -> new RuntimeException("Rol admin no encontrado"));
+        Rol rolAdmin = rolRepository.findByNombre("ADMIN")
+            .orElseThrow(() -> new RuntimeException("Rol ADMIN no encontrado. Debe crearse al arrancar la aplicación."));
         admin.setRol(rolAdmin);
 
         // Encripta la contraseña antes de guardar

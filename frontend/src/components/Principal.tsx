@@ -1,296 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Principal.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Navbar, Nav, Container, Row, Col, Button, NavDropdown } from 'react-bootstrap';
-import { useNavigate, Link } from 'react-router-dom';
+import { Container, Row, Col } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import AppNavbar from './layout/AppNavbar';
 
 const Principal: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('comprar');
-  const [selectedAction, setSelectedAction] = useState('comprar'); // Default to 'comprar'
-
-  // Add user state
-  const [user, setUser] = useState<{ name: string, username: string } | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null); // State to store user role
-
-  // Check if user is logged in on component mount
-  useEffect(() => {
-    // Check if user info exists in localStorage or sessionStorage
-    const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsLoggedIn(true);
-        
-        // Extraer el rol del usuario
-        if (parsedUser.rol) {
-          setUserRole(parsedUser.rol);
-        }
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-      }
-    }
-  }, []);
-
-  // Function to handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('user');
-    setUser(null);
-    setIsLoggedIn(false);
-    navigate('/');
-  };
+  const [selectedAction, setSelectedAction] = useState('comprar');
+  const [heroQuery, setHeroQuery] = useState('');
 
   return (
     <div className="full-width-container">
-      {/* Barra de Navegación */}
-      <Navbar bg="white" expand="lg" className="w-100 border-bottom">
-        <Container fluid className="px-4">
-          <Navbar.Brand as={Link} to="/">
-                      <img
-                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm6ETphfVq-SfJmeaX42jYRIUxikXCNQvu56BxSPdkWxgHO2KAov9MXLWJRZWjbBgwOR4&usqp=CAU"
-                        alt="InmoMarket"
-                        height="30"
-                        className="d-inline-block align-top"
-                      />
-                      <span className="fw-bold"> InmoMarket</span>
-                    </Navbar.Brand>
-          <Navbar.Toggle aria-controls="navbar-nav" />
-          <Navbar.Collapse id="navbar-nav">
-            <Nav className="me-auto">
-              {/* Menú Comprar */}
-              <div className="nav-item mega-dropdown">
-                <Nav.Link
-                  className="nav-link-text"
-                  id="comprar-dropdown"
-                >
-                  Comprar <i className="fas fa-chevron-down fa-xs"></i>
-                </Nav.Link>
-                <div className="mega-menu-wrapper">
-                  <Container fluid className="mega-menu-container py-4 px-4">
-                    <Row>
-                      <Col>
-                        <h6 className="fw-bold mb-3">Estado</h6>
-                        <ul className="list-unstyled">
-                          <li>Lima</li>
-                          <li>Piura</li>
-                          <li>Callao</li>
-                          <li>Ica</li>
-                          <li>Lambayeque</li>
-                          <li>La Libertad</li>
-                          <li>Arequipa</li>
-                          <li>Cusco</li>
-                          <li>Tumbes</li>
-                          <li>Junín</li>
-                          <li>Ancash</li>
-                        </ul>
-                      </Col>
-                      <Col>
-                        <h6 className="fw-bold mb-3">Tipo de propiedad</h6>
-                        <ul className="list-unstyled">
-                          <li>Departamento</li>
-                          <li>Casa</li>
-                          <li>Terreno / Lote</li>
-                          <li>Oficina</li>
-                          <li>Local Comercial</li>
-                        </ul>
-                      </Col>
-                      <Col>
-                        <h6 className="fw-bold mb-3">Dormitorios</h6>
-                        <ul className="list-unstyled">
-                          <li>3 dormitorios</li>
-                          <li>2 dormitorios</li>
-                          <li>4 dormitorios</li>
-                          <li>5 o más dormitorios</li>
-                          <li>1 dormitorio</li>
-                        </ul>
-                      </Col>
-                    </Row>
-                  </Container>
-                </div>
-              </div>
-
-              {/* Menú Alquilar */}
-              <div className="nav-item mega-dropdown">
-                <Nav.Link
-                  className="nav-link-text"
-                  id="vender-dropdown"
-                >
-                  Vender <i className="fas fa-chevron-down fa-xs"></i>
-                </Nav.Link>
-                <div className="mega-menu-wrapper">
-                  <Container fluid className="mega-menu-container py-4 px-4">
-                    <Row>
-                      <Col>
-                        <h6 className="fw-bold mb-3">Estado</h6>
-                        <ul className="list-unstyled">
-                          <li>Lima</li>
-                          <li>Piura</li>
-                          <li>Arequipa</li>
-                          <li>Cusco</li>
-                        </ul>
-                      </Col>
-                      <Col>
-                        <h6 className="fw-bold mb-3">Tipo de propiedad</h6>
-                        <ul className="list-unstyled">
-                          <li>Departamento</li>
-                          <li>Casa</li>
-                          <li>Oficina</li>
-                          <li>Local Comercial</li>
-                        </ul>
-                      </Col>
-                      <Col>
-                        <h6 className="fw-bold mb-3">Dormitorios</h6>
-                        <ul className="list-unstyled">
-                          <li>3 dormitorios</li>
-                          <li>2 dormitorios</li>
-                          <li>1 dormitorio</li>
-                        </ul>
-                      </Col>
-                    </Row>
-                  </Container>
-                </div>
-              </div>
-
-              {/* Menú Servicios */}
-              <div className="nav-item mega-dropdown">
-                <Nav.Link
-                  className="nav-link-text"
-                  id="servicios-dropdown"
-                >
-                  InmoMarket te ayuda <i className="fas fa-chevron-down fa-xs"></i>
-                </Nav.Link>
-                <div className="mega-menu-wrapper">
-                  <Container fluid className="mega-menu-container py-4 px-4">
-                    <Row>
-                      <Col>
-                        <h6 className="fw-bold mb-3">Para Vendedores</h6>
-                        <ul className="list-unstyled">
-                          <li>
-                            <Link to="/vendedores" className="text-decoration-none text-dark">
-                              Guía para Vender
-                            </Link>
-                          </li>
-                        </ul>
-                      </Col>
-                      <Col>
-                        <h6 className="fw-bold mb-3">Para compradores</h6>
-                        <ul className="list-unstyled">
-                          <li>
-                            <Link to="/compradores" className="text-decoration-none text-dark">
-                              Guía para Comprar
-                            </Link>
-                          </li>
-                        </ul>
-                      </Col>
-                      <Col>
-                        <h6 className="fw-bold mb-3">Nuestra Mision y Vision</h6>
-                        <ul className="list-unstyled">
-                          <li>
-                            <Link to="/conocenos" className="text-decoration-none text-dark">
-                              Conocenos
-                            </Link>
-                          </li>
-                        </ul>
-                      </Col>
-                    </Row>
-                  </Container>
-                </div>
-              </div>
-            </Nav>
-
-            <Nav className="ms-auto">
-              {/* Notificaciones */}
-              <Nav.Link href="#" className="me-2">
-                <span className="nav-link-text">Notificaciones <i className="far fa-bell"></i></span>
-              </Nav.Link>
-              {/* Ingresar o Avatar de Usuario */}
-              {isLoggedIn && user ? (
-                <NavDropdown
-                  title={
-                    <div className="avatar-container">
-                      <div className="user-avatar">
-                        {user.name ? user.name.charAt(0).toUpperCase() : user.username ? user.username.charAt(0).toUpperCase() : '?'}
-                      </div>
-                      <i className="fas fa-chevron-down avatar-arrow"></i>
-                    </div>
-                  }
-                  id="user-dropdown"
-                  align="end"
-                  className="custom-dropdown"
-                >
-                  <NavDropdown.Item as={Link} to="/publicaciones" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-file-alt"></i></div>
-                    <span>Mis publicaciones</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/inmuebles" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="bi-house-door-fill"></i></div>
-                    <span>Mis inmuebles</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/favoritos" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-heart"></i></div>
-                    <span>Favoritos</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/chats" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-comments"></i></div>
-                    <span>Mis chats</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Divider />
-
-                  {/* Dashboard Admin (solo visible para ADMIN y MASTER) */}
-                  {(userRole === 'ROLE_ADMIN' || userRole === 'ROLE_MASTER') && (
-                    <>
-                      <NavDropdown.Item as={Link} to="/Dashboard" className="dropdown-item-custom">
-                        <div className="icon-wrapper"><i className="fas fa-tachometer-alt"></i></div>
-                        <span>Dashboard Admin</span>
-                      </NavDropdown.Item>
-                      <NavDropdown.Divider />
-                    </>
-                  )}
-
-                  <NavDropdown.Item as={Link} to="/perfil" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-user"></i></div>
-                    <span>Mi cuenta</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Item 
-                    onClick={() => {
-                      // Cerrar el dropdown
-                      document.body.click();
-                      // Cambiar a la sección de notificaciones en Perfil
-                      navigate('/perfil', { state: { activeSection: 'notificaciones' } });
-                    }} 
-                    className="dropdown-item-custom"
-                  >
-                    <div className="icon-wrapper"><i className="fas fa-cog"></i></div>
-                    <span>Ajustes de notificaciones</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Item as={Link} to="/compradores" className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="far fa-question-circle"></i></div>
-                    <span>Ayuda</span>
-                  </NavDropdown.Item>
-                  <NavDropdown.Item onClick={handleLogout} className="dropdown-item-custom">
-                    <div className="icon-wrapper"><i className="fas fa-sign-out-alt"></i></div>
-                    <span>Cerrar sesión</span>
-                  </NavDropdown.Item>
-                </NavDropdown>
-              ) : (
-                <Nav.Link href="#">
-                  <Button
-                    variant="success"
-                    className="btn-ingresar"
-                    onClick={() => navigate('/login')}
-                  >
-                    Ingresar
-                  </Button>
-                </Nav.Link>
-              )}
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+      <AppNavbar />
 
       {/* Hero Section with Dynamic Background */}
       <div className={`search-hero ${activeTab === 'vender' ? 'vender-bg' : 'comprar-bg'}`}>
@@ -338,6 +61,8 @@ const Principal: React.FC = () => {
                 <input
                   type="text"
                   className="form-control"
+                  value={heroQuery}
+                  onChange={(e) => setHeroQuery(e.target.value)}
                   placeholder={activeTab === 'comprar'
                     ? "Ingresa ubicaciones o características (ej: piscina)"
                     : "Ingresa la ubicación de tu propiedad"}
@@ -348,9 +73,10 @@ const Principal: React.FC = () => {
                   className="btn btn-success w-100"
                   onClick={() => {
                     if (activeTab === 'comprar') {
-                      navigate('/Buscar'); // Redirecciona a la página de búsqueda
+                      const q = heroQuery.trim();
+                      navigate(q ? `/buscar?q=${encodeURIComponent(q)}` : '/buscar');
                     } else {
-                      navigate('/Vender'); // Redirecciona a la página de publicar
+                      navigate('/vender');
                     }
                   }}
                 >

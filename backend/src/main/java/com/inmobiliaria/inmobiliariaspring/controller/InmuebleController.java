@@ -21,6 +21,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.inmobiliaria.inmobiliariaspring.dto.InmuebleDTO;
 import com.inmobiliaria.inmobiliariaspring.mappers.InmuebleMapper;
 import com.inmobiliaria.inmobiliariaspring.model.Inmueble;
+import com.inmobiliaria.inmobiliariaspring.security.AuthAccess;
 import com.inmobiliaria.inmobiliariaspring.service.InmuebleService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +34,9 @@ public class InmuebleController implements WebMvcConfigurer {
 
     @Autowired
     private InmuebleService inmuebleService;
+
+    @Autowired
+    private AuthAccess authAccess;
 
     @PostMapping("/crear")
     @Operation(summary = "Crear un inmueble", description = "Crea un nuevo inmueble asociado al usuario autenticado.")
@@ -128,13 +132,15 @@ public class InmuebleController implements WebMvcConfigurer {
     })
     public ResponseEntity<?> subirImagenes(
             @PathVariable Integer id,
-            @RequestParam("imagenes") List<MultipartFile> imagenes) {
+            @RequestParam("imagenes") List<MultipartFile> imagenes,
+            Authentication authentication) {
 
         Optional<Inmueble> inmuebleOpt = inmuebleService.obtenerInmueblePorId(id);
         if (inmuebleOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         Inmueble inmueble = inmuebleOpt.get();
+        authAccess.requireInmuebleAccess(inmueble, authentication);
 
         String uploadDir = System.getProperty("user.dir") + "/assets/inmuebles/";
         File dir = new File(uploadDir);
@@ -172,12 +178,11 @@ public class InmuebleController implements WebMvcConfigurer {
         @ApiResponse(responseCode = "400", description = "Error al marcar como vendido")
     })
     public ResponseEntity<InmuebleDTO> marcarComoVendido(@PathVariable Integer id, Authentication authentication) {
-        boolean esAdmin = authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_CLIENTE"));
-        if (!esAdmin) {
-            return ResponseEntity.status(403).body(null);
+        Inmueble inmueble = inmuebleService.obtenerInmueblePorId(id).orElse(null);
+        if (inmueble == null) {
+            return ResponseEntity.notFound().build();
         }
+        authAccess.requireInmuebleAccess(inmueble, authentication);
         try {
             Inmueble inmuebleVendido = inmuebleService.marcarComoVendido(id);
             return ResponseEntity.ok(InmuebleMapper.toDTO(inmuebleVendido));

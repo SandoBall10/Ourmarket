@@ -61,10 +61,8 @@ public class ClienteService {
         if (clienteRepository.findByEmail(cliente.getEmail()).isPresent()) {
             throw new RuntimeException("El email ya está registrado");
         }
-        // Crear el rol "cliente" directamente sin buscar en la base de datos
-        Rol rolCliente = new Rol();
-        rolCliente.setIdRol(3); // Asegúrate de que este ID corresponde al rol "cliente" en tu base de datos
-        rolCliente.setNombre("CLIENTE");
+        Rol rolCliente = rolRepository.findByNombre("CLIENTE")
+            .orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado. Debe crearse al arrancar la aplicación."));
 
         // Encriptar la contraseña antes de usarla
         String contraseñaEncriptada = passwordEncoder.encode(cliente.getContrasena());

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../api/config';
 import './Registro.css';
 
 // Componente para la notificación de éxito
@@ -257,7 +258,7 @@ const Registro: React.FC = () => {
 
       console.log("Enviando datos:", cliente);
 
-      const response = await fetch('http://localhost:8080/api/clientes/registrar', {
+      const response = await fetch(API_BASE_URL + '/api/clientes/registrar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

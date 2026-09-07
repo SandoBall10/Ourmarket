@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Importa Link
+import { useNavigate, Link } from 'react-router-dom';
+import { API_BASE_URL } from '../api/config';
+import { saveSession } from '../auth/session';
 import './Login.css';
 // Removed unused import for Registro
 
@@ -16,7 +18,7 @@ const Login: React.FC = () => {
     setError('');
 
  try {
-      const response = await fetch('http://localhost:8080/authenticate', {
+      const response = await fetch(`${API_BASE_URL}/authenticate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ usernameOrEmail: username, password }),
@@ -27,18 +29,12 @@ const Login: React.FC = () => {
       }
 
       const data = await response.json();
-
-      // Guardar el usuario
-      localStorage.setItem('user', JSON.stringify({
-        id:data.id,
+      saveSession(data.token, {
+        id: data.id,
         name: username,
-        isLoggedIn: true,
         rol: data.rol,
-        prueba: "ddddddddd"
-      }));
-
-      // Guardar el token por separado
-      localStorage.setItem('token', data.token);
+        isLoggedIn: true,
+      });
 
       // Redirección según el rol del usuario
       if (data.rol === 'ROLE_MASTER' || data.rol === 'ROLE_ADMIN') {

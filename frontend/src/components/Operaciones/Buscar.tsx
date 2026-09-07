@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Container, Nav, Form, Button, Card, Badge, NavDropdown, Row, Col, InputGroup } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import './Buscar.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import axios from 'axios';
+import { API_BASE_URL } from '../../api/config';
 import Modal from 'react-bootstrap/Modal';
 import Carousel from 'react-bootstrap/Carousel';
 
@@ -21,6 +22,7 @@ interface PublicacionBackend {
   idPublicacion?: number;
   id_publicacion?: number;
   titulo: string;
+  descripcion?: string;
   estado?: string;
   autorizado?: boolean | number;
   idCliente?: number;
@@ -67,8 +69,9 @@ interface Publicacion {
 
 const Buscar: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
-  const [busqueda, setBusqueda] = useState<string>('');
+  const [busqueda, setBusqueda] = useState<string>(searchParams.get('q') || '');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
   // Estados para la autenticación
@@ -152,12 +155,9 @@ const Buscar: React.FC = () => {
       // Cargar publicaciones desde el backend
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token');
-        const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-        const response = await axios.get('http://localhost:8080/api/publicaciones', {
-          headers: {
-            'Authorization': authToken
-          }
+        const q = searchParams.get('q') || undefined;
+        const response = await axios.get(API_BASE_URL + '/api/publicaciones/catalogo', {
+          params: { q },
         });
         console.log('Publicaciones recibidas:', response.data);
         
@@ -175,7 +175,7 @@ const Buscar: React.FC = () => {
             
             // Procesar las imágenes como array
             const imagenesArray = inm.imagenes
-              ? inm.imagenes.split(';').filter(img => img.trim() !== '').map(img => `http://localhost:8080/assets/inmuebles/${img}`)
+              ? inm.imagenes.split(';').filter(img => img.trim() !== '').map(img => `${API_BASE_URL}/assets/inmuebles/${img}`)
               : [];
             
             // AGREGAR LOGS PARA DEBUGGEAR
@@ -225,7 +225,7 @@ const Buscar: React.FC = () => {
   };
 
   cargarDatos();
-}, []);
+}, [searchParams]);
 
   // Función para cerrar sesión
   const handleLogout = () => {
@@ -302,7 +302,7 @@ const Buscar: React.FC = () => {
       
       if (esFavorito) {
         // Eliminar de favoritos
-        await axios.delete(`http://localhost:8080/api/favoritos/eliminar`, {
+        await axios.delete(`${API_BASE_URL}/api/favoritos/eliminar`, {
           headers: {
             'Authorization': authToken,
             'Content-Type': 'application/json'
@@ -329,7 +329,7 @@ const Buscar: React.FC = () => {
         
         console.log('Enviando datos de favorito:', favoritoData);
         
-        const response = await axios.post('http://localhost:8080/api/favoritos/crear', favoritoData, {
+        const response = await axios.post(API_BASE_URL + '/api/favoritos/crear', favoritoData, {
           headers: {
             'Authorization': authToken,
             'Content-Type': 'application/json'
@@ -378,7 +378,7 @@ const Buscar: React.FC = () => {
       
       console.log('Cargando favoritos para usuario:', userId);
       
-      const response = await axios.get(`http://localhost:8080/api/favoritos/usuario/${userId}`, {
+      const response = await axios.get(`${API_BASE_URL}/api/favoritos/usuario/${userId}`, {
         headers: {
           'Authorization': authToken
         }

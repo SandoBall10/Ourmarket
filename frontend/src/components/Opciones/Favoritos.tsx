@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge, Navbar, Nav, NavDropdown, Modal, Carousel } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../../api/config';
 import './Favoritos.css';
 
 // Interfaces
@@ -102,7 +103,7 @@ const Favoritos: React.FC = () => {
       console.log('Cargando favoritos para usuario:', userId);
       
       // 1. Obtener los favoritos del usuario
-      const favoritosResponse = await axios.get<FavoritoBackend[]>(`http://localhost:8080/api/favoritos/usuario/${userId}`, {
+      const favoritosResponse = await axios.get<FavoritoBackend[]>(`${API_BASE_URL}/api/favoritos/usuario/${userId}`, {
         headers: {
           'Authorization': authToken
         }
@@ -119,7 +120,7 @@ const Favoritos: React.FC = () => {
       // 2. Obtener todas las publicaciones CON sus inmuebles
       let publicaciones: PublicacionBackend[];
       try {
-        const response = await axios.get<PublicacionBackend[]>('http://localhost:8080/api/publicaciones', {
+        const response = await axios.get<PublicacionBackend[]>(API_BASE_URL + '/api/publicaciones', {
           headers: {
             'Authorization': authToken
           }
@@ -137,7 +138,7 @@ const Favoritos: React.FC = () => {
       // 3. Obtener todos los inmuebles por separado como backup
       let inmuebles: InmuebleBackend[] = [];
       try {
-        const response = await axios.get<InmuebleBackend[]>('http://localhost:8080/api/inmuebles', {
+        const response = await axios.get<InmuebleBackend[]>(API_BASE_URL + '/api/inmuebles', {
           headers: {
             'Authorization': authToken
           }
@@ -213,7 +214,7 @@ const Favoritos: React.FC = () => {
 
           // Procesar las imágenes como array
           const imagenesArray = inmuebleData.imagenes
-            ? inmuebleData.imagenes.split(';').filter((img: string) => img.trim() !== '').map((img: string) => `http://localhost:8080/assets/inmuebles/${img}`)
+            ? inmuebleData.imagenes.split(';').filter((img: string) => img.trim() !== '').map((img: string) => `${API_BASE_URL}/assets/inmuebles/${img}`)
             : [];
 
           console.log('Datos del inmueble para debugging:', {
@@ -291,7 +292,7 @@ const Favoritos: React.FC = () => {
       console.log('Eliminando favorito:', { id_cliente: user.id, id_inmueble: inmuebleId });
       
       // USAR EXACTAMENTE EL MISMO MÉTODO QUE EN BUSCAR
-      await axios.delete(`http://localhost:8080/api/favoritos/eliminar`, {
+      await axios.delete(`${API_BASE_URL}/api/favoritos/eliminar`, {
         headers: {
           'Authorization': authToken,
           'Content-Type': 'application/json'

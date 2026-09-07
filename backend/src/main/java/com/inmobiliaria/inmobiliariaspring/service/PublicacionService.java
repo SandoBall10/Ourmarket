@@ -1,4 +1,5 @@
 package com.inmobiliaria.inmobiliariaspring.service;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -52,6 +53,23 @@ public class PublicacionService {
     // Listar todas las publicaciones
     public List<Publicacion> listarPublicaciones() {
         return publicacionRepository.findAll(); 
+    }
+
+    public List<Publicacion> buscarCatalogo(String tipo, BigDecimal precioMin, BigDecimal precioMax,
+            String region, String distrito, Integer habitaciones, String q) {
+        Inmueble.Tipo tipoEnum = null;
+        if (tipo != null && !tipo.isBlank()) {
+            try {
+                tipoEnum = Inmueble.Tipo.valueOf(tipo.trim().toLowerCase());
+            } catch (IllegalArgumentException ignored) {
+                tipoEnum = null;
+            }
+        }
+        String query = (q == null || q.isBlank()) ? null : q.trim();
+        String regionFiltro = (region == null || region.isBlank()) ? null : region.trim();
+        String distritoFiltro = (distrito == null || distrito.isBlank()) ? null : distrito.trim();
+        return publicacionRepository.buscarCatalogo(
+                tipoEnum, precioMin, precioMax, regionFiltro, distritoFiltro, habitaciones, query);
     }
 
     // Buscar publicación por ID

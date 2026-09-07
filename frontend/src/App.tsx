@@ -16,14 +16,13 @@ import Vender from './components/Operaciones/Vender';
 import Favoritos from './components/Opciones/Favoritos';
 import Dashboard from './components/Super/Dashboard';
 import Inmuebles from './components/Opciones/Inmuebles';
+import ProtectedRoute from './auth/ProtectedRoute';
 
-// Importación de AOS para animaciones
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'animate.css';
 
 const App: React.FC = () => {
-  // Inicializar AOS para animaciones al cargar la aplicación
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -34,20 +33,69 @@ const App: React.FC = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<Principal />} />
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
+      <Route path="/" element={<Principal />} />
       <Route path="/vendedores" element={<Vendedores />} />
       <Route path="/compradores" element={<Compradores />} />
       <Route path="/conocenos" element={<Conocenos />} />
-      <Route path="/publicaciones" element={<Publicaciones />} />
-      <Route path="/perfil" element={<Perfil />} />
       <Route path="/buscar" element={<Buscar />} />
-      <Route path="/chats" element={<Chats />} />
-      <Route path="/vender" element={<Vender />} />
-      <Route path="/favoritos" element={<Favoritos />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/inmuebles" element={<Inmuebles />} />
+      <Route
+        path="/vender"
+        element={
+          <ProtectedRoute>
+            <Vender />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/publicaciones"
+        element={
+          <ProtectedRoute>
+            <Publicaciones />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/inmuebles"
+        element={
+          <ProtectedRoute>
+            <Inmuebles />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/favoritos"
+        element={
+          <ProtectedRoute>
+            <Favoritos />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/chats"
+        element={
+          <ProtectedRoute>
+            <Chats />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/perfil"
+        element={
+          <ProtectedRoute>
+            <Perfil />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute adminOnly>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 };

@@ -379,7 +379,7 @@ const Vendedores: React.FC = () => {
             variant="success"
             size="lg"
             className="animated-btn"
-            onClick={() => navigate('/publicar')}
+            onClick={() => navigate('/vender')}
           >
             <i className="bi bi-rocket-takeoff me-2"></i>Comenzar ahora
           </Button>

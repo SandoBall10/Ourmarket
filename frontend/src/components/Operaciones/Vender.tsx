@@ -6,6 +6,8 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import peruUbigeo from '../Operaciones/peruUbigeo.json';
 import axios from 'axios';
+import { API_BASE_URL } from '../../api/config';
+import GoogleMapComponent from './MapaGoogle';
 
 const Vender: React.FC = () => {
   const navigate = useNavigate();
@@ -48,7 +50,7 @@ const Vender: React.FC = () => {
         setIsLoggedIn(true);
         
         // Verificar que el token es válido mediante una petición al backend
-        axios.get('http://localhost:8080/api/clientes/me', {
+        axios.get(API_BASE_URL + '/api/clientes/me', {
           headers: {
             'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
           }
@@ -96,13 +98,15 @@ const Vender: React.FC = () => {
   };
 
   const handleSaveAndExit = () => {
-    navigate('/mis-publicaciones');
+    navigate('/publicaciones');
   };
 
   const [region, setRegion] = useState('');
   const [address, setAddress] = useState('');
   const [province, setProvince] = useState('');
   const [district, setDistrict] = useState('');
+  const [mapLat, setMapLat] = useState<number | null>(null);
+  const [mapLng, setMapLng] = useState<number | null>(null);
   const [provinceOptions, setProvinceOptions] = useState<string[]>([]);
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
 interface Inmueble {
@@ -125,7 +129,7 @@ useEffect(() => {
       const userData = localStorage.getItem('user');
       const user = userData ? JSON.parse(userData) : null;
       const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      const response = await axios.get('http://localhost:8080/api/inmuebles', {
+      const response = await axios.get(API_BASE_URL + '/api/inmuebles', {
         headers: { 'Authorization': authToken }
       });
       setInmueblesCreados(
@@ -252,7 +256,7 @@ useEffect(() => {
 
       const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
       const response = await axios.post(
-        'http://localhost:8080/api/inmuebles/crear',
+        API_BASE_URL + '/api/inmuebles/crear',
         inmuebleData,
         {
           headers: {
@@ -277,7 +281,7 @@ useEffect(() => {
         while (!success && retries < maxRetries) {
           try {
             await axios.post(
-              `http://localhost:8080/api/inmuebles/${response.data.idInmueble}/imagenes`,
+              `${API_BASE_URL}/api/inmuebles/${response.data.idInmueble}/imagenes`,
               formData,
               {
                 headers: {
@@ -731,6 +735,21 @@ useEffect(() => {
                       </Form.Group>
                     </Col>
                   </Row>
+                  <div className="mb-4">
+                    <Form.Label>Ubica el inmueble en el mapa</Form.Label>
+                    <GoogleMapComponent
+                      address={[address, district, province, region].filter(Boolean).join(', ')}
+                      setCoordinates={(lat, lng) => {
+                        setMapLat(lat);
+                        setMapLng(lng);
+                      }}
+                    />
+                    {mapLat != null && mapLng != null && (
+                      <Form.Text className="text-muted">
+                        Coordenadas: {mapLat.toFixed(5)}, {mapLng.toFixed(5)}
+                      </Form.Text>
+                    )}
+                  </div>
                   
                 </div>
               )}
@@ -979,7 +998,7 @@ useEffect(() => {
                           descripcion
                         };
                         await axios.post(
-                          'http://localhost:8080/api/publicaciones/publicar',
+                          API_BASE_URL + '/api/publicaciones/publicar',
                           publicacion,
                           {
                             headers: {

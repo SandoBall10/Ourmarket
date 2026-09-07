@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.security.core.Authentication;
+
 import com.inmobiliaria.inmobiliariaspring.dto.ResenaDTO;
 import com.inmobiliaria.inmobiliariaspring.mappers.ResenaMapper;
 import com.inmobiliaria.inmobiliariaspring.model.Resena;
+import com.inmobiliaria.inmobiliariaspring.security.AuthAccess;
 import com.inmobiliaria.inmobiliariaspring.service.ResenaService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +25,9 @@ public class ResenaController {
     @Autowired
     private ResenaService resenaService;
 
+    @Autowired
+    private AuthAccess authAccess;
+
     // Crear una nueva reseña
     @PostMapping("/crear")
     @Operation(summary = "Crear una reseña", description = "Crea una nueva reseña asociada a un cliente e inmueble.")
@@ -30,18 +36,18 @@ public class ResenaController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos"),
         @ApiResponse(responseCode = "403", description = "Acceso denegado: Solo el cliente autenticado puede crear una reseña")
     })
-    public ResponseEntity<ResenaDTO> crearResena(@RequestBody Resena resena) {
+    public ResponseEntity<ResenaDTO> crearResena(@RequestBody Resena resena, Authentication authentication) {
         try {
-            // Llamamos al servicio para crear la reseña
+            Integer clienteId = authAccess.requireCliente(authentication).getIdCliente();
+            Integer inmuebleId = resena.getInmueble() != null ? resena.getInmueble().getIdInmueble() : null;
             Resena nuevaResena = resenaService.crearResena(
                 resena.getComentario(),
                 resena.getEstrellas(),
-                resena.getCliente().getIdCliente(),
-                resena.getInmueble().getIdInmueble()
+                clienteId,
+                inmuebleId
             );
             return ResponseEntity.ok(ResenaMapper.toDTO(nuevaResena));
         } catch (RuntimeException e) {
-            // Si ocurre un error en el servicio
             return ResponseEntity.badRequest().body(null);
         }
     }
@@ -81,17 +87,17 @@ public class ResenaController {
         @ApiResponse(responseCode = "404", description = "Reseña no encontrada"),
         @ApiResponse(responseCode = "403", description = "Acceso denegado: Solo el cliente que creó la reseña puede actualizarla")
     })
-    public ResponseEntity<ResenaDTO> actualizarResena(@PathVariable Integer id, @RequestBody Resena resena) {
+    public ResponseEntity<ResenaDTO> actualizarResena(@PathVariable Integer id, @RequestBody Resena resena, Authentication authentication) {
         try {
-            // Llamamos al servicio para actualizar la reseña
+            resenaService.assertPuedeEditar(id, authentication);
             Resena resenaActualizada = resenaService.actualizarResena(
                 id,
                 resena.getComentario(),
                 resena.getEstrellas()
             );
-            return ResponseEntity.ok(ResenaMapper.toDTO(resenaActualizada)); // Devuelve la reseña actualizada
+            return ResponseEntity.ok(ResenaMapper.toDTO(resenaActualizada));
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build(); // Si no se encuentra la reseña, respondemos con 404
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -103,8 +109,9 @@ public class ResenaController {
         @ApiResponse(responseCode = "404", description = "Reseña no encontrada"),
         @ApiResponse(responseCode = "403", description = "Acceso denegado: Solo el cliente que creó la reseña puede eliminarla")
     })
-    public ResponseEntity<Void> eliminarResena(@PathVariable Integer id) {
+    public ResponseEntity<Void> eliminarResena(@PathVariable Integer id, Authentication authentication) {
+        resenaService.assertPuedeEditar(id, authentication);
         resenaService.eliminarResena(id);
-        return ResponseEntity.noContent().build(); // Responde con 204 No Content (sin cuerpo)
+        return ResponseEntity.noContent().build();
     }
 }

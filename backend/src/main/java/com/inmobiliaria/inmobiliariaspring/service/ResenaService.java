@@ -2,7 +2,11 @@ package com.inmobiliaria.inmobiliariaspring.service;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+
 import com.inmobiliaria.inmobiliariaspring.factory.ResenaFactory;
 import com.inmobiliaria.inmobiliariaspring.model.Cliente;
 import com.inmobiliaria.inmobiliariaspring.model.Inmueble;
@@ -10,6 +14,7 @@ import com.inmobiliaria.inmobiliariaspring.model.Resena;
 import com.inmobiliaria.inmobiliariaspring.repository.ClienteRepository;
 import com.inmobiliaria.inmobiliariaspring.repository.InmuebleRepository;
 import com.inmobiliaria.inmobiliariaspring.repository.ResenaRepository;
+import com.inmobiliaria.inmobiliariaspring.security.AuthAccess;
 
 @Service
 public class ResenaService {
@@ -22,6 +27,9 @@ public class ResenaService {
 
     @Autowired
     private InmuebleRepository inmuebleRepository;
+
+    @Autowired
+    private AuthAccess authAccess;
 
     // Crear una nueva reseña
     public Resena crearResena(String comentario, Integer estrellas, Integer clienteId, Integer inmuebleId) {
@@ -62,7 +70,13 @@ public class ResenaService {
         }
     }
 
-    //eliminar una reseña
+    public void assertPuedeEditar(Integer id, Authentication authentication) {
+        Resena resena = resenaRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reseña no encontrada"));
+        Integer autorId = resena.getCliente() != null ? resena.getCliente().getIdCliente() : null;
+        authAccess.requireClienteAccess(autorId, authentication);
+    }
+
     public void eliminarResena(Integer id) {
         resenaRepository.deleteById(id);
     }

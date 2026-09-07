@@ -5,6 +5,7 @@ import './Publicaciones.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import axios from 'axios';
+import { API_BASE_URL } from '../../api/config';
 import Carousel from 'react-bootstrap/Carousel';
 import Modal from 'react-bootstrap/Modal';
 
@@ -69,7 +70,7 @@ const Publicaciones: React.FC = () => {
         const token = localStorage.getItem('token');
         const user = userData ? JSON.parse(userData) : null;
         const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-        const response = await axios.get('http://localhost:8080/api/publicaciones', {
+        const response = await axios.get(API_BASE_URL + '/api/publicaciones', {
           headers: { 'Authorization': authToken }
         });
 
@@ -108,7 +109,7 @@ const Publicaciones: React.FC = () => {
               imagenes = inm.imagenes
                 .split(';')
                 .filter((img: string) => img.trim() !== '')
-                .map((img: string) => `http://localhost:8080/assets/inmuebles/${img}`);
+                .map((img: string) => `${API_BASE_URL}/assets/inmuebles/${img}`);
             }
             return {
               id: pub.idPublicacion ?? pub.id ?? pub.id_publicacion,
@@ -182,7 +183,7 @@ const Publicaciones: React.FC = () => {
       const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
       // Solo envía los campos requeridos
       await axios.put(
-        `http://localhost:8080/api/publicaciones/${publicacionEdit.id}`,
+        `${API_BASE_URL}/api/publicaciones/${publicacionEdit.id}`,
         {
           titulo: editTitulo,
           descripcion: editDescripcion
@@ -406,7 +407,7 @@ const Publicaciones: React.FC = () => {
             <div className="col-12 col-md-2">
               <Button
                 className="nuevo-inmueble-btn w-100"
-                onClick={() => navigate('/nueva-publicacion')}
+                onClick={() => navigate('/vender')}
               >
                 <i className="bi bi-plus-circle me-2"></i>
                 Nueva
@@ -463,7 +464,7 @@ const Publicaciones: React.FC = () => {
                                 borderTopRightRadius: 12
                               }}
                               onError={e => {
-                                (e.target as HTMLImageElement).src = 'http://localhost:8080/assets/inmuebles/img_default.jpg';
+                                (e.target as HTMLImageElement).src = API_BASE_URL + '/assets/inmuebles/img_default.jpg';
                               }}
                             />
                           </Carousel.Item>
@@ -550,7 +551,7 @@ const Publicaciones: React.FC = () => {
                               const token = localStorage.getItem('token');
                               const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
                               await axios.delete(
-                                `http://localhost:8080/api/publicaciones/${pub.id}`,
+                                `${API_BASE_URL}/api/publicaciones/${pub.id}`,
                                 {
                                   headers: {
                                     'Authorization': authToken

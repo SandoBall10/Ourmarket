@@ -2,6 +2,8 @@ package com.inmobiliaria.inmobiliariaspring.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,7 +26,7 @@ public class Administrador {
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    //La contraseña no se debe serializar en la respuesta JSON para evitar fugas de seguridad
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false, length = 100)
     private String contrasena;
 

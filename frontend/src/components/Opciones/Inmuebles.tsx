@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navbar, Nav, Container, Row, Col, Button, Card, Badge, NavDropdown, Modal, Carousel } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../../api/config';
 import './Inmuebles.css';
 
 interface Inmueble {
@@ -53,7 +54,7 @@ const Inmuebles: React.FC = () => {
       try {
         const token = localStorage.getItem('token');
         const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-        const response = await axios.get('http://localhost:8080/api/inmuebles', {
+        const response = await axios.get(API_BASE_URL + '/api/inmuebles', {
           headers: { 'Authorization': authToken }
         });
         // Filtrar por email del cliente si es ROLE_CLIENTE
@@ -270,7 +271,7 @@ const Inmuebles: React.FC = () => {
                 {/* Dashboard Admin (solo visible para ADMIN y MASTER) */}
                 {(userRole === 'ROLE_ADMIN' || userRole === 'ROLE_MASTER') && (
                   <>
-                    <NavDropdown.Item as={Link} to="/Dashboard" className="dropdown-item-custom">
+                    <NavDropdown.Item as={Link} to="/dashboard" className="dropdown-item-custom">
                       <div className="icon-wrapper"><i className="fas fa-tachometer-alt"></i></div>
                       <span>Dashboard Admin</span>
                     </NavDropdown.Item>
@@ -348,7 +349,7 @@ const Inmuebles: React.FC = () => {
       <Carousel.Item key={index}>
         <img
           className="d-block w-100"
-          src={`http://localhost:8080/assets/inmuebles/${img}`}
+          src={`${API_BASE_URL}/assets/inmuebles/${img}`}
           alt={`Imagen ${index + 1}`}
           style={{
             height: 180,
@@ -357,7 +358,7 @@ const Inmuebles: React.FC = () => {
             borderTopRightRadius: 12
           }}
           onError={(e) => {
-            (e.target as HTMLImageElement).src = "http://localhost:8080/assets/inmuebles/img_default.jpg";
+            (e.target as HTMLImageElement).src = API_BASE_URL + "/assets/inmuebles/img_default.jpg";
           }}
         />
       </Carousel.Item>
@@ -505,7 +506,7 @@ const Inmuebles: React.FC = () => {
               const token = localStorage.getItem('token');
               const authToken = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
               await axios.put(
-                `http://localhost:8080/api/inmuebles/actualizar/${inmuebleEdit.idInmueble}`,
+                `${API_BASE_URL}/api/inmuebles/actualizar/${inmuebleEdit.idInmueble}`,
                 {
                   ...inmuebleEdit,
                   direccion: editDireccion ?? '',

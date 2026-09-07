@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import axios from 'axios';
+import { API_BASE_URL } from '../../api/config';
 import './Chats.css';
 
 // Interfaces
@@ -112,6 +113,17 @@ const Chats: React.FC = () => {
     }
   }, [location.state, user]);
 
+  useEffect(() => {
+    const inmuebleId = selectedContact?.publicacion?.idInmueble;
+    if (!inmuebleId) {
+      return;
+    }
+    const intervalId = window.setInterval(() => {
+      cargarMensajes(inmuebleId);
+    }, 5000);
+    return () => window.clearInterval(intervalId);
+  }, [selectedContact]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -154,7 +166,7 @@ const Chats: React.FC = () => {
       
       const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
       
-      const response = await axios.post('http://localhost:8080/api/mensajes/crear', {
+      const response = await axios.post(API_BASE_URL + '/api/mensajes/crear', {
         contenido: initialMessage,
         tipoMensaje: 'pregunta',
         inmuebleId: Number(inmuebleId)
@@ -253,7 +265,7 @@ const Chats: React.FC = () => {
       
       console.log('🔄 Cargando conversaciones existentes para usuario:', user.id);
       
-      const response = await axios.get('http://localhost:8080/api/mensajes/conversaciones', {
+      const response = await axios.get(API_BASE_URL + '/api/mensajes/conversaciones', {
         headers: {
           'Authorization': authToken
         }
@@ -320,7 +332,7 @@ const Chats: React.FC = () => {
       const token = localStorage.getItem('token');
       const authToken = token?.startsWith('Bearer ') ? token : `Bearer ${token}`;
       
-      const response = await axios.get<Message[]>(`http://localhost:8080/api/mensajes/inmueble/${inmuebleId}`, {
+      const response = await axios.get<Message[]>(`${API_BASE_URL}/api/mensajes/inmueble/${inmuebleId}`, {
         headers: {
           'Authorization': authToken
         }
@@ -372,7 +384,7 @@ const Chats: React.FC = () => {
         inmuebleId: Number(inmuebleId)
       };
 
-      const response = await axios.post('http://localhost:8080/api/mensajes/crear', mensajeData, {
+      const response = await axios.post(API_BASE_URL + '/api/mensajes/crear', mensajeData, {
         headers: {
           'Authorization': authToken,
           'Content-Type': 'application/json'

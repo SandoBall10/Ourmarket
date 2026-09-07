@@ -3,7 +3,8 @@ import { Container, Row, Col, Form, Card, ListGroup, Alert, InputGroup, Navbar, 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Perfil.css';
-import axios from 'axios'; // Asegúrate que axios está importado
+import axios from 'axios';
+import { API_BASE_URL } from '../../api/config';
 
 interface User {
   name: string;
@@ -162,7 +163,7 @@ const Perfil: React.FC = () => {
       console.log("Headers de autenticación:", config.headers);
       
       // URL base del backend - ajusta según tu configuración
-      const baseURL = 'http://localhost:8080'; // Cambia esto si tu backend está en otra URL
+      const baseURL = API_BASE_URL; // Cambia esto si tu backend está en otra URL
       const url = `${baseURL}/api/clientes/me`;
       
       console.log("Llamando a API:", url);
@@ -257,7 +258,7 @@ const Perfil: React.FC = () => {
       
       // Configurar la petición correctamente - enviando SOLO nombreCompleto y telefono
       const response = await axios.put(
-        'http://localhost:8080/api/clientes/me',
+        API_BASE_URL + '/api/clientes/me',
         {
           nombreCompleto: profileData.nombreCompleto,
           telefono: profileData.telefono
@@ -374,7 +375,7 @@ const Perfil: React.FC = () => {
         contrasena: passwordData.newPassword
       };
 
-      const baseURL = 'http://localhost:8080';
+      const baseURL = API_BASE_URL;
       await axios.put(`${baseURL}/api/clientes/me`, body, config);
 
       setMessage({
@@ -457,7 +458,7 @@ const Perfil: React.FC = () => {
 
       console.log("Enviando datos para actualizar email:", body);
 
-      const baseURL = 'http://localhost:8080';
+      const baseURL = API_BASE_URL;
       
       // Probar con el endpoint general en lugar del específico de email
       const response = await axios.put(

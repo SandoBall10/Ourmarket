@@ -425,7 +425,7 @@ const Compradores: React.FC = () => {
                         variant="primary"
                         size="lg"
                         className="animated-btn"
-                        onClick={() => navigate('/buscar-propiedades')}
+                        onClick={() => navigate('/buscar')}
                     >
                         <i className="bi bi-search-heart me-2"></i>Comenzar búsqueda
                     </Button>

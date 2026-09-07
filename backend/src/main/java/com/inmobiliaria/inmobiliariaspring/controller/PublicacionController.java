@@ -1,5 +1,6 @@
 package com.inmobiliaria.inmobiliariaspring.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -76,6 +77,30 @@ public class PublicacionController {
             return dto;
         })
         .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/catalogo")
+    @Operation(summary = "Catálogo público", description = "Lista publicaciones autorizadas con filtros opcionales.")
+    public ResponseEntity<List<PublicacionDTO>> catalogo(
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) BigDecimal precioMin,
+            @RequestParam(required = false) BigDecimal precioMax,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) String distrito,
+            @RequestParam(required = false) Integer habitaciones,
+            @RequestParam(required = false) String q) {
+        List<PublicacionDTO> dtos = publicacionService
+            .buscarCatalogo(tipo, precioMin, precioMax, region, distrito, habitaciones, q)
+            .stream()
+            .map(pub -> {
+                PublicacionDTO dto = PublicacionMapper.toDTO(pub);
+                if (pub.getInmueble() != null) {
+                    dto.setInmueble(InmuebleMapper.toDTO(pub.getInmueble()));
+                }
+                return dto;
+            })
+            .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
     
