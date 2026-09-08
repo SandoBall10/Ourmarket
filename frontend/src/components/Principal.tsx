@@ -13,17 +13,17 @@ const quickLinks = [
 
 const properties = [
   {
-    image: 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    image: '/images/departamento-san-isidro.jpg',
     tag: 'DESTACADO', title: 'Moderno departamento en San Isidro', location: 'San Isidro, Lima',
     beds: 3, baths: 2, area: '120 m²', price: 'US$ 245,000',
   },
   {
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85',
+    image: '/images/casa-la-molina-piscina.jpg',
     tag: 'CON PISCINA', title: 'Casa familiar con jardín en La Molina', location: 'La Molina, Lima',
     beds: 4, baths: 4, area: '250 m²', price: 'US$ 520,000',
   },
   {
-    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=85',
+    image: '/images/terreno-cieneguilla.jpg',
     tag: 'TERRENO', title: 'Terreno en condominio exclusivo', location: 'Cieneguilla, Lima',
     area: '500 m²', price: 'US$ 180,000',
   },
@@ -64,11 +64,11 @@ const Principal: React.FC = () => {
 
   return (
     <div className="inmo-home">
-      <AppNavbar />
+      <AppNavbar active="buscar" />
 
       <main>
         <section className="home-hero" aria-labelledby="hero-title">
-          <div className="home-shell hero-content">
+          <div className="home-shell inmo-hero-content">
             <p className="hero-kicker">MÁS QUE PROPIEDADES, MEJORES HISTORIAS</p>
             <h1 id="hero-title">Encuentra tu hogar<span>con confianza</span></h1>
             <p className="hero-copy">Miles de propiedades en un solo lugar. Compra, vende o alquila de forma simple, segura y rápida.</p>
@@ -102,7 +102,12 @@ const Principal: React.FC = () => {
           <div className="home-shell">
             <p className="strip-label">MARCAS QUE CONFÍAN EN NOSOTROS</p>
             <div className="brand-list" aria-hidden="true">
-              <span className="brand-bcp">BCP</span><span>Interbank</span><span>Scotiabank</span><span className="brand-bbva">BBVA</span><span className="brand-asei">asei</span><span>Urbania</span>
+              <span className="brand-bcp">›BCP›</span>
+              <span><i className="fa-solid fa-square" /> Interbank</span>
+              <span><i className="fa-solid fa-s" /> Scotiabank</span>
+              <span className="brand-bbva">BBVA</span>
+              <span className="brand-asei">asei <small>ASOCIACIÓN DE EMPRESAS INMOBILIARIAS</small></span>
+              <span><i className="fa-regular fa-gem" /> Urbania</span>
             </div>
           </div>
         </section>
@@ -178,7 +183,7 @@ const Principal: React.FC = () => {
       <footer className="inmo-footer">
         <div className="home-shell footer-grid">
           <div className="footer-brand-column">
-            <div className="footer-logo"><img src="/inmoicon.png" alt="" /><span>InmoMarket</span></div>
+            <div className="footer-logo"><i className="fa-solid fa-house-chimney" aria-hidden="true" /><span>InmoMarket</span></div>
             <p>La plataforma inmobiliaria que conecta a compradores y vendedores para hacer realidad sus sueños inmobiliarios.</p>
             <div className="social-links" aria-label="Redes sociales">
               <a href="#" aria-label="Facebook"><i className="fa-brands fa-facebook-f" /></a><a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram" /></a><a href="#" aria-label="X"><i className="fa-brands fa-x-twitter" /></a><a href="#" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in" /></a><a href="#" aria-label="YouTube"><i className="fa-brands fa-youtube" /></a>

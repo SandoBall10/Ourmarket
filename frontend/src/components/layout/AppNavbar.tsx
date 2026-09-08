@@ -42,7 +42,7 @@ export default function AppNavbar({ active }: AppNavbarProps) {
     <Navbar expand="lg" className="inmo-navbar" sticky="top">
       <Container className="navbar-shell">
         <Navbar.Brand as={Link} to="/" className="inmo-brand">
-          <img src="/inmoicon.png" alt="" />
+          <i className="fa-solid fa-house-chimney brand-mark" aria-hidden="true" />
           <span>InmoMarket</span>
         </Navbar.Brand>
 
